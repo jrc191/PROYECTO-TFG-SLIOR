@@ -36,6 +36,7 @@ captures/
 .externalNativeBuild/
 .cxx/
 *.apk
+*.hprof
 *.aab
 *.ap_
 *.dex
