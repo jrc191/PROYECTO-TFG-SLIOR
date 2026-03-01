@@ -415,6 +415,42 @@ Con DTOs separados, podemos evolucionar la BD y la API de forma independiente.
 
 ---
 
+##  CI/CD — INTEGRACIÓN Y ENTREGA CONTINUA
+
+**¿Qué es CI/CD?**
+- **CI (Continuous Integration):** cada vez que subes código a GitHub, una máquina automáticamente compila tu proyecto y ejecuta los tests. Si algo falla, te avisa antes de que llegue a producción.
+- **CD (Continuous Delivery):** si el CI pasa, automáticamente se genera el artefacto final (el JAR del servidor o el APK de la app) listo para desplegar.
+
+**¿Qué herramienta usaremos?**  
+**GitHub Actions** — está integrado directamente en GitHub, es gratuito para repositorios privados (hasta cierto límite) y no requiere instalar nada.
+
+**¿Cómo funcionará en SLIOR?**
+
+```
+Tú haces push a feature/fase-X
+        ↓
+GitHub Actions arranca automáticamente
+        ↓
+  
+    Backend: mvn test + mvn package
+    Android: gradlew assembleDebug 
+  
+        ↓
+   Todo OK → puedes hacer PR a develop
+   Error   → tienes que corregirlo primero
+```
+
+**¿Qué necesitamos para activarlo?**
+- Que existan tests escritos (si el CI no tiene tests que ejecutar, solo compila, que es útil pero limitado)
+- Un fichero `.github/workflows/backend.yml` y otro `android.yml`
+
+**¿Cuándo lo implementaremos?**  
+Al finalizar las fases de desarrollo, cuando tengamos tests unitarios e integración escritos. Así el CI tiene valor real.
+
+>  **Pendiente de implementar** al finalizar las fases de desarrollo.
+
+---
+
 ##  REFERENCIA: PROYECTO FOTAPP
 
 Durante la Fase 1 Android, se analizó el proyecto anterior del alumno, **FotApp (FutConnect)**, disponible en [GitHub](https://github.com/jrc191/FotApp/tree/feature/GUI), para adaptar el estilo de desarrollo Android conocido al proyecto SLIOR.

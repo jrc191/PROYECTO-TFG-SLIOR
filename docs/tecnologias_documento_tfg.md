@@ -306,18 +306,47 @@ ZXing (*Zebra Crossing*) es la librería de código abierto más extendida para 
 
 ## 4. Herramientas de Desarrollo
 
-### 4.1 Control de versiones: Git
+### 4.1 Control de versiones: Git y modelo de ramificación
 
 Git es el sistema de control de versiones distribuido estándar en la industria del software. Se emplea la convención **Conventional Commits** para los mensajes de commit, que establece un formato estructurado: `tipo(ámbito): descripción`.
 
 **Tipos de commit empleados:** `feat` (nueva funcionalidad), `fix` (corrección), `docs` (documentación), `refactor` (refactorización), `chore` (tareas de mantenimiento), `test` (tests).
 
-### 4.2 IDEs
+**Modelo de ramificación (rama `main` como producción):**
+
+El repositorio sigue un modelo de ramificación profesional basado en GitFlow simplificado:
+
+| Rama | Propósito |
+|------|-----------|
+| `main` | Código de producción. Solo recibe merges desde `develop` |
+| `develop` | Rama de integración continua. Recibe merges de ramas `feature/` |
+| `feature/fase-X-descripcion` | Una rama por fase de desarrollo, creada desde `develop` |
+
+El flujo de trabajo es el siguiente: el desarrollo ocurre en ramas `feature/`, que se integran en `develop` mediante merge al completar cada fase. Cuando `develop` es estable, se integra en `main`, constituyendo un "release". Este flujo garantiza que `main` siempre contenga código funcional y probado.
+
+### 4.2 CI/CD: GitHub Actions
+
+Se implementará un pipeline de **Integración Continua y Entrega Continua (CI/CD)** mediante **GitHub Actions** al finalizar las fases de desarrollo, una vez que existan tests unitarios e integración escritos.
+
+**Pipeline previsto:**
+
+| Evento | Acción CI/CD |
+|--------|-------------|
+| Push a cualquier rama | Compilación del backend (`mvn package`) y app Android (`gradlew assembleDebug`) |
+| Pull Request a `develop` | Compilación + ejecución de tests unitarios |
+| Merge a `main` | Compilación + tests + generación de artefactos (JAR y APK) |
+
+**Justificación:**  
+La integración de CI/CD en el flujo de desarrollo garantiza que ningún código que rompa la compilación o los tests llegue a las ramas de integración. Es una práctica estándar en entornos de desarrollo profesional que demuestra conocimiento del ciclo de vida completo del software (*DevOps*).
+
+> **Estado:** Pendiente de implementación. Se activará al concluir las fases de desarrollo funcional del sistema.
+
+### 4.3 IDEs
 
 - **IntelliJ IDEA 2025.2.1**: entorno de desarrollo para el backend Java/Spring Boot
 - **Android Studio 2025.1.3 (Meerkat)**: entorno oficial de desarrollo para Android
 
-### 4.3 Herramienta de asistencia: GitHub Copilot CLI
+### 4.4 Herramienta de asistencia: GitHub Copilot CLI
 
 El desarrollo del proyecto ha sido asistido por GitHub Copilot CLI, una herramienta de inteligencia artificial basada en el modelo Claude Sonnet 4.6 de Anthropic, que actúa como co-desarrollador proporcionando código, explicaciones y guía técnica durante todo el proceso.
 
