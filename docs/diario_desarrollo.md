@@ -462,3 +462,128 @@ Comparativa entre la arquitectura de FotApp (proyecto previo del alumno) y las m
 | Backend | Sin backend | API REST JWT |
 | Offline | Sin soporte | Room + WorkManager |
 | Errores | Sin gestión | `sealed class Result<T>` |
+
+---
+
+## FASE 2: Gestión de Rutas — Backend
+
+**Fecha:** 02/03/2026 – 03/03/2026
+**Estado:**  Completada (CRUD básico)
+**Rama:** `feature/fase-2-gestion-rutas`
+
+---
+
+### 2.1 Motivación y objetivo
+
+Con la autenticación completada en Fase 1, el siguiente bloque es el núcleo del sistema: la gestión de rutas de reparto. Un administrador debe poder crear rutas, asignarlas a repartidores y definir las paradas en orden. El repartidor puede consultar sus rutas.
+
+---
+
+### 2.2 Modelo de datos
+
+Se crearon dos entidades JPA nuevas y sus enumeraciones asociadas:
+
+#### Enumeraciones
+
+| Enum | Valores |
+|------|---------|
+| `RouteStatus` | `PLANIFICADA`, `EN_CURSO`, `COMPLETADA`, `CANCELADA` |
+| `StopStatus` | `PENDIENTE`, `EN_CAMINO`, `ENTREGADO`, `FALLIDO`, `REPROGRAMADO` |
+
+#### Entidad `Route`
+
+| Campo | Tipo | Descripción |
+|-------|------|-------------|
+| `id` | `UUID` | PK generada automáticamente |
+| `nombre` | `String` | Nombre descriptivo de la ruta |
+| `fechaPlanificada` | `LocalDate` | Fecha para la que está planificada |
+| `status` | `RouteStatus` | Estado actual de la ruta |
+| `repartidor` | `User` (ManyToOne) | Repartidor asignado |
+| `stops` | `List<Stop>` (OneToMany) | Paradas ordenadas por `ordenVisita` |
+| `distanciaTotal` | `Double` | Distancia total calculada (km) |
+| `notas` | `String` | Notas adicionales |
+| `isDeleted` | `boolean` | Borrado lógico |
+
+#### Entidad `Stop`
+
+| Campo | Tipo | Descripción |
+|-------|------|-------------|
+| `id` | `UUID` | PK generada automáticamente |
+| `route` | `Route` (ManyToOne) | Ruta a la que pertenece |
+| `direccion` | `String` | Dirección de entrega |
+| `destinatario` | `String` | Nombre del destinatario |
+| `telefonoDestinatario` | `String` | Teléfono de contacto |
+| `latitud` / `longitud` | `Double` | Coordenadas GPS |
+| `ordenVisita` | `Integer` | Posición en la ruta (1, 2, 3…) |
+| `status` | `StopStatus` | Estado de la parada |
+| `notas` | `String` | Notas de la parada |
+| `entregadoEn` | `LocalDateTime` | Timestamp real de entrega |
+| `isDeleted` | `boolean` | Borrado lógico |
+
+**Decisión de diseño:** `@OrderBy("ordenVisita ASC")` en la relación `OneToMany` garantiza que las paradas siempre se devuelven ordenadas sin necesidad de ordenar en memoria.
+
+---
+
+### 2.3 DTOs creados
+
+| DTO | Tipo | Descripción |
+|-----|------|-------------|
+| `StopRequest` | Record | Datos para crear una parada |
+| `CreateRouteRequest` | Record | Datos para crear una ruta (con lista de paradas) |
+| `StopResponse` | Record | Respuesta de una parada (con factory `from(Stop)`) |
+| `RouteResponse` | Record | Respuesta de una ruta (con factory `from(Route)`) |
+
+Se usaron **Java Records** como en Fase 1, ya que los DTOs son objetos inmutables de transferencia de datos.
+
+---
+
+### 2.4 Repositorios
+
+Se añadieron métodos de consulta por naming convention de Spring Data JPA:
+
+```java
+// RouteRepository
+List<Route> findByRepartidorIdAndIsDeletedFalse(UUID userId);
+Optional<Route> findByIdAndIsDeletedFalse(UUID id);
+
+// StopRepository
+List<Stop> findByRouteIdAndIsDeletedFalse(UUID routeId);
+```
+
+---
+
+### 2.5 Servicio: `RouteService`
+
+Implementación inicial del servicio. En esta primera versión se optó por la solución más directa:
+- Sin `@Transactional` (se añadirá en refactors posteriores)
+- `RuntimeException` genérica para errores (se crearán excepciones personalizadas más adelante)
+- Lógica de mapeo inline (sin mapper dedicado)
+
+Operaciones implementadas:
+- `createRoute(request)` — crea ruta con sus paradas, asigna repartidor por ID
+- `getRoutesForRepartidor(repartidorId)` — lista rutas de un repartidor
+- `getRouteById(id)` — obtiene ruta por ID
+- `deleteRoute(id)` — borrado lógico
+
+---
+
+### 2.6 Controlador: `RouteController`
+
+```
+POST   /api/routes                         → createRoute
+GET    /api/routes/repartidor/{id}         → getRoutesByRepartidor
+GET    /api/routes/{id}                    → getRouteById
+DELETE /api/routes/{id}                    → deleteRoute
+```
+
+Todos los endpoints requieren JWT válido (protegidos por `.anyRequest().authenticated()` en `SecurityConfig`).
+
+---
+
+### 2.7 Compilación
+
+```
+mvn clean compile → BUILD SUCCESS
+```
+
+Sin errores. Los nuevos archivos se integran correctamente con el contexto existente.
