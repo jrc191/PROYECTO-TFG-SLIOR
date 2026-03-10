@@ -587,3 +587,98 @@ mvn clean compile → BUILD SUCCESS
 ```
 
 Sin errores. Los nuevos archivos se integran correctamente con el contexto existente.
+
+---
+
+## FASE 3: Optimización de Rutas
+
+**Fecha:** 10/03/2026
+**Estado:**  Completada
+
+---
+
+### 3.1 Objetivo
+
+Implementar un algoritmo de optimización de rutas que, dado un punto de inicio (coordenadas GPS), reordene las paradas de una ruta de forma eficiente usando el algoritmo **Nearest Neighbor** (vecino más cercano).
+
+---
+
+### 3.2 Archivos creados
+
+| Archivo | Descripción |
+|---------|-------------|
+| `util/HaversineUtil.java` | Calcula distancia en km entre dos coordenadas geográficas |
+| `exception/RouteNotFoundException.java` | Excepción 404 cuando no existe una ruta |
+| `exception/UnauthorizedAccessException.java` | Excepción 403 para accesos no autorizados |
+| `dto/route/OptimizeRouteRequest.java` | DTO con `puntoInicioLat` y `puntoInicioLon` |
+| `service/RouteOptimizationService.java` | Servicio con el algoritmo Nearest Neighbor |
+
+### 3.3 Archivos modificados
+
+| Archivo | Cambio |
+|---------|--------|
+| `model/Route.java` | Añadido campo `tiempoEstimado` (Integer, minutos) |
+| `dto/route/RouteResponse.java` | Añadido `tiempoEstimado` al record y al `from()` |
+| `controller/RouteController.java` | Nuevo endpoint `POST /api/routes/{id}/optimize` |
+| `exception/GlobalExceptionHandler.java` | Handlers para 404 (RouteNotFound) y 403 (UnauthorizedAccess) |
+| `service/RouteService.java` | Reemplazado `RuntimeException` por `RouteNotFoundException` |
+
+---
+
+### 3.4 Algoritmo Nearest Neighbor
+
+El algoritmo funciona de la siguiente manera:
+
+1. Se parte del punto de inicio (lat/lon recibidos en el request)
+2. De todas las paradas pendientes, se elige la más cercana usando Haversine
+3. Se añade esa parada al resultado y se elimina de pendientes
+4. Se repite desde la parada recién añadida hasta visitar todas
+5. Se actualiza `ordenVisita` (1, 2, 3…) en cada parada
+6. Se calcula `distanciaTotal` (km, redondeado a 2 decimales)
+7. Se calcula `tiempoEstimado` (minutos) asumiendo velocidad media urbana de **30 km/h**
+
+---
+
+### 3.5 Fórmula Haversine
+
+```
+a = sin²(Δlat/2) + cos(lat1) · cos(lat2) · sin²(Δlon/2)
+c = 2 · atan2(√a, √(1−a))
+d = R · c       (R = 6371 km)
+```
+
+---
+
+### 3.6 Endpoint
+
+```
+POST /api/routes/{id}/optimize
+Authorization: Bearer <token>
+Content-Type: application/json
+
+{
+  "puntoInicioLat": 40.4168,
+  "puntoInicioLon": -3.7038
+}
+```
+
+Respuesta: `RouteResponse` con paradas reordenadas, `distanciaTotal` y `tiempoEstimado` actualizados.
+
+---
+
+### 3.7 Migración de BD
+
+Hibernate ejecutó automáticamente al arrancar:
+```sql
+ALTER TABLE routes ADD COLUMN tiempo_estimado INTEGER;
+```
+
+---
+
+### 3.8 Verificación
+
+```
+Spring Boot arrancó sin errores en 4.6 segundos.
+Columna tiempo_estimado creada automáticamente en PostgreSQL.
+Commit: feat(optimization): implementar algoritmo Nearest Neighbor para optimizacion de rutas
+```
