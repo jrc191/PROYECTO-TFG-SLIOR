@@ -453,7 +453,7 @@ Al finalizar las fases de desarrollo, cuando tengamos tests unitarios e integrac
 
 ##  REFERENCIA: PROYECTO FOTAPP
 
-Durante la Fase 1 Android, se analizó el proyecto anterior del alumno, **FotApp (FutConnect)**, disponible en [GitHub](https://github.com/jrc191/FotApp/tree/feature/GUI), para adaptar el estilo de desarrollo Android conocido al proyecto SLIOR.
+Durante la Fase 1 Android, revisé mi proyecto anterior, **FotApp (FutConnect)**, disponible en [GitHub](https://github.com/jrc191/FotApp/tree/feature/GUI), para adaptar el estilo de desarrollo Android que ya conocía al proyecto SLIOR.
 
 ### ¿Qué aprendimos de FotApp?
 
@@ -479,4 +479,4 @@ FotApp es una app de información sobre jugadores de fútbol construida íntegra
 | Arquitectura | Sin capas definidas | MVVM + Clean Architecture |
 
 **¿Por qué mantener el estilo Compose de FotApp en SLIOR?**  
-El alumno ya tiene experiencia con Jetpack Compose. Adaptarse a XML hubiera supuesto aprender una tecnología más antigua y con menos futuro. Compose es el estándar actual de Android y permite al alumno aplicar conocimientos previos mientras incorpora patrones de arquitectura profesionales nuevos (ViewModel, Hilt, Room, Retrofit).
+Ya tengo experiencia con Jetpack Compose gracias a FotApp. Aprender XML hubiera supuesto dedicar tiempo a una tecnología más antigua y con menos futuro. Compose es el estándar actual de Android y me permite aplicar conocimientos previos mientras incorporo patrones de arquitectura profesionales nuevos (ViewModel, Hilt, Room, Retrofit).

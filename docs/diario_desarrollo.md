@@ -27,7 +27,7 @@
 
 ### 0.2 Creación de la Estructura de Directorios
 
-Se creó la estructura de carpetas del monorepo con el siguiente comando PowerShell:
+Creé la estructura de carpetas del monorepo con el siguiente comando PowerShell:
 
 ```powershell
 New-Item -ItemType Directory -Path "slior-project"
@@ -46,7 +46,7 @@ slior-project/
  scripts/      → Scripts de utilidad (BD, arranque)
 ```
 
-**Decisión:** Se optó por un **monorepo** (un único repositorio Git para backend y app móvil) en lugar de repositorios separados. Ventajas para un proyecto académico:
+**Decisión:** Opté por un **monorepo** (un único repositorio Git para backend y app móvil) en lugar de repositorios separados. Ventajas para un proyecto académico:
 - Un solo `git clone` para tener todo el código
 - Commits coordinados entre backend y frontend
 - Más sencillo para el tribunal evaluador
@@ -67,19 +67,19 @@ git branch -M main   # Rama principal llamada 'main' (convención moderna)
 
 ### 0.4 Archivo `.gitignore`
 
-Se creó `.gitignore` con exclusiones para:
+Creé `.gitignore` con exclusiones para:
 - **Java/Maven:** carpeta `target/`, archivos `.class`, `.jar`
 - **Android/Gradle:** carpeta `build/`, `.gradle/`, `.apk`, `.aab`
 - **IDEs:** `.idea/`, `.vscode/`, `.cursor/`
 - **Seguridad:** `*.env`, `application-prod.properties`, `keystore.properties`, `google-services.json`
 
-**Decisión importante:** Se incluyó `application-prod.properties` en el gitignore para evitar exponer credenciales de producción en el repositorio público.
+**Decisión importante:** Incluí `application-prod.properties` en el gitignore para evitar exponer credenciales de producción en el repositorio público.
 
 ---
 
 ### 0.5 Licencia MIT
 
-Se eligió la **licencia MIT** por ser la más permisiva y adecuada para un proyecto académico que puede servir de referencia a otros estudiantes.
+Elegí la **licencia MIT** por ser la más permisiva y adecuada para un proyecto académico que puede servir de referencia a otros estudiantes.
 
 ---
 
@@ -197,7 +197,7 @@ com.slior
 
 ### 0.8 Clase Application (`SliorApplication.kt`)
 
-Se creó la clase Application con:
+Creé la clase Application con:
 - **`@HiltAndroidApp`**: dispara la generación de código de Hilt al compilar
 - **`Configuration.Provider`**: permite a WorkManager usar `HiltWorkerFactory` para inyectar dependencias en los Workers
 
@@ -367,9 +367,9 @@ Hash: 3b9f887
 
 ### 1.A Migración a Jetpack Compose
 
-Antes de crear los archivos de UI, se realizó un análisis del proyecto anterior del alumno (**FotApp**, disponible en GitHub, rama `feature/GUI`) para alinear el estilo de desarrollo Android con su experiencia previa.
+Antes de crear los archivos de UI, revisé mi proyecto anterior (**FotApp**, disponible en mi GitHub, rama `feature/GUI`) para alinear el estilo de desarrollo Android con lo que ya conocía.
 
-**Hallazgo principal:** FotApp está construida íntegramente con Jetpack Compose y Material 3, no con XML. Se decidió adoptar el mismo enfoque en SLIOR, sustituyendo los layouts XML por funciones `@Composable`.
+**Hallazgo principal:** FotApp está construida íntegramente con Jetpack Compose y Material 3, no con XML. Decidí adoptar el mismo enfoque en SLIOR, sustituyendo los layouts XML por funciones `@Composable`.
 
 **Cambios en `build.gradle.kts` (raíz):**
 - Añadido plugin: `id("org.jetbrains.kotlin.plugin.compose") version "2.0.21" apply false`
@@ -451,7 +451,7 @@ Esta separación evita que la UI tenga que entender detalles de la capa de datos
 
 ### 1.C Análisis FotApp → SLIOR
 
-Comparativa entre la arquitectura de FotApp (proyecto previo del alumno) y las mejoras introducidas en SLIOR:
+Comparativa entre la arquitectura de mi proyecto anterior FotApp y las mejoras introducidas en SLIOR:
 
 | Aspecto | FotApp | SLIOR (mejora) |
 |---------|--------|----------------|
@@ -554,9 +554,9 @@ List<Stop> findByRouteIdAndIsDeletedFalse(UUID routeId);
 
 ### 2.5 Servicio: `RouteService`
 
-Implementación inicial del servicio. En esta primera versión se optó por la solución más directa:
-- Sin `@Transactional` (se añadirá en refactors posteriores)
-- `RuntimeException` genérica para errores (se crearán excepciones personalizadas más adelante)
+Implementación inicial del servicio. En esta primera versión opté por la solución más directa:
+- Sin `@Transactional` (lo añadiré en refactors posteriores)
+- `RuntimeException` genérica para errores (crearé excepciones personalizadas más adelante)
 - Lógica de mapeo inline (sin mapper dedicado)
 
 Operaciones implementadas:

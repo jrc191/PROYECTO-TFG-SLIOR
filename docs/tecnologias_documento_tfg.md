@@ -6,7 +6,7 @@
 
 ## 1. Introducción
 
-El desarrollo del sistema SLIOR implica dos componentes principales: un servidor backend que expone una API REST, y una aplicación cliente Android. La selección de tecnologías para ambos componentes se ha realizado siguiendo criterios de madurez, compatibilidad, documentación oficial y adecuación a los requisitos funcionales del sistema, especialmente la capacidad de funcionamiento sin conexión a internet (*offline-first*).
+El desarrollo del sistema SLIOR implica dos componentes principales: un servidor backend que expone una API REST, y una aplicación cliente Android. He seleccionado las tecnologías para ambos componentes siguiendo criterios de madurez, compatibilidad, documentación oficial y adecuación a los requisitos funcionales del sistema, especialmente la capacidad de funcionamiento sin conexión a internet (*offline-first*).
 
 ---
 
@@ -42,7 +42,7 @@ Spring Boot es un framework de código abierto basado en el ecosistema Spring qu
 - Requiere Java 17 como mínimo, alineado con nuestra elección de lenguaje
 
 **Ventajas frente a alternativas:**
-Spring Boot fue preferido frente a otras opciones como Quarkus o Micronaut por su mayor adopción en la industria, la amplitud de su documentación y la familiaridad del alumnado con el ecosistema Java-Spring en el ámbito académico.
+Elegí Spring Boot frente a otras opciones como Quarkus o Micronaut por su mayor adopción en la industria, la amplitud de su documentación y mi familiaridad con el ecosistema Java-Spring adquirida durante el ciclo formativo.
 
 ### 2.3 ORM: Spring Data JPA con Hibernate
 
@@ -79,7 +79,7 @@ El flujo de autenticación implementado es el siguiente:
 5. El filtro `JwtAuthenticationFilter` valida el token antes de procesar cada petición
 
 **Librería jjwt 0.12.3:**  
-JJWT (*Java JWT*) es la librería Java más utilizada para la generación y validación de tokens JWT. La versión 0.12.x presenta una API modernizada respecto a versiones anteriores (pre-0.11), con métodos más seguros y claros. Se eligió esta versión por su compatibilidad con Spring Boot 3.x y su API actualizada.
+JJWT (*Java JWT*) es la librería Java más utilizada para la generación y validación de tokens JWT. La versión 0.12.x presenta una API modernizada respecto a versiones anteriores (pre-0.11), con métodos más seguros y claros. Elegí esta versión por su compatibilidad con Spring Boot 3.x y su API actualizada.
 
 **Algoritmo BCrypt para contraseñas:**  
 Las contraseñas no se almacenan en texto plano ni con algoritmos de hash simples (MD5, SHA-1). Se emplea BCrypt, un algoritmo específicamente diseñado para el hashing de contraseñas que incorpora un factor de coste configurable y un *salt* aleatorio por cada hash, haciendo inviables los ataques por diccionario o tablas arcoíris.
@@ -161,7 +161,7 @@ El proyecto Android sigue la arquitectura recomendada por Google para aplicacion
 Jetpack Compose es el toolkit de UI declarativo oficial de Android, introducido de forma estable en 2021 y recomendado por Google para todo nuevo desarrollo Android desde 2022.
 
 **Fundamento del paradigma declarativo:**  
-En el enfoque clásico (XML + ViewBinding), el desarrollador describe *cómo* construir la UI y *cómo* actualizarla cuando cambian los datos (manipulación imperativa del árbol de vistas). En Compose, el desarrollador describe *qué* mostrar en función del estado actual, y el framework gestiona automáticamente las actualizaciones del árbol de UI (*recomposición*).
+En el enfoque clásico (XML + ViewBinding), hay que describir *cómo* construir la UI y *cómo* actualizarla cuando cambian los datos (manipulación imperativa del árbol de vistas). Con Compose, describes *qué* mostrar en función del estado actual, y el framework gestiona automáticamente las actualizaciones del árbol de UI (*recomposición*).
 
 **Componentes de Compose utilizados en SLIOR:**
 
@@ -175,17 +175,17 @@ En el enfoque clásico (XML + ViewBinding), el desarrollador describe *cómo* co
 | `LazyColumn` / `LazyRow` | Listas virtualizadas (equivalente a RecyclerView) |
 
 **Compose BOM (Bill of Materials):**  
-El BOM es un artefacto Maven que gestiona las versiones de todas las librerías de Compose, garantizando compatibilidad entre ellas. La versión `2024.09.03` se eligió por ser la más reciente y estable en el inicio del proyecto.
+El BOM es un artefacto Maven que gestiona las versiones de todas las librerías de Compose, garantizando compatibilidad entre ellas. La versión `2024.09.03` la elegí por ser la más reciente y estable en el inicio del proyecto.
 
 **Justificación de Compose frente a XML:**
 - Elimina la sincronización manual entre XML y Kotlin (ViewBinding, `findViewById`)
 - El estado de la UI fluye unidireccionalmente desde el ViewModel
 - Compilación incremental más rápida en proyectos grandes
 - Es el estándar oficial para nuevos proyectos Android
-- El alumno tiene experiencia previa con Compose (proyecto FotApp)
+- Tengo experiencia previa con Compose gracias al proyecto FotApp (disponible en mi GitHub)
 
 **Influencia del proyecto FotApp:**  
-Durante el desarrollo, se analizó el proyecto previo del alumno (*FotApp*, disponible en GitHub) para alinear el estilo de desarrollo Android. FotApp utiliza Compose, Material 3 y Navigation Compose, tecnologías adoptadas igualmente en SLIOR. Sin embargo, SLIOR incorpora patrones de arquitectura adicionales ausentes en FotApp: ViewModel con StateFlow, Hilt, Room y Retrofit. Véase la sección 6 para el análisis comparativo detallado.
+Antes de empezar con la UI de SLIOR, revisé mi proyecto anterior (*FotApp*, disponible en mi GitHub) para mantener coherencia de estilo. FotApp utiliza Compose, Material 3 y Navigation Compose, tecnologías que adopté igualmente en SLIOR. Sin embargo, SLIOR incorpora patrones de arquitectura adicionales ausentes en FotApp: ViewModel con StateFlow, Hilt, Room y Retrofit. Véase la sección 6 para el análisis comparativo detallado.
 
 ### 3.5 Navegación: Navigation Compose
 
@@ -387,11 +387,11 @@ La integración de CI/CD en el flujo de desarrollo garantiza que ningún código
 
 ## 6. Análisis Comparativo: FotApp vs. SLIOR
 
-Durante la fase de desarrollo Android, se analizó el proyecto previo del alumno, **FotApp (FutConnect)** (rama `feature/GUI`, disponible en GitHub), como referencia para el estilo de desarrollo Android. Este análisis motivó la adopción de Jetpack Compose en SLIOR y permitió identificar las mejoras arquitectónicas necesarias para un sistema de mayor complejidad.
+Durante la fase de desarrollo Android, revisé mi proyecto anterior, **FotApp (FutConnect)** (rama `feature/GUI`, disponible en mi GitHub), como referencia para el estilo de desarrollo Android. Esta revisión motivó la adopción de Jetpack Compose en SLIOR y me permitió identificar las mejoras arquitectónicas necesarias para un sistema de mayor complejidad.
 
 ### 6.1 Descripción de FotApp
 
-FotApp es una aplicación de consulta de información sobre jugadores de fútbol, desarrollada como práctica anterior por el alumno. La aplicación presenta:
+FotApp es una aplicación de consulta de información sobre jugadores de fútbol que desarrollé como práctica anterior. La aplicación presenta:
 
 - Interfaz construida íntegramente con **Jetpack Compose** y **Material 3**
 - Navegación mediante **Navigation Compose** con `NavHost`
@@ -420,7 +420,7 @@ FotApp es una aplicación de consulta de información sobre jugadores de fútbol
 
 La decisión de emplear Jetpack Compose en SLIOR, en lugar del enfoque clásico basado en XML, se sustentó en los siguientes argumentos:
 
-1. **Experiencia previa del alumno**: El alumno domina Compose por su uso en FotApp, lo que permite centrarse en los aspectos arquitectónicos avanzados sin la curva de aprendizaje de una nueva tecnología de UI.
+1. **Experiencia previa con Compose**: Ya domino Compose gracias a FotApp, lo que me permite centrarme en los aspectos arquitectónicos avanzados sin la curva de aprendizaje de una nueva tecnología de UI.
 
 2. **Alineación con las recomendaciones de Google**: Compose es el toolkit de UI recomendado oficialmente para nuevos proyectos Android desde 2022.
 
