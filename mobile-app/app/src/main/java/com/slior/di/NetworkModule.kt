@@ -18,7 +18,7 @@ object NetworkModule {
 
     // URL base del backend
     // 10.0.2.2 es la IP que usa el emulador Android para acceder al localhost del PC
-    private const val BASE_URL = "http://10.0.2.2:8080/"
+    private val BASE_URL = "http://100.115.5.3:8080/"
 
     @Provides
     @Singleton

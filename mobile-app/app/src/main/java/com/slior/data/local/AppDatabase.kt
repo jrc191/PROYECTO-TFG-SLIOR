@@ -19,7 +19,7 @@ import com.slior.data.local.entity.UserEntity
  */
 @Database(
     entities = [UserEntity::class, RouteEntity::class, StopEntity::class],
-    version = 2,
+    version = 3,
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {
