@@ -346,9 +346,10 @@ La integración de CI/CD en el flujo de desarrollo garantiza que ningún código
 - **IntelliJ IDEA 2025.2.1**: entorno de desarrollo para el backend Java/Spring Boot
 - **Android Studio 2025.1.3 (Meerkat)**: entorno oficial de desarrollo para Android
 
-### 4.4 Herramienta de asistencia: GitHub Copilot CLI
+### 4.4 Control de versiones
 
-El desarrollo del proyecto ha sido asistido por GitHub Copilot CLI, una herramienta de inteligencia artificial basada en el modelo Claude Sonnet 4.6 de Anthropic, que actúa como co-desarrollador proporcionando código, explicaciones y guía técnica durante todo el proceso.
+- **Git 2.x**: sistema de control de versiones distribuido
+- **GitHub**: plataforma de alojamiento del repositorio con ramas `main`, `develop` y ramas de feature
 
 ---
 

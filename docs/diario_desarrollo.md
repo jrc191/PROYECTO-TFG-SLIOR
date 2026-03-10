@@ -18,8 +18,8 @@
 | Elemento | Valor |
 |----------|-------|
 | Sistema Operativo | Windows 11 |
-| IDE | Cursor (basado en VSCode) con agente IA |
-| Herramienta IA | GitHub Copilot CLI (Claude Sonnet 4.6) |
+| IDE Backend | IntelliJ IDEA 2025.2.1 |
+| IDE Android | Android Studio 2025.1.3 Meerkat |
 | Ruta del proyecto | `C:\Users\User\Documents\PROYECTO-TFG\slior-project\` |
 | Control de versiones | Git |
 
