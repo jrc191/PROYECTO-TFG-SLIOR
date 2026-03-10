@@ -15,5 +15,6 @@ data class RouteEntity(
     val distanciaTotal: Double?,
     val notas: String?,
     val createdAt: String,
-    val syncStatus: String = "SYNCED"
+    val syncStatus: String = "SYNCED",
+    val tiempoEstimado: Int? = null
 )

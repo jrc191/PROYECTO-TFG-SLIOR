@@ -1,6 +1,7 @@
 package com.slior.data.remote
 
 import com.slior.data.remote.dto.AuthResponse
+import com.slior.data.remote.dto.CreateRouteRequest
 import com.slior.data.remote.dto.LoginRequest
 import com.slior.data.remote.dto.RegisterRequest
 import com.slior.data.remote.dto.RouteResponseDto
@@ -16,11 +17,9 @@ import retrofit2.http.Path
  */
 interface ApiService {
 
-    /** POST /auth/login → retorna JWT y datos del usuario */
     @POST("auth/login")
     suspend fun login(@Body request: LoginRequest): AuthResponse
 
-    /** POST /auth/register → crea usuario y retorna JWT */
     @POST("auth/register")
     suspend fun register(@Body request: RegisterRequest): AuthResponse
 
@@ -31,4 +30,13 @@ interface ApiService {
 
     @GET("api/routes/{id}")
     suspend fun getRouteById(@Path("id") id: String): RouteResponseDto
+
+    @POST("api/routes")
+    suspend fun createRoute(@Body request: CreateRouteRequest): RouteResponseDto
+
+    @POST("api/routes/{id}/optimize")
+    suspend fun optimizeRoute(
+        @Path("id") routeId: String,
+        @Body body: Map<String, Double>
+    ): RouteResponseDto
 }

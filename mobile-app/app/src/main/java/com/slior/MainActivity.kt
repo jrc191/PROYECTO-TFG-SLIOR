@@ -8,6 +8,8 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.slior.ui.auth.LoginScreen
 import com.slior.ui.auth.RegisterScreen
+import com.slior.ui.routes.CreateRouteScreen
+import com.slior.ui.routes.RouteDetailScreen
 import com.slior.ui.routes.RouteListScreen
 import com.slior.ui.theme.SliorTheme
 import dagger.hilt.android.AndroidEntryPoint
@@ -22,10 +24,8 @@ class MainActivity : ComponentActivity() {
             SliorTheme {
                 val navController = rememberNavController()
 
-                NavHost(
-                    navController = navController,
-                    startDestination = "login"
-                ) {
+                NavHost(navController = navController, startDestination = "login") {
+
                     composable("login") {
                         LoginScreen(
                             onLoginSuccess = { repartidorId ->
@@ -33,15 +33,8 @@ class MainActivity : ComponentActivity() {
                                     popUpTo("login") { inclusive = true }
                                 }
                             },
-                            onGoToRegister = {
-                                navController.navigate("register")
-                            }
+                            onGoToRegister = { navController.navigate("register") }
                         )
-                    }
-
-                    composable("routes/{repartidorId}") { backStackEntry ->
-                        val repartidorId = backStackEntry.arguments?.getString("repartidorId") ?: ""
-                        RouteListScreen(repartidorId = repartidorId)
                     }
 
                     composable("register") {
@@ -51,9 +44,39 @@ class MainActivity : ComponentActivity() {
                                     popUpTo("login") { inclusive = true }
                                 }
                             },
-                            onGoToLogin = {
-                                navController.popBackStack()
+                            onGoToLogin = { navController.popBackStack() }
+                        )
+                    }
+
+                    composable("routes/{repartidorId}") { backStackEntry ->
+                        val repartidorId = backStackEntry.arguments?.getString("repartidorId") ?:
+                        ""
+                        RouteListScreen(
+                            repartidorId = repartidorId,
+                            onRouteClick = { routeId ->
+                                navController.navigate("route-detail/$routeId")
+                            },
+                            onCreateRoute = {
+                                navController.navigate("create-route/$repartidorId")
                             }
+                        )
+                    }
+
+                    composable("route-detail/{routeId}") { backStackEntry ->
+                        val routeId = backStackEntry.arguments?.getString("routeId") ?: ""
+                        RouteDetailScreen(
+                            routeId = routeId,
+                            onBack = { navController.popBackStack() }
+                        )
+                    }
+
+                    composable("create-route/{repartidorId}") { backStackEntry ->
+                        val repartidorId = backStackEntry.arguments?.getString("repartidorId") ?:
+                        ""
+                        CreateRouteScreen(
+                            repartidorId = repartidorId,
+                            onBack = { navController.popBackStack() },
+                            onRouteCreated = { navController.popBackStack() }
                         )
                     }
                 }

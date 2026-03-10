@@ -25,5 +25,6 @@ data class RouteResponseDto(
     val paradas: List<StopResponseDto>,
     val distanciaTotal: Double?,
     val notas: String?,
-    val createdAt: String
+    val createdAt: String,
+    val tiempoEstimado: Int?
 )
