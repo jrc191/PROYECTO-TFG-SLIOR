@@ -34,6 +34,7 @@
 | Mapas | OSMDroid 6.1.17 (OpenStreetMap) |
 | Escaneo | ZXing 4.3.0 |
 | Background Tasks | WorkManager |
+| Red privada (dev) | Tailscale (VPN mesh, gratuito, open source) |
 
 ---
 
@@ -110,7 +111,46 @@ cd mobile-app
 ./gradlew connectedAndroidTest         # Tests instrumentados
 ```
 
-> **Nota para emulador:** La base URL del backend es `http://10.0.2.2:8080/` (redirige a localhost del host).
+> **Nota para emulador:** La base URL del backend es `http://10.0.2.2:8080/` (redirige al localhost del PC).
+>
+> **Nota para dispositivo físico / otra red:** Ver sección [Acceso desde dispositivo físico](#acceso-desde-dispositivo-físico-tailscale) más abajo.
+
+---
+
+## Acceso desde dispositivo físico (Tailscale)
+
+Durante el desarrollo se usa **Tailscale** para conectar el móvil al backend desde cualquier red (WiFi externa, datos móviles, etc.) sin necesidad de estar en la misma red local.
+
+### ¿Por qué Tailscale?
+
+| Problema | Solución |
+|----------|----------|
+| El emulador accede a `10.0.2.2` (localhost del PC), pero un móvil real no puede | Tailscale crea una red privada virtual entre dispositivos |
+| Las alternativas de tunneling (ngrok, localtunnel) cambian la URL en cada sesión → hay que recompilar la app | Tailscale asigna una IP fija permanente → se compila una vez |
+| Requiere pagar o tener dominio propio | Tailscale es **gratuito** para uso personal (hasta 100 dispositivos) y su cliente es **open source** |
+
+### Configuración (ya realizada en este proyecto)
+
+**Requisitos:**
+- [Tailscale](https://tailscale.com) instalado en el PC (`winget install tailscale.tailscale`)
+- App Tailscale en el móvil Android (Google Play)
+- Ambos dispositivos con la misma cuenta Tailscale
+
+**IP fija del PC de desarrollo:** `100.115.5.3`
+
+**Para usar dispositivo físico**, cambiar en `mobile-app/app/src/main/java/com/slior/di/NetworkModule.kt`:
+```kotlin
+// Emulador:
+private const val BASE_URL = "http://10.0.2.2:8080/"
+
+// Dispositivo físico (Tailscale):
+private const val BASE_URL = "http://100.115.5.3:8080/"
+```
+
+**Regla de Firewall** (ejecutar como Administrador, solo una vez):
+```powershell
+New-NetFirewallRule -DisplayName "SLIOR Backend" -Direction Inbound -Protocol TCP -LocalPort 8080 -Action Allow
+```
 
 ---
 
