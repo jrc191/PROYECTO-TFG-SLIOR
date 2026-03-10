@@ -675,6 +675,73 @@ ALTER TABLE routes ADD COLUMN tiempo_estimado INTEGER;
 
 ---
 
+---
+
+## FASE 4: Mapas y Navegación Android
+
+**Fecha:** 10/03/2026
+**Estado:**  Completada
+
+---
+
+### 4.1 Objetivo
+
+Integrar OSMDroid para visualizar rutas en mapa, añadir navegación a las pantallas de detalle y creación de rutas, y conectar la geolocalización para la optimización.
+
+---
+
+### 4.2 Archivos creados
+
+| Archivo | Descripción |
+|---------|-------------|
+| `util/LocationHelper.kt` | Obtiene ubicación GPS actual con FusedLocationProviderClient |
+| `ui/map/MapComposable.kt` | Composable con AndroidView que envuelve OSMDroid. Dibuja marcadores y polyline |
+| `ui/routes/RouteDetailScreen.kt` | Pantalla: mapa + info de ruta + lista de paradas + botón Optimizar |
+| `ui/routes/RouteDetailState.kt` | Sealed class Loading/Success/Error para el detalle |
+| `ui/routes/CreateRouteScreen.kt` | Formulario para crear rutas con paradas (lat/lon manuales) |
+| `ui/routes/CreateRouteState.kt` | Sealed class Idle/Loading/Success/Error para creación |
+| `data/remote/dto/CreateRouteRequest.kt` | DTOs para enviar al backend: CreateRouteRequest + StopRequestDto |
+
+### 4.3 Archivos modificados
+
+| Archivo | Cambio |
+|---------|--------|
+| `data/remote/ApiService.kt` | Endpoints: POST /api/routes, POST /api/routes/{id}/optimize |
+| `data/repository/RouteRepository.kt` | Métodos: createRoute, optimizeRoute, getStopsByRoute |
+| `ui/routes/RouteViewModel.kt` | Estados separados (list/detail/create) + nuevos métodos |
+| `ui/routes/RouteListScreen.kt` | Cards clicables + FAB para nueva ruta |
+| `MainActivity.kt` | Navegación: route-detail/{routeId}, create-route/{repartidorId} |
+| `data/local/entity/RouteEntity.kt` | Campo tiempoEstimado añadido |
+| `data/remote/dto/RouteResponse.kt` | Campo tiempoEstimado añadido |
+
+---
+
+### 4.4 Integración OSMDroid con Jetpack Compose
+
+OSMDroid es una librería View-based. Para usarla en Compose se usa `AndroidView`:
+
+```kotlin
+AndroidView(
+    factory = { context -> MapView(context) },
+    update = { mapView -> /* actualizar marcadores */ }
+)
+```
+
+Se añadió `Configuration.getInstance().userAgentValue = context.packageName` obligatorio para que OSMDroid cargue los tiles del mapa correctamente.
+
+---
+
+### 4.5 Verificación
+
+```
+Build exitoso. App ejecutada en emulador.
+Login funcional → POST /auth/login → 200 OK con JWT.
+Navegación entre pantallas operativa.
+Commit: feat(maps): integrar OSMDroid, pantallas de detalle y creacion de rutas
+```
+
+---
+
 ### 3.8 Verificación
 
 ```
