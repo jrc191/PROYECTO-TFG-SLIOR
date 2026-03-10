@@ -31,10 +31,15 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+            // En release usar la URL del túnel (sustituir por la URL real de Cloudflare)
+            buildConfigField("String", "BASE_URL", "\"https://CHANGE-ME.trycloudflare.com/\"")
         }
         debug {
             applicationIdSuffix = ".debug"
             isDebuggable = true
+            // Emulador local → 10.0.2.2 apunta al localhost del PC
+            // Para usar el túnel: cambiar por "https://tu-url.trycloudflare.com/"
+            buildConfigField("String", "BASE_URL", "\"http://10.0.2.2:8080/\"")
         }
     }
 
@@ -49,6 +54,7 @@ android {
 
     buildFeatures {
         compose = true   // Activa Jetpack Compose
+        buildConfig = true   // Activa BuildConfig para BASE_URL configurable
     }
 }
 
