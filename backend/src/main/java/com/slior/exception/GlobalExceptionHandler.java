@@ -58,6 +58,22 @@ public class GlobalExceptionHandler {
                 .body(buildError(HttpStatus.BAD_REQUEST, firstError, request.getRequestURI()));
     }
 
+    /** Ruta no encontrada → 404 */
+    @ExceptionHandler(RouteNotFoundException.class)
+    public ResponseEntity<Map<String, Object>> handleRouteNotFound(
+            RouteNotFoundException ex, HttpServletRequest request) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(buildError(HttpStatus.NOT_FOUND, ex.getMessage(), request.getRequestURI()));
+    }
+
+    /** Acceso no autorizado a un recurso → 403 */
+    @ExceptionHandler(UnauthorizedAccessException.class)
+    public ResponseEntity<Map<String, Object>> handleUnauthorizedAccess(
+            UnauthorizedAccessException ex, HttpServletRequest request) {
+        return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                .body(buildError(HttpStatus.FORBIDDEN, ex.getMessage(), request.getRequestURI()));
+    }
+
     /** Cualquier otro error no controlado → 500 */
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Map<String, Object>> handleGeneral(

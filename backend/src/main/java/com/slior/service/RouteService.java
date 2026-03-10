@@ -10,6 +10,7 @@ import com.slior.repository.RouteRepository;
 import com.slior.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import com.slior.exception.RouteNotFoundException;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -63,13 +64,13 @@ public class RouteService {
 
     public RouteResponse getRouteById(UUID id) {
         Route route = routeRepository.findByIdAndIsDeletedFalse(id)
-                .orElseThrow(() -> new RuntimeException("Ruta no encontrada"));
+                .orElseThrow(() -> new RuntimeException(id.toString()));
         return RouteResponse.from(route);
     }
 
     public void deleteRoute(UUID id) {
         Route route = routeRepository.findByIdAndIsDeletedFalse(id)
-                .orElseThrow(() -> new RuntimeException("Ruta no encontrada"));
+                .orElseThrow(() -> new RuntimeException(id.toString()));
         route.setDeleted(true);
         routeRepository.save(route);
     }

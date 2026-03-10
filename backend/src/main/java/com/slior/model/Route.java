@@ -54,6 +54,10 @@ public class Route {
     @Column
     private Double distanciaTotal;
 
+    // Tiempo estimado de la ruta en minutos (calculado por el algoritmo)
+    @Column
+    private Integer tiempoEstimado;
+
     @Column
     private String notas;
 

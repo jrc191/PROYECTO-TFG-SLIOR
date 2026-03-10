@@ -17,6 +17,7 @@ public record RouteResponse(
         String repartidorNombre,
         List<StopResponse> paradas,
         Double distanciaTotal,
+        Integer tiempoEstimado,
         String notas,
         LocalDateTime createdAt
 ) {
@@ -33,6 +34,7 @@ public record RouteResponse(
                         .map(StopResponse::from)
                         .toList(),
                 route.getDistanciaTotal(),
+                route.getTiempoEstimado(),
                 route.getNotas(),
                 route.getCreatedAt()
         );

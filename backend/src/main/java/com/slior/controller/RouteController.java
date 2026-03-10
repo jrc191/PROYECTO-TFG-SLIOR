@@ -8,6 +8,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import com.slior.dto.route.OptimizeRouteRequest;
+import com.slior.service.RouteOptimizationService;
 
 import java.util.List;
 import java.util.UUID;
@@ -18,6 +20,7 @@ import java.util.UUID;
 public class RouteController {
 
     private final RouteService routeService;
+    private final RouteOptimizationService routeOptimizationService;
 
     @PostMapping
     public ResponseEntity<RouteResponse> createRoute(@Valid @RequestBody CreateRouteRequest request) {
@@ -39,5 +42,12 @@ public class RouteController {
     public ResponseEntity<Void> deleteRoute(@PathVariable UUID id) {
         routeService.deleteRoute(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/{id}/optimize")
+    public ResponseEntity<RouteResponse> optimizeRoute(
+            @PathVariable UUID id,
+            @Valid @RequestBody OptimizeRouteRequest request) {
+        return ResponseEntity.ok(routeOptimizationService.optimizarRuta(id, request));
     }
 }
