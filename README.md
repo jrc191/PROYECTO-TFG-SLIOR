@@ -81,7 +81,7 @@ slior-project/
 
 - JDK 17+ instalado
 - PostgreSQL 15+ corriendo localmente
-- Android Studio o Cursor IDE
+- Android Studio (Android)
 - Maven 3.9+
 
 ### 1. Base de Datos

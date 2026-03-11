@@ -18,8 +18,8 @@
 | Elemento | Valor |
 |----------|-------|
 | Sistema Operativo | Windows 11 |
-| IDE | Cursor (basado en VSCode) con agente IA |
-| Herramienta IA | GitHub Copilot CLI (Claude Sonnet 4.6) |
+| IDE Backend | IntelliJ IDEA 2025.2.1 |
+| IDE Android | Android Studio 2025.1.3 Meerkat |
 | Ruta del proyecto | `C:\Users\User\Documents\PROYECTO-TFG\slior-project\` |
 | Control de versiones | Git |
 
@@ -27,7 +27,7 @@
 
 ### 0.2 Creación de la Estructura de Directorios
 
-Se creó la estructura de carpetas del monorepo con el siguiente comando PowerShell:
+Creé la estructura de carpetas del monorepo con el siguiente comando PowerShell:
 
 ```powershell
 New-Item -ItemType Directory -Path "slior-project"
@@ -46,7 +46,7 @@ slior-project/
  scripts/      → Scripts de utilidad (BD, arranque)
 ```
 
-**Decisión:** Se optó por un **monorepo** (un único repositorio Git para backend y app móvil) en lugar de repositorios separados. Ventajas para un proyecto académico:
+**Decisión:** Opté por un **monorepo** (un único repositorio Git para backend y app móvil) en lugar de repositorios separados. Ventajas para un proyecto académico:
 - Un solo `git clone` para tener todo el código
 - Commits coordinados entre backend y frontend
 - Más sencillo para el tribunal evaluador
@@ -67,19 +67,19 @@ git branch -M main   # Rama principal llamada 'main' (convención moderna)
 
 ### 0.4 Archivo `.gitignore`
 
-Se creó `.gitignore` con exclusiones para:
+Creé `.gitignore` con exclusiones para:
 - **Java/Maven:** carpeta `target/`, archivos `.class`, `.jar`
 - **Android/Gradle:** carpeta `build/`, `.gradle/`, `.apk`, `.aab`
 - **IDEs:** `.idea/`, `.vscode/`, `.cursor/`
 - **Seguridad:** `*.env`, `application-prod.properties`, `keystore.properties`, `google-services.json`
 
-**Decisión importante:** Se incluyó `application-prod.properties` en el gitignore para evitar exponer credenciales de producción en el repositorio público.
+**Decisión importante:** Incluí `application-prod.properties` en el gitignore para evitar exponer credenciales de producción en el repositorio público.
 
 ---
 
 ### 0.5 Licencia MIT
 
-Se eligió la **licencia MIT** por ser la más permisiva y adecuada para un proyecto académico que puede servir de referencia a otros estudiantes.
+Elegí la **licencia MIT** por ser la más permisiva y adecuada para un proyecto académico que puede servir de referencia a otros estudiantes.
 
 ---
 
@@ -197,7 +197,7 @@ com.slior
 
 ### 0.8 Clase Application (`SliorApplication.kt`)
 
-Se creó la clase Application con:
+Creé la clase Application con:
 - **`@HiltAndroidApp`**: dispara la generación de código de Hilt al compilar
 - **`Configuration.Provider`**: permite a WorkManager usar `HiltWorkerFactory` para inyectar dependencias en los Workers
 
@@ -367,9 +367,9 @@ Hash: 3b9f887
 
 ### 1.A Migración a Jetpack Compose
 
-Antes de crear los archivos de UI, se realizó un análisis del proyecto anterior del alumno (**FotApp**, disponible en GitHub, rama `feature/GUI`) para alinear el estilo de desarrollo Android con su experiencia previa.
+Antes de crear los archivos de UI, revisé mi proyecto anterior (**FotApp**, disponible en mi GitHub, rama `feature/GUI`) para alinear el estilo de desarrollo Android con lo que ya conocía.
 
-**Hallazgo principal:** FotApp está construida íntegramente con Jetpack Compose y Material 3, no con XML. Se decidió adoptar el mismo enfoque en SLIOR, sustituyendo los layouts XML por funciones `@Composable`.
+**Hallazgo principal:** FotApp está construida íntegramente con Jetpack Compose y Material 3, no con XML. Decidí adoptar el mismo enfoque en SLIOR, sustituyendo los layouts XML por funciones `@Composable`.
 
 **Cambios en `build.gradle.kts` (raíz):**
 - Añadido plugin: `id("org.jetbrains.kotlin.plugin.compose") version "2.0.21" apply false`
@@ -451,7 +451,7 @@ Esta separación evita que la UI tenga que entender detalles de la capa de datos
 
 ### 1.C Análisis FotApp → SLIOR
 
-Comparativa entre la arquitectura de FotApp (proyecto previo del alumno) y las mejoras introducidas en SLIOR:
+Comparativa entre la arquitectura de mi proyecto anterior FotApp y las mejoras introducidas en SLIOR:
 
 | Aspecto | FotApp | SLIOR (mejora) |
 |---------|--------|----------------|
@@ -462,3 +462,128 @@ Comparativa entre la arquitectura de FotApp (proyecto previo del alumno) y las m
 | Backend | Sin backend | API REST JWT |
 | Offline | Sin soporte | Room + WorkManager |
 | Errores | Sin gestión | `sealed class Result<T>` |
+
+---
+
+## FASE 2: Gestión de Rutas — Backend
+
+**Fecha:** 02/03/2026 – 03/03/2026
+**Estado:**  Completada (CRUD básico)
+**Rama:** `feature/fase-2-gestion-rutas`
+
+---
+
+### 2.1 Motivación y objetivo
+
+Con la autenticación completada en Fase 1, el siguiente bloque es el núcleo del sistema: la gestión de rutas de reparto. Un administrador debe poder crear rutas, asignarlas a repartidores y definir las paradas en orden. El repartidor puede consultar sus rutas.
+
+---
+
+### 2.2 Modelo de datos
+
+Se crearon dos entidades JPA nuevas y sus enumeraciones asociadas:
+
+#### Enumeraciones
+
+| Enum | Valores |
+|------|---------|
+| `RouteStatus` | `PLANIFICADA`, `EN_CURSO`, `COMPLETADA`, `CANCELADA` |
+| `StopStatus` | `PENDIENTE`, `EN_CAMINO`, `ENTREGADO`, `FALLIDO`, `REPROGRAMADO` |
+
+#### Entidad `Route`
+
+| Campo | Tipo | Descripción |
+|-------|------|-------------|
+| `id` | `UUID` | PK generada automáticamente |
+| `nombre` | `String` | Nombre descriptivo de la ruta |
+| `fechaPlanificada` | `LocalDate` | Fecha para la que está planificada |
+| `status` | `RouteStatus` | Estado actual de la ruta |
+| `repartidor` | `User` (ManyToOne) | Repartidor asignado |
+| `stops` | `List<Stop>` (OneToMany) | Paradas ordenadas por `ordenVisita` |
+| `distanciaTotal` | `Double` | Distancia total calculada (km) |
+| `notas` | `String` | Notas adicionales |
+| `isDeleted` | `boolean` | Borrado lógico |
+
+#### Entidad `Stop`
+
+| Campo | Tipo | Descripción |
+|-------|------|-------------|
+| `id` | `UUID` | PK generada automáticamente |
+| `route` | `Route` (ManyToOne) | Ruta a la que pertenece |
+| `direccion` | `String` | Dirección de entrega |
+| `destinatario` | `String` | Nombre del destinatario |
+| `telefonoDestinatario` | `String` | Teléfono de contacto |
+| `latitud` / `longitud` | `Double` | Coordenadas GPS |
+| `ordenVisita` | `Integer` | Posición en la ruta (1, 2, 3…) |
+| `status` | `StopStatus` | Estado de la parada |
+| `notas` | `String` | Notas de la parada |
+| `entregadoEn` | `LocalDateTime` | Timestamp real de entrega |
+| `isDeleted` | `boolean` | Borrado lógico |
+
+**Decisión de diseño:** `@OrderBy("ordenVisita ASC")` en la relación `OneToMany` garantiza que las paradas siempre se devuelven ordenadas sin necesidad de ordenar en memoria.
+
+---
+
+### 2.3 DTOs creados
+
+| DTO | Tipo | Descripción |
+|-----|------|-------------|
+| `StopRequest` | Record | Datos para crear una parada |
+| `CreateRouteRequest` | Record | Datos para crear una ruta (con lista de paradas) |
+| `StopResponse` | Record | Respuesta de una parada (con factory `from(Stop)`) |
+| `RouteResponse` | Record | Respuesta de una ruta (con factory `from(Route)`) |
+
+Se usaron **Java Records** como en Fase 1, ya que los DTOs son objetos inmutables de transferencia de datos.
+
+---
+
+### 2.4 Repositorios
+
+Se añadieron métodos de consulta por naming convention de Spring Data JPA:
+
+```java
+// RouteRepository
+List<Route> findByRepartidorIdAndIsDeletedFalse(UUID userId);
+Optional<Route> findByIdAndIsDeletedFalse(UUID id);
+
+// StopRepository
+List<Stop> findByRouteIdAndIsDeletedFalse(UUID routeId);
+```
+
+---
+
+### 2.5 Servicio: `RouteService`
+
+Implementación inicial del servicio. En esta primera versión opté por la solución más directa:
+- Sin `@Transactional` (lo añadiré en refactors posteriores)
+- `RuntimeException` genérica para errores (crearé excepciones personalizadas más adelante)
+- Lógica de mapeo inline (sin mapper dedicado)
+
+Operaciones implementadas:
+- `createRoute(request)` — crea ruta con sus paradas, asigna repartidor por ID
+- `getRoutesForRepartidor(repartidorId)` — lista rutas de un repartidor
+- `getRouteById(id)` — obtiene ruta por ID
+- `deleteRoute(id)` — borrado lógico
+
+---
+
+### 2.6 Controlador: `RouteController`
+
+```
+POST   /api/routes                         → createRoute
+GET    /api/routes/repartidor/{id}         → getRoutesByRepartidor
+GET    /api/routes/{id}                    → getRouteById
+DELETE /api/routes/{id}                    → deleteRoute
+```
+
+Todos los endpoints requieren JWT válido (protegidos por `.anyRequest().authenticated()` en `SecurityConfig`).
+
+---
+
+### 2.7 Compilación
+
+```
+mvn clean compile → BUILD SUCCESS
+```
+
+Sin errores. Los nuevos archivos se integran correctamente con el contexto existente.
