@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Descargable font via Google Fonts Provider (requiere Google Play Services) -->
+<font-family xmlns:app="http://schemas.android.com/apk/res-auto"
+    app:fontProviderAuthority="com.google.android.gms.fonts"
+    app:fontProviderPackage="com.google.android.gms"
+    app:fontProviderQuery="Space Grotesk"
+    app:fontProviderCerts="@array/com_google_android_gms_fonts_certs">
+</font-family>

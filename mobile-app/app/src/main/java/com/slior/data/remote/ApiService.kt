@@ -23,6 +23,11 @@ interface ApiService {
     @POST("auth/register")
     suspend fun register(@Body request: RegisterRequest): AuthResponse
 
+    /** Comprueba si el servidor está activo. Cualquier respuesta HTTP (incluso 4xx)
+     *  significa que el servidor está en línea; solo una IOException implica sin conexión. */
+    @GET("health")
+    suspend fun healthCheck(): retrofit2.Response<Unit>
+
     @GET("api/routes/repartidor/{repartidorId}")
     suspend fun getRoutesByRepartidor(
         @Path("repartidorId") repartidorId: String
