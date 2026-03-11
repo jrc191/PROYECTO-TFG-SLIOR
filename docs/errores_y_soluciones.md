@@ -332,7 +332,7 @@ Cuando se usa el patrón `application-local.properties` para separar secretos de
 **Fecha:** 11/03/2026  
 **Fase:** Fase 5 — Diseño UI  
 **Componente:** Android — `NetworkModule.kt`  
-**Severidad:** 🟡 Funcional (timeout en emulador, funciona en dispositivo físico Tailscale)
+**Severidad:**  Funcional (timeout en emulador, funciona en dispositivo físico Tailscale)
 
 ### Síntoma
 

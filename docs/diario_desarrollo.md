@@ -675,6 +675,14 @@ ALTER TABLE routes ADD COLUMN tiempo_estimado INTEGER;
 
 ---
 
+### 3.8 Verificación
+
+```
+Spring Boot arrancó sin errores en 4.6 segundos.
+Columna tiempo_estimado creada automáticamente en PostgreSQL.
+Commit: feat(optimization): implementar algoritmo Nearest Neighbor para optimizacion de rutas
+```
+
 ---
 
 ## FASE 4: Mapas y Navegación Android
@@ -944,10 +952,4 @@ Commits:
 
 ---
 
-### 3.8 Verificación
 
-```
-Spring Boot arrancó sin errores en 4.6 segundos.
-Columna tiempo_estimado creada automáticamente en PostgreSQL.
-Commit: feat(optimization): implementar algoritmo Nearest Neighbor para optimizacion de rutas
-```
