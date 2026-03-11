@@ -30,7 +30,7 @@ class AuthViewModel @Inject constructor(
             _loginState.value = LoginState.Loading
 
             _loginState.value = when (val result = authRepository.login(email, password)) {
-                is Result.Success -> LoginState.Success
+                is Result.Success -> LoginState.Success(result.data)
                 is Result.Error -> LoginState.Error(
                     result.exception.message ?: "Error de conexión"
                 )
@@ -49,7 +49,7 @@ class AuthViewModel @Inject constructor(
             _loginState.value = LoginState.Loading
 
             _loginState.value = when (val result = authRepository.register(nombre, email, password, rol)) {
-                is Result.Success -> LoginState.Success
+                is Result.Success -> LoginState.Success(result.data)
                 is Result.Error -> LoginState.Error(
                     result.exception.message ?: "Error de registro"
                 )
@@ -60,5 +60,9 @@ class AuthViewModel @Inject constructor(
 
     fun resetState() {
         _loginState.value = LoginState.Idle
+    }
+
+    fun setError(message: String) {
+        _loginState.value = LoginState.Error(message)
     }
 }
