@@ -24,8 +24,8 @@ if [ $? -ne 0 ]; then
     echo "Asegúrate de que PostgreSQL está corriendo y ejecuta scripts/setup_database.sql"
 fi
 
-# Compilar y arrancar
-echo "Compilando y arrancando Spring Boot en puerto 8080..."
-mvn spring-boot:run
+# Compilar y arrancar con perfil local (carga application-local.properties)
+echo "Compilando y arrancando Spring Boot en puerto 8080 (perfil: local)..."
+mvn spring-boot:run -Dspring-boot.run.profiles=local
 
 echo "Backend detenido."
