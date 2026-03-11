@@ -173,6 +173,21 @@ New-NetFirewallRule -DisplayName "SLIOR Backend" -Direction Inbound -Protocol TC
 
 ---
 
+## Diseño de Interfaz
+
+Los diseños de las pantallas están en Figma:  
+ **[Ver diseños en Figma](https://www.figma.com/design/BU9MWjru8Nzyubx8aXXixH/TFG?node-id=0-1&t=EjH6o2kPcwD9HkqT-1)**
+
+| Pantalla | Estado |
+|----------|--------|
+| Login |  Implementada |
+| Registro |  Implementada |
+| Lista de rutas (carga / éxito / sin conexión) |  Pendiente |
+| Detalle de ruta |  Pendiente |
+| Detalle de paquete |  Pendiente |
+
+---
+
 ## Fases de Desarrollo
 
 | Fase | Descripción | Horas |

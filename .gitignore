@@ -78,3 +78,6 @@ out/
 keystore.properties
 google-services.json
 secrets.properties
+
+# ------ Diseños locales ------
+DISEÑOS/
