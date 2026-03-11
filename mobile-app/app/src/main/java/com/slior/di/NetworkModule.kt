@@ -1,5 +1,6 @@
 package com.slior.di
 
+import com.slior.BuildConfig
 import com.slior.data.remote.ApiService
 import com.slior.data.remote.AuthInterceptor
 import dagger.Module
@@ -16,9 +17,10 @@ import javax.inject.Singleton
 @InstallIn(SingletonComponent::class)
 object NetworkModule {
 
-    // URL base del backend
-    // 10.0.2.2 es la IP que usa el emulador Android para acceder al localhost del PC
-    private val BASE_URL = "http://100.115.5.3:8080/"
+    // La URL se inyecta desde build.gradle.kts según el build type:
+    //   debug   → http://10.0.2.2:8080/   (emulador → localhost del PC)
+    //   release → URL pública
+    private val BASE_URL = BuildConfig.BASE_URL
 
     @Provides
     @Singleton
