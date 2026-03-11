@@ -187,4 +187,187 @@ En proyectos Android con múltiples librerías que usan procesamiento de anotaci
 
 ---
 
+---
+
 *— Nuevos errores se añadirán aquí a medida que avance el proyecto —*
+
+---
+
+## ERROR #4
+
+**Fecha:** 11/03/2026  
+**Fase:** Fase 5 — Diseño UI  
+**Componente:** `RegisterScreen.kt`  
+**Severidad:**  Bloqueo (el proyecto no compilaba)
+
+### Mensaje de error
+
+```
+e: file:///...RegisterScreen.kt:61:1
+Conflicting overloads:
+fun RegisterScreen(onRegisterSuccess: ..., onGoToLogin: ..., viewModel: AuthViewModel = ...): Unit
+```
+
+### ¿Qué estaba pasando?
+
+Al editar el fichero `RegisterScreen.kt` para añadir la nueva implementación brutalista, la herramienta de edición localizó solo el bloque de imports como `old_str` y ANTEPUSO el nuevo código. El resultado fue que el fichero quedó con **dos declaraciones de `fun RegisterScreen`**: la nueva (al principio) y la anterior (al final). El compilador de Kotlin lanzó un error de "conflicting overloads" al encontrar dos funciones con la misma firma en el mismo fichero.
+
+### Solución
+
+Eliminar la implementación duplicada al final del fichero, dejando únicamente la nueva versión brutalista. Se truncó el fichero a las primeras 340 líneas (la implementación correcta).
+
+### Lección aprendida
+
+Cuando se reescribe completamente un fichero, asegurarse de que el `old_str` de la edición incluya el contenido completo del fichero original, no solo las primeras líneas. Alternativamente, verificar el contenido del fichero tras la edición antes de compilar.
+
+---
+
+## ERROR #5
+
+**Fecha:** 11/03/2026  
+**Fase:** Fase 5 — Diseño UI  
+**Componente:** `Theme.kt` / Fuentes Google  
+**Severidad:**  Bloqueo (el proyecto no compilaba)
+
+### Mensaje de error
+
+```
+e: file:///...Theme.kt:17:45
+Unresolved reference 'ExperimentalGoogleFontsApi'.
+
+e: file:///...Theme.kt:26:8
+Annotation argument must be a compile-time constant.
+
+e: file:///...Theme.kt:35:5
+None of the following candidates is applicable:
+fun Font(fileDescriptor: ParcelFileDescriptor, ...): Font
+fun Font(file: File, ...): Font
+```
+
+### ¿Qué estaba pasando?
+
+Tres errores relacionados con la integración de Google Fonts en Compose:
+
+1. `ExperimentalGoogleFontsApi` no existe en el BOM `2024.09.03`. Esta anotación solo existía en versiones antiguas de la librería y fue eliminada/renombrada.
+
+2. Al usar `@OptIn(ExperimentalGoogleFontsApi::class)` con una referencia no resuelta, el compilador no puede evaluar el argumento en tiempo de compilación.
+
+3. `Font(googleFont, provider, ...)` no resolvía porque se estaba importando `androidx.compose.ui.text.font.Font` en lugar de `androidx.compose.ui.text.googlefonts.Font`. Las dos funciones tienen la misma firma base pero están en paquetes distintos.
+
+### Solución
+
+1. Eliminar todas las anotaciones `@OptIn(ExperimentalGoogleFontsApi::class)` del fichero.
+2. Cambiar el import de `Font`:
+
+```kotlin
+// INCORRECTO
+import androidx.compose.ui.text.font.Font
+
+// CORRECTO
+import androidx.compose.ui.text.googlefonts.Font
+```
+
+### Lección aprendida
+
+Con el BOM `2024.09.03` de Compose, la API de Google Fonts es estable y no requiere opt-in. Siempre verificar en la documentación oficial si una API experimental ya fue promovida a estable. El error "None of the following candidates" en una función con argumentos de tipo Google-specific suele indicar un import del paquete equivocado.
+
+---
+
+## ERROR #6
+
+**Fecha:** 11/03/2026  
+**Fase:** Fase 5 — Diseño UI  
+**Componente:** Backend Spring Boot — `/auth/login`  
+**Severidad:**  Bloqueo (login devolvía siempre HTTP 500)
+
+### Mensaje de error
+
+```
+<-- 500 http://10.0.2.2:8080/auth/login (107ms)
+{"path":"/auth/login","error":"Internal Server Error",
+ "message":"Error interno del servidor","status":500}
+```
+
+### ¿Qué estaba pasando?
+
+`application.properties` define `jwt.secret=PLACEHOLDER_SET_IN_APPLICATION_LOCAL_PROPERTIES`. El secret real (`tspk8XhnY93GmpKHEvXKXBM17l3aByXhFhhEjAuJiQI=`) está en `application-local.properties`, fichero que Spring Boot solo carga cuando el perfil `local` está activo.
+
+Al arrancar el backend sin especificar el perfil Spring, la propiedad `jwt.secret` mantenía el valor placeholder. Cuando el login llegaba a `jwtUtil.generateToken()`, la librería jjwt llamaba a `Decoders.BASE64.decode("PLACEHOLDER_SET_IN_APPLICATION_LOCAL_PROPERTIES")`. La cadena placeholder contiene guiones bajos (`_`), que son caracteres **inválidos en Base64 estándar** (solo válidos en Base64URL). La decodificación lanzaba `IllegalArgumentException`, excepción no capturada específicamente en el `GlobalExceptionHandler`, que la convierte en HTTP 500.
+
+### Diagrama de la causa
+
+```
+Backend arrancado sin -Dspring.profiles.active=local
+   application-local.properties NO se carga
+         jwt.secret = "PLACEHOLDER_SET_IN_APPLICATION_LOCAL_PROPERTIES"
+               Decoders.BASE64.decode(placeholder) → IllegalArgumentException
+                     GlobalExceptionHandler (catch Exception) → HTTP 500
+```
+
+### Solución
+
+Añadir el perfil activo por defecto en `application.properties`:
+
+```properties
+# application.properties
+spring.profiles.active=local
+```
+
+Y en el script de arranque:
+
+```bash
+mvn spring-boot:run -Dspring-boot.run.profiles=local
+```
+
+En producción, la variable de entorno `SPRING_PROFILES_ACTIVE=prod` sobrescribe este valor.
+
+### Lección aprendida
+
+Cuando se usa el patrón `application-local.properties` para separar secretos del código versionado, añadir `spring.profiles.active=local` como valor por defecto en `application.properties` para desarrollo. Así el perfil se activa automáticamente sin necesidad de configurar cada entorno de ejecución (IDE, terminal, CI/CD) por separado.
+
+---
+
+## ERROR #7
+
+**Fecha:** 11/03/2026  
+**Fase:** Fase 5 — Diseño UI  
+**Componente:** Android — `NetworkModule.kt`  
+**Severidad:** 🟡 Funcional (timeout en emulador, funciona en dispositivo físico Tailscale)
+
+### Síntoma
+
+```
+<-- HTTP FAILED: java.net.SocketTimeoutException:
+    failed to connect to /100.115.5.3 (port 8080) from /10.0.2.16 after 10000ms
+```
+
+### ¿Qué estaba pasando?
+
+`NetworkModule.kt` tenía la URL del backend **hardcodeada** directamente en el código:
+
+```kotlin
+// INCORRECTO — ignoraba BuildConfig.BASE_URL
+private val BASE_URL = "http://100.115.5.3:8080/"
+```
+
+`100.115.5.3` es la IP de Tailscale del PC de desarrollo. El emulador Android corre en una máquina virtual aislada que **no tiene acceso a la red Tailscale del host**, por lo que todos los intentos de conexión agotaban el timeout de 10 segundos.
+
+El fichero `build.gradle.kts` ya tenía configurada la URL correcta por build type (`http://10.0.2.2:8080/` para debug), pero `NetworkModule` no la usaba.
+
+### Solución
+
+```kotlin
+// CORRECTO — usa la URL del build type activo
+import com.slior.BuildConfig
+
+private val BASE_URL = BuildConfig.BASE_URL
+```
+
+Con esto:
+- **Emulador** (debug build) → `http://10.0.2.2:8080/` (emulador → localhost del PC)
+- **Dispositivo físico** con Tailscale → cambiar `BASE_URL` en `build.gradle.kts` a la IP Tailscale
+- **Producción** (release build) → URL pública configurada en `build.gradle.kts`
+
+### Lección aprendida
+
+Nunca hardcodear URLs de red en el código de producción. Usar `BuildConfig` con variables por build type es el patrón correcto en Android para gestionar entornos (desarrollo/staging/producción) sin cambiar el código fuente.

@@ -742,6 +742,208 @@ Commit: feat(maps): integrar OSMDroid, pantallas de detalle y creacion de rutas
 
 ---
 
+## FASE 5: Diseño UI Brutalista — Pantallas de Autenticación
+
+**Fecha:** 11/03/2026  
+**Estado:**  Completada
+
+---
+
+### 5.1 Objetivo
+
+Rediseñar completamente las pantallas de Login y Registro para que sigan fielmente los mockups del proyecto. Los diseños están disponibles en Figma: https://www.figma.com/design/BU9MWjru8Nzyubx8aXXixH/TFG?node-id=0-1&t=EjH6o2kPcwD9HkqT-1
+
+El estilo visual es **brutalista**: bordes negros marcados, sombras rígidas offset, colores primarios saturados (verde neón y naranja seguridad), tipografía Space Grotesk en mayúsculas y cero border radius. Todos los componentes deben ser reutilizables para mantener coherencia visual a lo largo de toda la aplicación.
+
+---
+
+### 5.2 Análisis de los diseños
+
+Los mockups se encuentran en `DISEÑOS/stitch/` — carpetas `login_slior/` y `registro_slior/`, cada una con `screen.png` y `code.html` como referencia.
+
+| Token de diseño | Valor |
+|-----------------|-------|
+| Color primario | `NeonGreen` #39FF14 |
+| Color acento | `SafetyOrange` #F95B06 |
+| Fondo | `BrutalistBlack` #0A0A0A |
+| Tipografía | Space Grotesk (Google Fonts) |
+| Radio de borde | 0 dp (ninguno) |
+| Sombra offset | 4–6 dp abajo y derecha, color negro |
+| Bordes | 2 dp negro sólido |
+
+---
+
+### 5.3 Sistema de diseño — SliorComponents.kt
+
+Creé `ui/components/SliorComponents.kt` como fichero central de todos los componentes reutilizables:
+
+| Componente | Descripción |
+|-----------|-------------|
+| `hardShadow()` | Modifier extension que dibuja la sombra offset brutalista |
+| `SliorDesignTokens` | Objeto con todas las constantes de diseño (tamaños, pesos, paddings) |
+| `SliorTextField` | Campo de texto con borde negro y sombra offset |
+| `SliorPasswordField` | Campo de contraseña con dos estilos: icono separado (Login) e icono superpuesto (Registro) |
+| `SliorPrimaryButton` | Botón primario con fondo NeonGreen, texto negro en mayúsculas y sombra offset |
+| `SliorLoadingButton` | Variante de botón que muestra `CircularProgressIndicator` mientras carga |
+| `SliorErrorBanner` | Banner de error con fondo SafetyOrange y texto descriptivo |
+| `SliorFieldLabel` | Etiqueta de campo en mayúsculas con Space Grotesk Bold |
+| `SliorAccentBar` | Barra decorativa de tres colores (SafetyOrange / NeonGreen / LightGray) |
+
+La sombra offset se implementa con una combinación de `Modifier.padding` + `drawBehind`:
+
+```kotlin
+fun Modifier.hardShadow(offsetX: Dp = 4.dp, offsetY: Dp = 4.dp, color: Color = BrutalistBlack): Modifier {
+    return this
+        .padding(end = offsetX, bottom = offsetY)
+        .drawBehind {
+            drawRect(
+                color = color,
+                topLeft = Offset(offsetX.toPx(), offsetY.toPx()),
+                size = size
+            )
+        }
+}
+```
+
+El `padding` crea espacio de layout para la sombra; `drawBehind` dibuja el rectángulo desplazado que se extiende hacia ese espacio.
+
+---
+
+### 5.4 Tipografía — Space Grotesk via Google Fonts
+
+Añadí la dependencia al `build.gradle.kts`:
+
+```kotlin
+implementation("androidx.compose.ui:ui-text-google-fonts:1.7.8")
+```
+
+Configuré la fuente en `Theme.kt` usando la API de fuentes descargables:
+
+```kotlin
+val provider = GoogleFontProvider(
+    providerAuthority = "com.google.android.gms.fonts",
+    providerPackage = "com.google.android.gms",
+    certificates = R.array.com_google_android_gms_fonts_certs
+)
+
+val SpaceGroteskFamily = FontFamily(
+    Font(GoogleFont("Space Grotesk"), provider, FontWeight.Normal),
+    Font(GoogleFont("Space Grotesk"), provider, FontWeight.Bold),
+    // ...
+)
+```
+
+> **Importante:** usar `import androidx.compose.ui.text.googlefonts.Font` (NOT `androidx.compose.ui.text.font.Font`). El BOM 2024.09.03 **no tiene** la anotación `@ExperimentalGoogleFontsApi` — no añadir ningún `@OptIn`. Si los certificados en `font_certs.xml` son incorrectos, la app cae silenciosamente a la fuente del sistema (Roboto) sin crash.
+
+---
+
+### 5.5 Indicador de estado del servidor
+
+Añadí un indicador visual "EN LÍNEA / SIN CONEXIÓN" en el pie de ambas pantallas. Para que sea real (no hardcodeado) implementé:
+
+- `ServerStatus.kt` — sealed class con estados `Online`, `Offline`, `Checking`
+- `ApiService.kt` — endpoint `GET /health` con `Response<Unit>` (no lanza excepción en 4xx/5xx)
+- `AuthRepository.kt` — método `checkServerStatus()` que mapea excepciones a `ServerStatus`
+- `AuthViewModel.kt` — `StateFlow<ServerStatus>`, método `checkServerConnectivity()` llamado en `init`
+
+```kotlin
+sealed class ServerStatus {
+    object Online : ServerStatus()
+    object Offline : ServerStatus()
+    object Checking : ServerStatus()
+}
+```
+
+---
+
+### 5.6 Mensajes de error descriptivos
+
+Los errores del login/registro ya no son genéricos. La función `toUserMessage()` en `AuthViewModel` clasifica las excepciones:
+
+| Excepción | Mensaje mostrado |
+|-----------|-----------------|
+| `UnknownHostException` | "Sin conexión a internet" |
+| `SocketTimeoutException` | "Tiempo de espera agotado. Verifica tu conexión" |
+| HTTP 401 | "Email o contraseña incorrectos" |
+| HTTP 409 | "Este email ya está registrado" |
+| HTTP 422 | "Los datos no cumplen los requisitos de formato" |
+| HTTP 5xx | "Error interno del servidor. Inténtalo más tarde" |
+
+---
+
+### 5.7 Corrección de configuración de red
+
+**Problema 1 — NetworkModule con IP hardcodeada:**  
+`NetworkModule.kt` tenía la IP de Tailscale (`100.115.5.3:8080`) hardcodeada en el código, ignorando el `BuildConfig.BASE_URL` definido en `build.gradle.kts`. El emulador Android no puede acceder a IPs de Tailscale del host porque corre en una VM aislada.
+
+**Solución:** cambiar `NetworkModule` para usar `BuildConfig.BASE_URL`:
+
+```kotlin
+private val BASE_URL = BuildConfig.BASE_URL
+```
+
+El `build.gradle.kts` ya tenía la configuración correcta por build type:
+- `debug` → `http://10.0.2.2:8080/` (emulador → localhost del PC)
+- `release` → URL pública (Cloudflare tunnel)
+
+---
+
+**Problema 2 — Backend devuelve 500 en `/auth/login`:**  
+`application.properties` define `jwt.secret=PLACEHOLDER_SET_IN_APPLICATION_LOCAL_PROPERTIES`. El secret real está en `application-local.properties`, que solo se carga si el perfil `local` está activo. Al arrancar el backend sin especificar perfil, `Decoders.BASE64.decode()` intentaba decodificar la cadena placeholder que contiene guiones bajos (carácter inválido en Base64 estándar), lanzando `IllegalArgumentException` no capturada → HTTP 500.
+
+**Solución:** añadir el perfil activo por defecto en `application.properties`:
+
+```properties
+spring.profiles.active=local
+```
+
+En producción se sobrescribe con la variable de entorno `SPRING_PROFILES_ACTIVE=prod`.
+
+---
+
+### 5.8 Archivos creados
+
+| Archivo | Descripción |
+|---------|-------------|
+| `ui/components/SliorComponents.kt` | Sistema de diseño completo — todos los componentes reutilizables |
+| `ui/auth/ServerStatus.kt` | Sealed class para estado de conectividad con el servidor |
+| `res/font/space_grotesk.xml` | Descriptor de fuente descargable Google Fonts |
+| `res/values/font_certs.xml` | Certificados del proveedor Google Fonts |
+
+### 5.9 Archivos modificados
+
+| Archivo | Cambio |
+|---------|--------|
+| `ui/theme/Color.kt` | Colores brutalistas: `NeonGreen`, `SafetyOrange`, `BrutalistBlack/White/LightGray` |
+| `ui/theme/Theme.kt` | `SpaceGroteskFamily` via GoogleFont + `SliorTypography` completa |
+| `ui/auth/LoginScreen.kt` | Reescritura completa — diseño brutalista + indicador servidor |
+| `ui/auth/RegisterScreen.kt` | Reescritura completa — TopAppBar + barra acento + formulario scrollable |
+| `viewmodel/AuthViewModel.kt` | `serverStatus` StateFlow + clasificación de errores descriptivos |
+| `data/remote/ApiService.kt` | Endpoint `GET /health` para health check |
+| `data/repository/AuthRepository.kt` | Método `checkServerStatus()` |
+| `di/NetworkModule.kt` | Usar `BuildConfig.BASE_URL` en vez de IP hardcodeada |
+| `app/build.gradle.kts` | Dependencia `ui-text-google-fonts` |
+| `backend/application.properties` | `spring.profiles.active=local` por defecto |
+| `scripts/start_backend.sh` | Añadir `-Dspring-boot.run.profiles=local` al comando mvn |
+
+---
+
+### 5.10 Verificación
+
+```
+Build exitoso. App ejecutada en emulador Android.
+GET http://10.0.2.2:8080/health → 200 OK → indicador "EN LÍNEA" visible.
+POST http://10.0.2.2:8080/auth/login → 200 OK con JWT token.
+Login con test@test.com / Test1234 → navegación correcta a pantalla principal.
+Commits:
+  feat(design): diseños Figma pantallas de autenticación
+  feat(mobile): sistema de diseño brutalista y pantallas auth
+  fix(mobile): NetworkModule usa BuildConfig.BASE_URL
+  fix(backend): activar perfil Spring local por defecto
+```
+
+---
+
 ### 3.8 Verificación
 
 ```
