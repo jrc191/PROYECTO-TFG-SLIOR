@@ -45,7 +45,7 @@ import com.slior.viewmodel.AuthViewModel
 
 @Composable
 fun LoginScreen(
-    onLoginSuccess: () -> Unit,
+    onLoginSuccess: (repartidorId: String) -> Unit,
     onGoToRegister: () -> Unit,
     viewModel: AuthViewModel = hiltViewModel()
 ) {
@@ -58,10 +58,11 @@ fun LoginScreen(
 
     // Reaccionar a cambios de estado
     LaunchedEffect(loginState) {
-        when (loginState) {
-            is LoginState.Success -> onLoginSuccess()
+        val state = loginState
+        when (state) {
+            is LoginState.Success -> onLoginSuccess(state.repartidorId)
             is LoginState.Error -> {
-                snackbarHostState.showSnackbar((loginState as LoginState.Error).message)
+                snackbarHostState.showSnackbar(state.message)
                 viewModel.resetState()
             }
             else -> {}

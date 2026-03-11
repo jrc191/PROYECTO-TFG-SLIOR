@@ -11,7 +11,7 @@ sealed interface LoginState {
     object Loading : LoginState
 
     // Login correcto: navegar a la pantalla principal
-    object Success : LoginState
+    data class Success(val repartidorId: String) : LoginState
 
     // Error: mostrar mensaje en Snackbar
     data class Error(val message: String) : LoginState

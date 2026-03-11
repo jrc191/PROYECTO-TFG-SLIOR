@@ -23,7 +23,7 @@ class AuthRepository @Inject constructor(
 ) {
 
     // Hace login en el backend, guarda el token y el usuario en local
-    suspend fun login(email: String, password: String): Result<Unit> {
+    suspend fun login(email: String, password: String): Result<String> {
         return try {
             val response = apiService.login(LoginRequest(email, password))
 
@@ -42,7 +42,7 @@ class AuthRepository @Inject constructor(
                 )
             )
 
-            Result.Success(Unit)
+            Result.Success(response.userId)
         } catch (e: Exception) {
             Result.Error(e)
         }
@@ -54,7 +54,7 @@ class AuthRepository @Inject constructor(
         email: String,
         password: String,
         rol: String
-    ): Result<Unit> {
+    ): Result<String> {
         return try {
             val response = apiService.register(
                 RegisterRequest(nombre, email, password, rol)
@@ -73,7 +73,7 @@ class AuthRepository @Inject constructor(
                 )
             )
 
-            Result.Success(Unit)
+            Result.Success(response.userId)
         } catch (e: Exception) {
             Result.Error(e)
         }

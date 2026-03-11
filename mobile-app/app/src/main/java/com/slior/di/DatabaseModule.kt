@@ -3,6 +3,7 @@ package com.slior.di
 import android.content.Context
 import androidx.room.Room
 import com.slior.data.local.AppDatabase
+import com.slior.data.local.dao.RouteDao
 import com.slior.data.local.dao.UserDao
 import dagger.Module
 import dagger.Provides
@@ -42,5 +43,10 @@ object DatabaseModule {
     @Provides
     fun provideUserDao(database: AppDatabase): UserDao {
         return database.userDao()
+    }
+
+    @Provides
+    fun provideRouteDao(database: AppDatabase): RouteDao {
+        return database.routeDao()
     }
 }

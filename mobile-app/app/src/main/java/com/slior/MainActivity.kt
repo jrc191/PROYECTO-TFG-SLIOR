@@ -7,6 +7,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.slior.ui.auth.LoginScreen
+import com.slior.ui.routes.RouteListScreen
 import com.slior.ui.theme.SliorTheme
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -26,8 +27,8 @@ class MainActivity : ComponentActivity() {
                 ) {
                     composable("login") {
                         LoginScreen(
-                            onLoginSuccess = {
-                                navController.navigate("routes") {
+                            onLoginSuccess = { repartidorId ->
+                                navController.navigate("routes/$repartidorId") {
                                     popUpTo("login") { inclusive = true }
                                 }
                             },
@@ -37,9 +38,10 @@ class MainActivity : ComponentActivity() {
                         )
                     }
 
-                    // Próximas fases añadirán las rutas aquí:
-                    // composable("routes") { RoutesListScreen(...) }
-                    // composable("register") { RegisterScreen(...) }
+                    composable("routes/{repartidorId}") { backStackEntry ->
+                        val repartidorId = backStackEntry.arguments?.getString("repartidorId") ?: ""
+                        RouteListScreen(repartidorId = repartidorId)
+                    }
                 }
             }
         }
