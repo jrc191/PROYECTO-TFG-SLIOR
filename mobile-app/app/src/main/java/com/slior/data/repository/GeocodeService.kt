@@ -1,15 +1,19 @@
 package com.slior.data.repository
 
+import com.slior.data.remote.ApiService
 import com.slior.data.remote.dto.AddressSuggestion
+import com.slior.util.RealAddresses
 import com.slior.util.Result
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import com.slior.util.RealAddresses
 import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class GeocodeService @Inject constructor() {
+class GeocodeService @Inject constructor(
+    private val apiService: ApiService
+) {
     private val cache = mutableMapOf<String, List<AddressSuggestion>>()
 
     suspend fun searchAddresses(query: String): Result<List<AddressSuggestion>> {
@@ -21,7 +25,13 @@ class GeocodeService @Inject constructor() {
 
         return withContext(Dispatchers.IO) {
             try {
-                val matches = RealAddresses.spanishAddresses
+                val backendResults = apiService.searchAddresses(normalizedQuery)
+                cache[normalizedQuery] = backendResults
+                Result.Success(backendResults)
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                val fallback = RealAddresses.spanishAddresses
                     .filter {
                         it.direccion.contains(normalizedQuery, ignoreCase = true) ||
                                 it.ciudad.contains(normalizedQuery, ignoreCase = true)
@@ -35,11 +45,8 @@ class GeocodeService @Inject constructor() {
                             longitude = it.longitud
                         )
                     }
-
-                cache[normalizedQuery] = matches
-                Result.Success(matches)
-            } catch (e: Exception) {
-                Result.Error(Exception("No se pudieron cargar direcciones", e))
+                cache[normalizedQuery] = fallback
+                Result.Success(fallback)
             }
         }
     }

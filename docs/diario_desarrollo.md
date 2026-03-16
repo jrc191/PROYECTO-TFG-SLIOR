@@ -5,6 +5,15 @@
 
 ---
 
+## FASE 4.1 — Geocodificación autoalojada (actualización)
+
+**Fecha:** 16/03/2026  
+**Estado:** En progreso
+
+- Añadido `PhotonAutoStarter` (backend) para arrancar automáticamente Photon al lanzar la app desde IntelliJ. Configurable vía propiedades `photon.*` (jar, datos, puerto, memoria).
+- Endpoint de autocompletado: `GET /api/geocode/search?q=` devuelve `displayName`, `latitude`, `longitude`.
+- App Android: `ApiService.searchAddresses` consume el endpoint; `GeocodeService` usa backend con caché y fallback a `RealAddresses` locales si falla la red.
+
 ## FASE 0: Inicialización del Proyecto
 
 **Fecha:** 09/03/2026  

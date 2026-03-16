@@ -5,10 +5,12 @@ import com.slior.data.remote.dto.CreateRouteRequest
 import com.slior.data.remote.dto.LoginRequest
 import com.slior.data.remote.dto.RegisterRequest
 import com.slior.data.remote.dto.RouteResponseDto
+import com.slior.data.remote.dto.AddressSuggestion
 import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.POST
 import retrofit2.http.Path
+import retrofit2.http.Query
 
 /**
  * Interfaz Retrofit que define los endpoints de la API REST de SLIOR.
@@ -44,4 +46,7 @@ interface ApiService {
         @Path("id") routeId: String,
         @Body body: Map<String, Double>
     ): RouteResponseDto
+
+    @GET("api/geocode/search")
+    suspend fun searchAddresses(@Query("q") query: String): List<AddressSuggestion>
 }
