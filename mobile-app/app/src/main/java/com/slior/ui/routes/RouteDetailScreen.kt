@@ -37,6 +37,7 @@ import com.slior.ui.theme.SpaceGroteskFamily
 fun RouteDetailScreen(
     routeId: String,
     onBack: () -> Unit,
+    onNavigate: (String) -> Unit = {},
     viewModel: RouteViewModel = hiltViewModel()
 ) {
     val state by viewModel.detailState.collectAsStateWithLifecycle()
@@ -300,7 +301,12 @@ fun RouteDetailScreen(
 
                             // Lista de paradas
                             items(data.stops) { stop ->
-                                StopCard(stop = stop)
+                                StopCard(
+                                    stop = stop,
+                                    onStatusChange = { newStatus ->
+                                        viewModel.updateStopStatus(stop.id, newStatus)
+                                    }
+                                )
                             }
                         }
                     }
@@ -312,14 +318,13 @@ fun RouteDetailScreen(
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .align(Alignment.BottomEnd)
                 .background(BrutalistWhite)
                 .border(SliorDesignTokens.BorderWidthHeavy, BrutalistBlack)
                 .padding(8.dp),
             contentAlignment = Alignment.Center
         ) {
             Button(
-                onClick = { /* TODO: Iniciar navegación */ },
+                onClick = { onNavigate(routeId) },
                 modifier = Modifier
                     .fillMaxWidth()
                     .heightIn(min = 64.dp),
@@ -327,7 +332,7 @@ fun RouteDetailScreen(
                     containerColor = NeonGreen,
                     contentColor = BrutalistBlack
                 ),
-                shape = androidx.compose.foundation.shape.RectangleShape
+                shape = RectangleShape
             ) {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
@@ -356,8 +361,11 @@ fun RouteDetailScreen(
 }
 
 @Composable
-private fun StopCard(stop: com.slior.data.local.entity.StopEntity) {
-    val isCompleted = stop.status.uppercase() == "COMPLETADA"
+private fun StopCard(
+    stop: com.slior.data.local.entity.StopEntity,
+    onStatusChange: (String) -> Unit
+) {
+    var isCompleted by remember { mutableStateOf(stop.status.uppercase() == "COMPLETADA") }
     val isActive = stop.status.uppercase() == "EN_CURSO"
     val statusColor = if (isCompleted) NeonGreen else if (isActive) SafetyOrange else BrutalistWhite
     
@@ -371,6 +379,13 @@ private fun StopCard(stop: com.slior.data.local.entity.StopEntity) {
                 offsetX = SliorDesignTokens.ShadowOffset,
                 offsetY = SliorDesignTokens.ShadowOffset
             )
+            .clickable {
+                if (!isActive) {
+                    isCompleted = !isCompleted
+                    val newStatus = if (isCompleted) "COMPLETADA" else "PENDIENTE"
+                    onStatusChange(newStatus)
+                }
+            }
     ) {
         Row(
             modifier = Modifier

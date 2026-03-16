@@ -27,6 +27,9 @@ class RouteViewModel @Inject constructor(
     private val _detailState = MutableStateFlow<RouteDetailState>(RouteDetailState.Loading)
     val detailState: StateFlow<RouteDetailState> = _detailState.asStateFlow()
 
+    private val _navigationState = MutableStateFlow<NavigationState>(NavigationState.Loading)
+    val navigationState: StateFlow<NavigationState> = _navigationState.asStateFlow()
+
     private val _createState = MutableStateFlow<CreateRouteState>(CreateRouteState.Idle)
     val createState: StateFlow<CreateRouteState> = _createState.asStateFlow()
 
@@ -64,6 +67,21 @@ class RouteViewModel @Inject constructor(
         }
     }
 
+    fun loadRouteForNavigation(routeId: String) {
+        viewModelScope.launch {
+            _navigationState.value = NavigationState.Loading
+            val route = routeDao.getRouteById(routeId)
+            if (route == null) {
+                _navigationState.value = NavigationState.Error("Ruta no encontrada")
+                return@launch
+            }
+
+            routeDao.getStopsByRoute(routeId).collect { stops ->
+                _navigationState.value = NavigationState.Success(route, stops)
+            }
+        }
+    }
+
     fun optimizeRoute(routeId: String) {
         viewModelScope.launch {
             try {
@@ -88,6 +106,12 @@ class RouteViewModel @Inject constructor(
                 )
                 else -> CreateRouteState.Idle
             }
+        }
+    }
+
+    fun updateStopStatus(stopId: String, newStatus: String) {
+        viewModelScope.launch {
+            routeDao.updateStopStatus(stopId, newStatus)
         }
     }
 
