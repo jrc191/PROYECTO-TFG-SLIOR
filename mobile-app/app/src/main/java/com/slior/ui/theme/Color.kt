@@ -5,6 +5,7 @@ import androidx.compose.ui.graphics.Color
 //  Sistema Brutalist SLIOR 
 val NeonGreen     = Color(0xFF39FF14)   // Acción primaria
 val SafetyOrange  = Color(0xFFF95B06)   // Alertas y acento secundario
+val WarningYellow = Color(0xFFFFD700)   // Estado planificada
 val BrutalistBlack = Color(0xFF000000)
 val BrutalistWhite = Color(0xFFFFFFFF)
 val BrutalistLightGray = Color(0xFFF8F6F5) // Fondo pantallas secundarias

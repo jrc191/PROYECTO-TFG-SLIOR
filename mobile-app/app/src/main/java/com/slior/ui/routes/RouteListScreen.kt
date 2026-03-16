@@ -8,12 +8,14 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.CloudDone
 import androidx.compose.material.icons.filled.Route
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -160,12 +162,27 @@ fun RouteListScreen(
 
 @Composable
 private fun RouteListItem(
-    route: com.slior.data.remote.dto.RouteResponse,
+    route: com.slior.data.local.entity.RouteEntity,
     onClick: () -> Unit
 ) {
+    val statusBadgeColor = when (route.status.uppercase()) {
+        "EN_CURSO" -> com.slior.ui.theme.SafetyOrange
+        "PLANIFICADA" -> com.slior.ui.theme.WarningYellow
+        "COMPLETADA" -> NeonGreen
+        else -> BrutalistBlack
+    }
+    
+    val statusLabel = when (route.status.uppercase()) {
+        "EN_CURSO" -> "En_Curso"
+        "PLANIFICADA" -> "Planificada"
+        "COMPLETADA" -> "Completada"
+        else -> route.status
+    }
+
     Box(
         modifier = Modifier
             .fillMaxWidth()
+            .heightIn(min = 140.dp)
             .background(BrutalistWhite)
             .border(SliorDesignTokens.BorderWidthHeavy, BrutalistBlack)
             .hardShadow(
@@ -177,51 +194,71 @@ private fun RouteListItem(
     ) {
         Column(
             modifier = Modifier.fillMaxWidth(),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
+            verticalArrangement = Arrangement.SpaceBetween
         ) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
+                verticalAlignment = Alignment.Top
             ) {
+                Column(modifier = Modifier.weight(1f)) {
+                    Box(
+                        modifier = Modifier
+                            .background(statusBadgeColor)
+                            .border(1.dp, BrutalistBlack)
+                            .padding(horizontal = 12.dp, vertical = 4.dp)
+                    ) {
+                        Text(
+                            text = statusLabel.uppercase(),
+                            fontFamily = SpaceGroteskFamily,
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 10.sp,
+                            letterSpacing = 0.5.sp,
+                            color = BrutalistBlack,
+                            modifier = Modifier.padding(vertical = 2.dp)
+                        )
+                    }
+                    
+                    Spacer(modifier = Modifier.height(8.dp))
+                    
+                    Text(
+                        text = route.nombre.uppercase(),
+                        fontFamily = SpaceGroteskFamily,
+                        fontWeight = FontWeight.Black,
+                        fontSize = 18.sp,
+                        letterSpacing = 1.sp,
+                        color = BrutalistBlack
+                    )
+                }
+                
                 Text(
-                    text = route.nombre.uppercase(),
+                    text = "${route.tiempoEstimado ?: "??"} MIN",
                     fontFamily = SpaceGroteskFamily,
                     fontWeight = FontWeight.Black,
-                    fontSize = 16.sp,
-                    letterSpacing = 1.sp,
+                    fontSize = 14.sp,
                     color = BrutalistBlack,
-                    modifier = Modifier.weight(1f)
-                )
-                Icon(
-                    imageVector = Icons.Default.Route,
-                    contentDescription = null,
-                    tint = NeonGreen,
-                    modifier = Modifier.size(20.dp)
+                    textAlign = TextAlign.Right
                 )
             }
 
-            Text(
-                text = "Fecha: ${route.fechaPlanificada}",
-                fontFamily = SpaceGroteskFamily,
-                fontSize = 12.sp,
-                color = BrutalistBlack
-            )
-
-            Text(
-                text = "Estado: ${route.status}",
-                fontFamily = SpaceGroteskFamily,
-                fontWeight = FontWeight.Bold,
-                fontSize = 12.sp,
-                color = NeonGreen
-            )
-
-            route.distanciaTotal?.let { distance ->
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.Bottom
+            ) {
                 Text(
-                    text = "${String.format("%.2f", distance)} km · ${route.tiempoEstimado ?: "?"} min",
-                    fontFamily = SpaceGroteskFamily,
-                    fontSize = 11.sp,
+                    text = route.fechaPlanificada.uppercase(),
+                    fontFamily = androidx.compose.ui.text.font.FontFamily.Monospace,
+                    fontWeight = FontWeight.Medium,
+                    fontSize = 12.sp,
                     color = BrutalistBlack
+                )
+                
+                Icon(
+                    imageVector = Icons.Default.CloudDone,
+                    contentDescription = null,
+                    tint = BrutalistBlack,
+                    modifier = Modifier.size(20.dp)
                 )
             }
         }
