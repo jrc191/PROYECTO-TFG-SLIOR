@@ -1,7 +1,6 @@
 package com.slior.data.remote
 
 import com.slior.data.remote.dto.AuthResponse
-import com.slior.data.remote.dto.AddressSuggestion
 import com.slior.data.remote.dto.CreateRouteRequest
 import com.slior.data.remote.dto.LoginRequest
 import com.slior.data.remote.dto.RegisterRequest
@@ -10,7 +9,6 @@ import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.POST
 import retrofit2.http.Path
-import retrofit2.http.Query
 
 /**
  * Interfaz Retrofit que define los endpoints de la API REST de SLIOR.
@@ -24,6 +22,11 @@ interface ApiService {
 
     @POST("auth/register")
     suspend fun register(@Body request: RegisterRequest): AuthResponse
+
+    /** Comprueba si el servidor está activo. Cualquier respuesta HTTP (incluso 4xx)
+     *  significa que el servidor está en línea; solo una IOException implica sin conexión. */
+    @GET("health")
+    suspend fun healthCheck(): retrofit2.Response<Unit>
 
     @GET("api/routes/repartidor/{repartidorId}")
     suspend fun getRoutesByRepartidor(
@@ -41,9 +44,4 @@ interface ApiService {
         @Path("id") routeId: String,
         @Body body: Map<String, Double>
     ): RouteResponseDto
-
-    @GET("api/geocode/search")
-    suspend fun searchAddresses(
-        @Query("q") query: String
-    ): List<AddressSuggestion>
 }

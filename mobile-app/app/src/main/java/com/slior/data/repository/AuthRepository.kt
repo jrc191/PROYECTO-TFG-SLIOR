@@ -10,8 +10,11 @@ import com.slior.data.remote.dto.LoginRequest
 import com.slior.data.remote.dto.RegisterRequest
 import com.slior.data.remote.dataStore
 import com.slior.util.Result
+import com.slior.ui.auth.ServerStatus
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.Flow
+import retrofit2.HttpException
+import java.io.IOException
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -83,6 +86,21 @@ class AuthRepository @Inject constructor(
     suspend fun logout() {
         context.dataStore.edit { it.remove(TOKEN_KEY) }
         userDao.deleteAll()
+    }
+
+    /** Intenta alcanzar el servidor. Cualquier respuesta HTTP = Online.
+     *  Solo una IOException (sin red / host inaccesible) = Offline. */
+    suspend fun checkServerStatus(): ServerStatus {
+        return try {
+            apiService.healthCheck()
+            ServerStatus.Online
+        } catch (e: HttpException) {
+            ServerStatus.Online   // Hubo respuesta HTTP, el servidor está activo
+        } catch (e: IOException) {
+            ServerStatus.Offline
+        } catch (e: Exception) {
+            ServerStatus.Offline
+        }
     }
 
     // Observa el usuario actual desde Room (Flow se actualiza automáticamente)
