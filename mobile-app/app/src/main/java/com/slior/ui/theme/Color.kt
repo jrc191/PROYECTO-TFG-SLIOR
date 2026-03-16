@@ -26,3 +26,10 @@ val OnSurfaceLight = Color(0xFF212121)
 val SurfaceDark = Color(0xFF1C1C1C)
 val BackgroundDark = Color(0xFF121212)
 val OnSurfaceDark = Color(0xFFE0E0E0)
+
+// Brutalista
+val BrutalistBlack = Color(0xFF0B0B0B)
+val BrutalistWhite = Color(0xFFFFFFFF)
+val BrutalistLightGray = Color(0xFFE6E6E6)
+val NeonGreen = Color(0xFF00FF5F)
+val SafetyOrange = Color(0xFFFF5C00)

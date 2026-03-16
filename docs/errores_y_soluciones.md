@@ -12,6 +12,12 @@
 | 1 | Fase 0 | Android / Gradle | `fileCollection(Spec)` incompatibilidad kapt + Gradle 8.x |  Resuelto |
 | 2 | Fase 1 Android | `MainActivity` / appcompat | `addMenuProvider` firma incompatible appcompat 1.6.1 vs activity-compose 1.9.2 |  Resuelto |
 | 3 | Fase 1 Android | D8 / Gradle JVM | `OutOfMemoryError: Java heap space` durante compilación |  Resuelto |
+| 4 | Fase 5 UI | `RegisterScreen.kt` | Duplicidad de `RegisterScreen` → conflicting overloads |  Resuelto |
+| 5 | Fase 5 UI | `Theme.kt` / Google Fonts | Imports incorrectos + opt-in inexistente |  Resuelto |
+| 6 | Fase 5 UI | Backend `/auth/login` | JWT secret placeholder sin perfil local → 500 |  Resuelto |
+| 7 | Fase 5 UI | `NetworkModule.kt` | URL Tailscale hardcodeada → timeout en emulador |  Resuelto |
+| 8 | Fase 4 Mapas | `GeocodeService` | 429 Nominatim (Varnish) al autocompletar direcciones |  Resuelto |
+| 9 | Fase 4 Mapas | UI Compose | Imports ausentes y props inválidas en campos y botones |  Resuelto |
 
 ---
 
@@ -187,4 +193,261 @@ En proyectos Android con múltiples librerías que usan procesamiento de anotaci
 
 ---
 
+---
+
 *— Nuevos errores se añadirán aquí a medida que avance el proyecto —*
+
+---
+
+## ERROR #4
+
+**Fecha:** 11/03/2026  
+**Fase:** Fase 5 — Diseño UI  
+**Componente:** `RegisterScreen.kt`  
+**Severidad:**  Bloqueo (el proyecto no compilaba)
+
+### Mensaje de error
+
+```
+e: file:///...RegisterScreen.kt:61:1
+Conflicting overloads:
+fun RegisterScreen(onRegisterSuccess: ..., onGoToLogin: ..., viewModel: AuthViewModel = ...): Unit
+```
+
+### ¿Qué estaba pasando?
+
+Al editar el fichero `RegisterScreen.kt` para añadir la nueva implementación brutalista, la herramienta de edición localizó solo el bloque de imports como `old_str` y ANTEPUSO el nuevo código. El resultado fue que el fichero quedó con **dos declaraciones de `fun RegisterScreen`**: la nueva (al principio) y la anterior (al final). El compilador de Kotlin lanzó un error de "conflicting overloads" al encontrar dos funciones con la misma firma en el mismo fichero.
+
+### Solución
+
+Eliminar la implementación duplicada al final del fichero, dejando únicamente la nueva versión brutalista. Se truncó el fichero a las primeras 340 líneas (la implementación correcta).
+
+### Lección aprendida
+
+Cuando se reescribe completamente un fichero, asegurarse de que el `old_str` de la edición incluya el contenido completo del fichero original, no solo las primeras líneas. Alternativamente, verificar el contenido del fichero tras la edición antes de compilar.
+
+---
+
+## ERROR #5
+
+**Fecha:** 11/03/2026  
+**Fase:** Fase 5 — Diseño UI  
+**Componente:** `Theme.kt` / Fuentes Google  
+**Severidad:**  Bloqueo (el proyecto no compilaba)
+
+### Mensaje de error
+
+```
+e: file:///...Theme.kt:17:45
+Unresolved reference 'ExperimentalGoogleFontsApi'.
+
+e: file:///...Theme.kt:26:8
+Annotation argument must be a compile-time constant.
+
+e: file:///...Theme.kt:35:5
+None of the following candidates is applicable:
+fun Font(fileDescriptor: ParcelFileDescriptor, ...): Font
+fun Font(file: File, ...): Font
+```
+
+### ¿Qué estaba pasando?
+
+Tres errores relacionados con la integración de Google Fonts en Compose:
+
+1. `ExperimentalGoogleFontsApi` no existe en el BOM `2024.09.03`. Esta anotación solo existía en versiones antiguas de la librería y fue eliminada/renombrada.
+
+2. Al usar `@OptIn(ExperimentalGoogleFontsApi::class)` con una referencia no resuelta, el compilador no puede evaluar el argumento en tiempo de compilación.
+
+3. `Font(googleFont, provider, ...)` no resolvía porque se estaba importando `androidx.compose.ui.text.font.Font` en lugar de `androidx.compose.ui.text.googlefonts.Font`. Las dos funciones tienen la misma firma base pero están en paquetes distintos.
+
+### Solución
+
+1. Eliminar todas las anotaciones `@OptIn(ExperimentalGoogleFontsApi::class)` del fichero.
+2. Cambiar el import de `Font`:
+
+```kotlin
+// INCORRECTO
+import androidx.compose.ui.text.font.Font
+
+// CORRECTO
+import androidx.compose.ui.text.googlefonts.Font
+```
+
+### Lección aprendida
+
+Con el BOM `2024.09.03` de Compose, la API de Google Fonts es estable y no requiere opt-in. Siempre verificar en la documentación oficial si una API experimental ya fue promovida a estable. El error "None of the following candidates" en una función con argumentos de tipo Google-specific suele indicar un import del paquete equivocado.
+
+---
+
+## ERROR #6
+
+**Fecha:** 11/03/2026  
+**Fase:** Fase 5 — Diseño UI  
+**Componente:** Backend Spring Boot — `/auth/login`  
+**Severidad:**  Bloqueo (login devolvía siempre HTTP 500)
+
+### Mensaje de error
+
+```
+<-- 500 http://10.0.2.2:8080/auth/login (107ms)
+{"path":"/auth/login","error":"Internal Server Error",
+ "message":"Error interno del servidor","status":500}
+```
+
+### ¿Qué estaba pasando?
+
+`application.properties` define `jwt.secret=PLACEHOLDER_SET_IN_APPLICATION_LOCAL_PROPERTIES`. El secret real (`tspk8XhnY93GmpKHEvXKXBM17l3aByXhFhhEjAuJiQI=`) está en `application-local.properties`, fichero que Spring Boot solo carga cuando el perfil `local` está activo.
+
+Al arrancar el backend sin especificar el perfil Spring, la propiedad `jwt.secret` mantenía el valor placeholder. Cuando el login llegaba a `jwtUtil.generateToken()`, la librería jjwt llamaba a `Decoders.BASE64.decode("PLACEHOLDER_SET_IN_APPLICATION_LOCAL_PROPERTIES")`. La cadena placeholder contiene guiones bajos (`_`), que son caracteres **inválidos en Base64 estándar** (solo válidos en Base64URL). La decodificación lanzaba `IllegalArgumentException`, excepción no capturada específicamente en el `GlobalExceptionHandler`, que la convierte en HTTP 500.
+
+### Diagrama de la causa
+
+```
+Backend arrancado sin -Dspring.profiles.active=local
+   application-local.properties NO se carga
+         jwt.secret = "PLACEHOLDER_SET_IN_APPLICATION_LOCAL_PROPERTIES"
+               Decoders.BASE64.decode(placeholder) → IllegalArgumentException
+                     GlobalExceptionHandler (catch Exception) → HTTP 500
+```
+
+### Solución
+
+Añadir el perfil activo por defecto en `application.properties`:
+
+```properties
+# application.properties
+spring.profiles.active=local
+```
+
+Y en el script de arranque:
+
+```bash
+mvn spring-boot:run -Dspring-boot.run.profiles=local
+```
+
+En producción, la variable de entorno `SPRING_PROFILES_ACTIVE=prod` sobrescribe este valor.
+
+### Lección aprendida
+
+Cuando se usa el patrón `application-local.properties` para separar secretos del código versionado, añadir `spring.profiles.active=local` como valor por defecto en `application.properties` para desarrollo. Así el perfil se activa automáticamente sin necesidad de configurar cada entorno de ejecución (IDE, terminal, CI/CD) por separado.
+
+---
+
+## ERROR #7
+
+**Fecha:** 11/03/2026  
+**Fase:** Fase 5 — Diseño UI  
+**Componente:** Android — `NetworkModule.kt`  
+**Severidad:**  Funcional (timeout en emulador, funciona en dispositivo físico Tailscale)
+
+### Síntoma
+
+```
+<-- HTTP FAILED: java.net.SocketTimeoutException:
+    failed to connect to /100.115.5.3 (port 8080) from /10.0.2.16 after 10000ms
+```
+
+### ¿Qué estaba pasando?
+
+`NetworkModule.kt` tenía la URL del backend **hardcodeada** directamente en el código:
+
+```kotlin
+// INCORRECTO — ignoraba BuildConfig.BASE_URL
+private val BASE_URL = "http://100.115.5.3:8080/"
+```
+
+`100.115.5.3` es la IP de Tailscale del PC de desarrollo. El emulador Android corre en una máquina virtual aislada que **no tiene acceso a la red Tailscale del host**, por lo que todos los intentos de conexión agotaban el timeout de 10 segundos.
+
+El fichero `build.gradle.kts` ya tenía configurada la URL correcta por build type (`http://10.0.2.2:8080/` para debug), pero `NetworkModule` no la usaba.
+
+### Solución
+
+```kotlin
+// CORRECTO — usa la URL del build type activo
+import com.slior.BuildConfig
+
+private val BASE_URL = BuildConfig.BASE_URL
+```
+
+Con esto:
+- **Emulador** (debug build) → `http://10.0.2.2:8080/` (emulador → localhost del PC)
+- **Dispositivo físico** con Tailscale → cambiar `BASE_URL` en `build.gradle.kts` a la IP Tailscale
+- **Producción** (release build) → URL pública configurada en `build.gradle.kts`
+
+### Lección aprendida
+
+Nunca hardcodear URLs de red en el código de producción. Usar `BuildConfig` con variables por build type es el patrón correcto en Android para gestionar entornos (desarrollo/staging/producción) sin cambiar el código fuente.
+
+---
+
+## ERROR #8
+
+**Fecha:** 16/03/2026  
+**Fase:** Fase 4 — Mapas y Navegación  
+**Componente:** Backend `GeocodeService` / proveedor de geocodificación  
+**Severidad:** Alta (autocompletado inutilizable bajo rate limit) — Resuelto
+
+### Mensaje de error
+
+```
+Nominatim ... 429 Too many requests (Varnish cache server)
+```
+
+### Causa
+
+Autocompletado usando Nominatim público sin control de frecuencia. Al escribir varios caracteres se lanzaban muchas peticiones en paralelo, superando el rate limit del proxy y devolviendo 429. La caché in-memory no persistía y no protegía de ráfagas.
+
+### Solución aplicada
+
+1. **Photon autoalojado** (dump España 1.0) en `photon/`:
+   - Binario `photon-1.0.1.jar`.
+   - Dump `photon-db-spain-1.0-latest.tar.bz2` extraído en `photon_data/`.
+   - Arranque local:  
+     ```powershell
+     cd photon
+     java -Xmx4G -jar photon-1.0.1.jar serve -data-dir . -listen-ip 127.0.0.1 -listen-port 2322
+     ```
+   - Verificación: `Invoke-WebRequest http://localhost:2322/api?q=Sevilla` → 200 OK.
+2. Backend configurable: `geocoder.provider=photon` por defecto y `geocoder.photon.url=http://localhost:2322/api` con fallback opcional a Nominatim.
+3. **Throttle** (`geocoder.throttle.ms`) antes de cualquier llamada externa y **caché persistente** (`geocode_cache` en Postgres) + caché in-memory para reutilizar resultados.
+
+### Estado
+
+Resuelto. El autocompletado puede usar Photon local sin depender de Nominatim público.
+
+---
+
+## ERROR #9
+
+**Fecha:** 16/03/2026  
+**Fase:** Fase 4 — Mapas y Navegación  
+**Componente:** Android UI (Compose)  
+**Severidad:** Bloqueo (la app no compilaba)
+
+### Mensaje de error
+
+```
+Unresolved reference: StopCard
+Unresolved reference: outlinedTextFieldColors
+No parameter with name 'keyboardType' found
+No parameter with name 'trailingIcon' found
+@Composable invocations can only happen from the context of a @Composable function
+```
+
+### ¿Qué estaba pasando?
+
+Se creó una librería de componentes brutalistas (`SliorComponents`) pero faltaban imports y parámetros opcionales usados por las pantallas:
+- `TextFieldDefaults.outlinedTextFieldColors` no estaba importado.
+- `SliorTextField` no exponía `keyboardOptions` ni `trailingIcon`.
+- `SliorPrimaryButton` no aceptaba `trailingIcon`.
+- `RouteDetailScreen` no encontraba `StopCard` aunque existía en el mismo paquete.
+
+### Solución aplicada
+
+1. Añadidos imports correctos y parámetros opcionales en `SliorTextField` (`keyboardOptions`, `trailingIcon`) y `SliorPrimaryButton` (`trailingIcon`).
+2. Ajustada la llamada de teléfono en `CreateRouteScreen` a `keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone)`.
+3. Import explícito de `StopCard` en `RouteDetailScreen`.
+
+### Estado
+
+Resuelto. El módulo móvil vuelve a compilar con los nuevos componentes brutalistas.

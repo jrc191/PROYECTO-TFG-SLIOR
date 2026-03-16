@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+
+<html lang="es"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>SLIOR - Login</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#39FF14", // Neon Green requested
+                        "safety-orange": "#f95b06",
+                        "background-light": "#ffffff",
+                        "background-dark": "#000000",
+                    },
+                    fontFamily: {
+                        "display": ["Space Grotesk", "sans-serif"]
+                    },
+                    boxShadow: {
+                        'hard': '4px 4px 0px 0px rgba(0,0,0,1)',
+                        'hard-hover': '2px 2px 0px 0px rgba(0,0,0,1)',
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0px",
+                        "lg": "0px",
+                        "xl": "0px",
+                        "full": "0px"
+                    },
+                },
+            },
+        }
+    </script>
+<style>
+        .shadow-hard { box-shadow: 6px 6px 0px 0px rgba(0,0,0,1); }
+        .focus-within-neon:focus-within { border-color: #39FF14 !important; }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark font-display min-h-screen flex items-center justify-center p-4">
+<div class="relative flex h-auto w-full max-w-[480px] flex-col bg-white border-[3px] border-black p-8 shadow-hard">
+<header class="mb-12 text-center">
+<h1 class="text-black text-[72px] font-bold leading-none tracking-tighter uppercase mb-2">
+                SLIOR
+            </h1>
+<div class="bg-black py-1 px-4 inline-block">
+<h2 class="text-white text-lg font-bold leading-tight tracking-[0.2em] uppercase">
+                    SISTEMA DE RUTAS
+                </h2>
+</div>
+</header>
+<div class="flex flex-col gap-6">
+<div class="bg-safety-orange border-2 border-black p-4 flex items-center gap-3 shadow-hard mb-4">
+<span class="material-symbols-outlined text-white font-bold">warning</span>
+<p class="text-white font-bold text-sm uppercase tracking-wider">Credenciales incorrectas</p>
+</div>
+<div class="flex flex-col gap-6">
+<label class="flex flex-col gap-2">
+<p class="text-black text-xl font-bold uppercase tracking-tight">Email</p>
+<div class="relative focus-within-neon border-2 border-black transition-colors">
+<input class="form-input block w-full bg-white text-black h-16 px-4 text-xl font-bold placeholder:text-gray-400 border-none focus:ring-0" placeholder="USER@SYSTEM.COM" type="email"/>
+</div>
+</label>
+<label class="flex flex-col gap-2">
+<p class="text-black text-xl font-bold uppercase tracking-tight">Password</p>
+<div class="flex border-2 border-black focus-within-neon transition-colors">
+<input class="form-input flex-1 bg-white text-black h-16 px-4 text-xl font-bold placeholder:text-gray-400 border-none focus:ring-0" placeholder="********" type="password"/>
+<button class="px-4 flex items-center justify-center border-l-2 border-black bg-white hover:bg-gray-100 transition-colors">
+<span class="material-symbols-outlined text-black">visibility</span>
+</button>
+</div>
+</label>
+</div>
+<button class="w-full bg-[#39FF14] border-[3px] border-black h-20 mt-4 flex items-center justify-center shadow-hard hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-hard-hover active:shadow-none transition-all">
+<span class="text-black text-2xl font-black uppercase tracking-widest">INICIAR SESIÓN</span>
+</button>
+<div class="mt-8 flex flex-col items-center gap-4">
+<a class="text-black font-bold uppercase text-sm border-b-2 border-transparent hover:border-black transition-all" href="#">
+                    ¿Olvidaste tu contraseña?
+                </a>
+<p class="text-gray-500 font-medium text-sm">
+                    ¿No tienes cuenta? 
+                    <a class="text-black font-bold uppercase hover:underline decoration-2" href="#">Regístrate aquí</a>
+</p>
+</div>
+</div>
+<div class="mt-12 flex justify-between items-center opacity-20">
+<div class="h-[2px] bg-black flex-1 mr-4"></div>
+<span class="text-[10px] font-black tracking-[0.5em] uppercase text-black leading-none">V 4.0.1 - RUGGED SYSTEM</span>
+<div class="h-[2px] bg-black flex-1 ml-4"></div>
+</div>
+</div>
+</body></html>

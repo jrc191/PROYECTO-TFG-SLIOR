@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+
+<html lang="es"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>SLIOR - Mis Rutas (Offline)</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#f95b06",
+                        "background-light": "#ffffff",
+                        "background-dark": "#050505",
+                        "surface": "#f4f4f5",
+                        "text-main": "#050505",
+                        "text-muted": "#71717a",
+                        "accent-yellow": "#ffd700",
+                        "accent-green": "#39ff14",
+                    },
+                    fontFamily: {
+                        "display": ["Space Grotesk", "sans-serif"],
+                        "body": ["IBM Plex Sans", "sans-serif"],
+                        "mono": ["IBM Plex Mono", "monospace"],
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0px",
+                        "sm": "0.25rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    boxShadow: {
+                        'hard': '4px 4px 0px #050505',
+                        'hard-primary': '8px 8px 0px #f95b06',
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        body {
+            background-color: #ffffff;
+            color: #050505;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="font-display antialiased bg-background-light min-h-screen relative pb-32">
+<!-- Top App Bar -->
+<header class="h-[64px] bg-background-light border-b-2 border-text-main flex items-center justify-between px-4 sticky top-0 z-40">
+<button aria-label="Menu" class="flex items-center justify-center w-[48px] h-[48px] text-text-main hover:bg-surface active:bg-text-main active:text-background-light transition-colors rounded-sm border-2 border-transparent active:border-text-main">
+<span class="material-symbols-outlined text-[32px]">menu</span>
+</button>
+<h1 class="text-xl font-bold tracking-tight text-text-main uppercase">Mis Rutas</h1>
+<button aria-label="Profile" class="flex items-center justify-center w-[48px] h-[48px] rounded-sm border-2 border-text-main bg-surface overflow-hidden shadow-sm">
+<img alt="User avatar" class="w-full h-full object-cover" data-alt="Close up portrait of driver" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA8lmHOt8F-5EFM-5o48O0ufEuebsmX4BodewJU7BY1r0zfTUBypQwCqF5PjBrpI40M1dF8ZnDxy9UQVf1K2C_Kt30ZxJCGddFiIaxUZ3eIph5QJNPFYn29g9deR69_oQ6PuOm4550EZ6-ecabAK4BM1HfBRS9btCUCt6wBxBS7XiYvNlRfj66Ct-hU7R6rTdAs-ozeJZIdh5l5REOpeJ0ldTUOM93lSabyLWGRwewPsp_uZGpUnx_lUm-ig3TR3_CLFdZHo9lBaZFl"/>
+</button>
+</header>
+<!-- Offline Banner -->
+<div class="h-[64px] bg-primary border-b-2 border-text-main flex items-center justify-center px-4 gap-3 sticky top-[64px] z-30 shadow-sm">
+<span class="material-symbols-outlined text-text-main text-[28px] font-bold">warning</span>
+<h2 class="text-lg font-bold text-text-main uppercase tracking-wide">Sin Conexión - Modo Local</h2>
+</div>
+<!-- Route List Container -->
+<main class="p-4 flex flex-col gap-6 mt-4">
+<!-- Route Card 1: En Curso -->
+<article class="h-[140px] bg-background-light border-2 border-text-main rounded-sm shadow-hard p-4 flex flex-col justify-between group cursor-pointer active:bg-text-main active:text-background-light transition-colors relative overflow-hidden">
+<div class="flex justify-between items-start w-full">
+<div class="flex flex-col">
+<h3 class="font-bold text-[20px] uppercase leading-none group-active:text-background-light">Ruta Norte 01</h3>
+<div class="flex items-center gap-2 mt-2">
+<span class="font-mono text-[14px] font-medium text-text-muted group-active:text-surface">12 OCT 2023</span>
+<!-- Pending Sync Indicator -->
+<span class="material-symbols-outlined text-accent-yellow text-[20px]" title="Pendiente de sincronización">cloud_sync</span>
+</div>
+</div>
+<span class="font-bold text-[16px] group-active:text-background-light">120 MIN</span>
+</div>
+<div class="flex justify-between items-end w-full">
+<div class="bg-primary text-text-main font-bold text-[12px] px-3 py-2 rounded-sm uppercase tracking-wider border-2 border-text-main">
+                    En_Curso
+                </div>
+</div>
+</article>
+<!-- Route Card 2: Planificada -->
+<article class="h-[140px] bg-background-light border-2 border-text-main rounded-sm shadow-hard p-4 flex flex-col justify-between group cursor-pointer active:bg-text-main active:text-background-light transition-colors relative overflow-hidden">
+<div class="flex justify-between items-start w-full">
+<div class="flex flex-col">
+<h3 class="font-bold text-[20px] uppercase leading-none group-active:text-background-light">Ruta Centro 04</h3>
+<div class="flex items-center gap-2 mt-2">
+<span class="font-mono text-[14px] font-medium text-text-muted group-active:text-surface">12 OCT 2023</span>
+<!-- Pending Sync Indicator -->
+<span class="material-symbols-outlined text-accent-yellow text-[20px]" title="Pendiente de sincronización">cloud_sync</span>
+</div>
+</div>
+<span class="font-bold text-[16px] group-active:text-background-light">45 MIN</span>
+</div>
+<div class="flex justify-between items-end w-full">
+<div class="bg-accent-yellow text-text-main font-bold text-[12px] px-3 py-2 rounded-sm uppercase tracking-wider border-2 border-text-main">
+                    Planificada
+                </div>
+</div>
+</article>
+<!-- Route Card 3: Planificada -->
+<article class="h-[140px] bg-background-light border-2 border-text-main rounded-sm shadow-hard p-4 flex flex-col justify-between group cursor-pointer active:bg-text-main active:text-background-light transition-colors relative overflow-hidden">
+<div class="flex justify-between items-start w-full">
+<div class="flex flex-col">
+<h3 class="font-bold text-[20px] uppercase leading-none group-active:text-background-light">Ruta Sur 09</h3>
+<div class="flex items-center gap-2 mt-2">
+<span class="font-mono text-[14px] font-medium text-text-muted group-active:text-surface">12 OCT 2023</span>
+<!-- Pending Sync Indicator -->
+<span class="material-symbols-outlined text-accent-yellow text-[20px]" title="Pendiente de sincronización">cloud_sync</span>
+</div>
+</div>
+<span class="font-bold text-[16px] group-active:text-background-light">180 MIN</span>
+</div>
+<div class="flex justify-between items-end w-full">
+<div class="bg-accent-yellow text-text-main font-bold text-[12px] px-3 py-2 rounded-sm uppercase tracking-wider border-2 border-text-main">
+                    Planificada
+                </div>
+</div>
+</article>
+</main>
+<!-- Extended FAB -->
+<button class="fixed bottom-6 right-6 h-[64px] min-w-[200px] bg-text-main text-background-light border-2 border-text-main rounded-sm shadow-hard-primary flex items-center justify-center gap-3 px-6 active:scale-95 transition-transform z-50">
+<span class="material-symbols-outlined text-[28px] font-bold">add</span>
+<span class="font-bold text-[18px] uppercase tracking-wide">Nueva Ruta</span>
+</button>
+</body></html>

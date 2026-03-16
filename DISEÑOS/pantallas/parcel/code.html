@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+
+<html lang="es"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&amp;family=IBM+Plex+Mono:wght@400;600&amp;family=IBM+Plex+Sans:wght@400;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#f95b06",
+                        "scanner-neon": "#39FF14",
+                        "background-light": "#f8f6f5",
+                        "background-dark": "#18181B",
+                    },
+                    fontFamily: {
+                        "display": ["Space Grotesk", "sans-serif"],
+                        "mono": ["IBM Plex Mono", "monospace"],
+                        "sans": ["IBM Plex Sans", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                },
+            },
+        }
+    </script>
+<style>
+        .hard-shadow {
+            box-shadow: 4px 4px 0px 0px rgba(0, 0, 0, 1);
+        }
+        .scanner-frame {
+            border: 2px solid transparent;
+            background: 
+                linear-gradient(to right, #39FF14 20px, transparent 20px) 0 0,
+                linear-gradient(to right, #39FF14 20px, transparent 20px) 100% 0,
+                linear-gradient(to left, #39FF14 20px, transparent 20px) 100% 0,
+                linear-gradient(to left, #39FF14 20px, transparent 20px) 0 0,
+                linear-gradient(to bottom, #39FF14 20px, transparent 20px) 0 0,
+                linear-gradient(to bottom, #39FF14 20px, transparent 20px) 0 100%,
+                linear-gradient(to top, #39FF14 20px, transparent 20px) 0 100%,
+                linear-gradient(to top, #39FF14 20px, transparent 20px) 100% 100%,
+                linear-gradient(to bottom, #39FF14 20px, transparent 20px) 100% 0,
+                linear-gradient(to top, #39FF14 20px, transparent 20px) 100% 0;
+            background-repeat: no-repeat;
+            background-size: 40px 40px;
+            width: 280px;
+            height: 280px;
+        }
+        .corner-top-left { border-top: 4px solid #39FF14; border-left: 4px solid #39FF14; width: 40px; height: 40px; position: absolute; top: 0; left: 0; }
+        .corner-top-right { border-top: 4px solid #39FF14; border-right: 4px solid #39FF14; width: 40px; height: 40px; position: absolute; top: 0; right: 0; }
+        .corner-bottom-left { border-bottom: 4px solid #39FF14; border-left: 4px solid #39FF14; width: 40px; height: 40px; position: absolute; bottom: 0; left: 0; }
+        .corner-bottom-right { border-bottom: 4px solid #39FF14; border-right: 4px solid #39FF14; width: 40px; height: 40px; position: absolute; bottom: 0; right: 0; }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark font-display">
+<!-- Top Navigation Bar -->
+<header class="sticky top-0 z-50 flex items-center bg-white border-b-2 border-black p-4 h-16">
+<button class="text-black flex items-center justify-center mr-4">
+<span class="material-symbols-outlined text-2xl">arrow_back</span>
+</button>
+<h1 class="text-black text-xl font-bold uppercase tracking-tight font-display">ESCANEAR PAQUETE</h1>
+</header>
+<!-- Main Viewport (Camera Area) -->
+<main class="relative flex flex-col h-[calc(100vh-64px)] w-full bg-background-dark overflow-hidden">
+<!-- Camera Viewport Content -->
+<div class="flex-1 flex flex-col items-center justify-center p-8">
+<!-- Scan Frame -->
+<div class="relative w-72 h-72">
+<div class="corner-top-left"></div>
+<div class="corner-top-right"></div>
+<div class="corner-bottom-left"></div>
+<div class="corner-bottom-right"></div>
+<!-- Scanning Line Effect (Static Placeholder) -->
+<div class="absolute top-1/2 left-0 w-full h-0.5 bg-scanner-neon/50 shadow-[0_0_15px_#39FF14]"></div>
+<!-- Package Placeholder Image in dark bg -->
+<div class="absolute inset-4 opacity-20 flex items-center justify-center">
+<span class="material-symbols-outlined text-9xl text-white">qr_code_scanner</span>
+</div>
+</div>
+<p class="mt-8 text-white/60 font-mono text-sm uppercase tracking-widest">Alinee el código de barras</p>
+</div>
+<!-- Bottom Sheet / Success Info Card -->
+<div class="px-4 pb-6 w-full">
+<div class="bg-white border-2 border-black rounded-lg hard-shadow overflow-hidden flex flex-col">
+<!-- Card Header/Drag Handle -->
+<div class="flex justify-center py-3 border-b border-slate-100">
+<div class="h-1.5 w-12 rounded-full bg-slate-200"></div>
+</div>
+<!-- Card Content -->
+<div class="p-6">
+<div class="flex flex-col gap-1 mb-6">
+<span class="font-mono text-slate-500 text-sm font-semibold">#PKG-88392A</span>
+<h2 class="font-sans text-[22px] font-bold text-black leading-tight">Juan Pérez</h2>
+<p class="font-sans text-slate-600 text-base">Calle Falsa 123, CP 28001</p>
+</div>
+<!-- Package Details Icons -->
+<div class="flex gap-4 mb-8">
+<div class="flex items-center gap-2 bg-slate-50 border border-slate-200 px-3 py-2 rounded-lg">
+<span class="material-symbols-outlined text-slate-600 text-xl">package_2</span>
+<span class="text-slate-700 text-xs font-bold uppercase">Frágil</span>
+</div>
+<div class="flex items-center gap-2 bg-slate-50 border border-slate-200 px-3 py-2 rounded-lg">
+<span class="material-symbols-outlined text-slate-600 text-xl">weight</span>
+<span class="text-slate-700 text-xs font-bold uppercase">2.5 KG</span>
+</div>
+</div>
+<!-- Confirmation Button -->
+<button class="w-full h-[72px] bg-scanner-neon border-2 border-black rounded-lg flex items-center justify-center gap-3 active:translate-y-1 active:shadow-none transition-all duration-75">
+<span class="text-black font-display font-bold text-xl uppercase tracking-tight">Confirmar Entrega</span>
+<span class="material-symbols-outlined text-black text-3xl font-bold">check_circle</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Utility Buttons Over Camera -->
+<div class="absolute top-4 right-4 flex flex-col gap-3">
+<button class="size-12 rounded-full bg-black/50 border border-white/20 text-white flex items-center justify-center backdrop-blur-sm">
+<span class="material-symbols-outlined">flashlight_on</span>
+</button>
+<button class="size-12 rounded-full bg-black/50 border border-white/20 text-white flex items-center justify-center backdrop-blur-sm">
+<span class="material-symbols-outlined">edit_square</span>
+</button>
+</div>
+</main>
+</body></html>

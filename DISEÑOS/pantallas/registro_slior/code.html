@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+
+<html lang="es"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#f95b06",
+                        "neon-green": "#39FF14",
+                        "background-light": "#f8f6f5",
+                        "background-dark": "#23160f",
+                    },
+                    fontFamily: {
+                        "display": ["Space Grotesk", "sans-serif"]
+                    },
+                    boxShadow: {
+                        'hard': '4px 4px 0px 0px rgba(0,0,0,1)',
+                        'hard-lg': '8px 8px 0px 0px rgba(0,0,0,1)',
+                    },
+                    borderWidth: {
+                        '3': '3px',
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0px", 
+                        "lg": "0px", 
+                        "xl": "0px", 
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+<style>
+        .brutalist-input:focus {
+            box-shadow: 6px 6px 0px 0px rgba(249, 91, 6, 1);
+            transform: translate(-2px, -2px);
+        }
+        .brutalist-button:active {
+            box-shadow: 0px 0px 0px 0px rgba(0,0,0,1);
+            transform: translate(4px, 4px);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-slate-100 min-h-screen">
+<div class="relative mx-auto max-w-[480px] min-h-screen flex flex-col bg-background-light dark:bg-background-dark border-x-0 md:border-x-4 border-black">
+<!-- TopAppBar - Rugged Header -->
+<header class="flex items-center p-6 border-b-4 border-black bg-white dark:bg-slate-900 sticky top-0 z-10">
+<button class="mr-4 flex h-12 w-12 items-center justify-center border-2 border-black bg-white hover:bg-primary/10 transition-colors shadow-hard">
+<span class="material-symbols-outlined font-bold text-black">arrow_back</span>
+</button>
+<h1 class="text-2xl font-bold uppercase tracking-tighter text-black dark:text-white">
+                NUEVO REPARTIDOR
+            </h1>
+</header>
+<!-- Progress Bar / Visual Accent -->
+<div class="h-2 bg-black w-full flex">
+<div class="h-full bg-primary w-1/3"></div>
+<div class="h-full bg-neon-green w-1/3 border-x-2 border-black"></div>
+<div class="h-full bg-white w-1/3"></div>
+</div>
+<main class="flex-1 px-6 py-8 space-y-8">
+<!-- Hero Title -->
+<div class="space-y-2">
+<span class="bg-black text-white px-2 py-1 text-xs font-bold uppercase tracking-widest">Slior Logistics v2.0</span>
+<h2 class="text-4xl font-extrabold leading-none uppercase italic italic">Únete a la<br/>Flota</h2>
+</div>
+<!-- Registration Form -->
+<form class="space-y-6">
+<!-- Field: Full Name -->
+<div class="flex flex-col gap-2">
+<label class="text-sm font-black uppercase tracking-widest text-black dark:text-slate-300">
+                        Nombre Completo
+                    </label>
+<div class="relative">
+<input class="brutalist-input w-full h-16 px-4 bg-white border-2 border-black text-xl font-bold placeholder:text-slate-400 focus:outline-none transition-all shadow-hard" placeholder="EJ. JUAN PÉREZ" type="text"/>
+</div>
+</div>
+<!-- Field: Email -->
+<div class="flex flex-col gap-2">
+<label class="text-sm font-black uppercase tracking-widest text-black dark:text-slate-300">
+                        Correo Electrónico
+                    </label>
+<div class="relative">
+<input class="brutalist-input w-full h-16 px-4 bg-white border-2 border-black text-xl font-bold placeholder:text-slate-400 focus:outline-none transition-all shadow-hard" placeholder="EMAIL@SLIOR.APP" type="email"/>
+</div>
+</div>
+<!-- Field: Password -->
+<div class="flex flex-col gap-2">
+<label class="text-sm font-black uppercase tracking-widest text-black dark:text-slate-300">
+                        Contraseña
+                    </label>
+<div class="relative flex">
+<input class="brutalist-input flex-1 h-16 px-4 bg-white border-2 border-black text-xl font-bold placeholder:text-slate-400 focus:outline-none transition-all shadow-hard" placeholder="••••••••" type="password"/>
+<button class="absolute right-4 top-1/2 -translate-y-1/2 text-black" type="button">
+<span class="material-symbols-outlined">visibility</span>
+</button>
+</div>
+</div>
+<!-- Massive Action Button -->
+<div class="pt-6">
+<button class="brutalist-button w-full h-20 bg-neon-green border-4 border-black shadow-hard-lg flex items-center justify-center gap-3 transition-all" type="submit">
+<span class="text-2xl font-black uppercase tracking-tighter text-black">Crear Cuenta</span>
+<span class="material-symbols-outlined font-black text-3xl text-black">arrow_forward</span>
+</button>
+</div>
+</form>
+<!-- Secondary Action -->
+<div class="pt-4 pb-12 text-center">
+<a class="inline-block group" href="#">
+<p class="text-lg font-bold text-black dark:text-white uppercase tracking-tight">
+                        ¿Ya tienes cuenta? 
+                        <span class="bg-primary text-white px-2 py-1 group-hover:bg-black transition-colors">Inicia sesión</span>
+</p>
+</a>
+</div>
+</main>
+<!-- Footer / Technical Info -->
+<footer class="p-6 border-t-4 border-black bg-slate-100 dark:bg-slate-800 flex justify-between items-center">
+<div class="flex flex-col">
+<span class="text-[10px] font-black uppercase text-slate-500">System Status</span>
+<div class="flex items-center gap-1">
+<div class="w-2 h-2 bg-neon-green rounded-full"></div>
+<span class="text-xs font-bold text-black dark:text-white">EN LÍNEA</span>
+</div>
+</div>
+<div class="text-right">
+<span class="text-[10px] font-black uppercase text-slate-500">Device ID</span>
+<p class="text-xs font-mono font-bold text-black dark:text-white">SL-992-TX</p>
+</div>
+</footer>
+</div>
+<!-- Background Pattern Decorative Elements -->
+<div class="fixed top-20 left-10 opacity-5 pointer-events-none select-none hidden lg:block">
+<p class="text-[120px] font-black leading-none uppercase italic">REGISTRO</p>
+</div>
+<div class="fixed bottom-20 right-10 opacity-5 pointer-events-none select-none hidden lg:block text-right">
+<p class="text-[120px] font-black leading-none uppercase italic">REPARTIDOR</p>
+</div>
+</body></html>

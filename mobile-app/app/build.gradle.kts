@@ -33,6 +33,7 @@ android {
             )
             // En release usar la URL del túnel (sustituir por la URL real de Cloudflare)
             buildConfigField("String", "BASE_URL", "\"https://CHANGE-ME.trycloudflare.com/\"")
+            buildConfigField("String", "PHOTON_URL", "\"https://CHANGE-ME-photon.trycloudflare.com/\"")
         }
         debug {
             applicationIdSuffix = ".debug"
@@ -40,6 +41,7 @@ android {
             // Emulador local → 10.0.2.2 apunta al localhost del PC
             // Para usar el túnel: cambiar por "https://tu-url.trycloudflare.com/"
             buildConfigField("String", "BASE_URL", "\"http://10.0.2.2:8080/\"")
+            buildConfigField("String", "PHOTON_URL", "\"http://10.0.2.2:2322/\"")
         }
     }
 
@@ -71,6 +73,7 @@ dependencies {
     implementation("androidx.compose.ui:ui-tooling-preview")
     implementation("androidx.compose.material3:material3")
     implementation("androidx.compose.material:material-icons-extended")
+    implementation("androidx.compose.foundation:foundation")
     debugImplementation("androidx.compose.ui:ui-tooling")
 
     // ======= Navigation Compose =======

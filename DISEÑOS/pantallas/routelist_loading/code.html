@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+
+<html lang="es"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>SLIOR - RouteList (Loading)</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500&amp;family=IBM+Plex+Sans:wght@600;700&amp;family=Space+Grotesk:wght@700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+  tailwind.config = {
+    darkMode: "class",
+    theme: {
+      extend: {
+        colors: {
+          "primary": "#050505",
+          "background-light": "#FFFFFF",
+          "background-dark": "#050505",
+          "surface": "#F4F4F5",
+          "muted": "#71717A",
+          "accent-orange": "#FF5A00",
+          "accent-green": "#39FF14",
+          "accent-yellow": "#FFD700",
+        },
+        fontFamily: {
+          "display": ["Space Grotesk", "sans-serif"],
+          "body": ["IBM Plex Sans", "sans-serif"],
+          "mono": ["IBM Plex Mono", "monospace"],
+        },
+        borderRadius: {
+          "DEFAULT": "0px",
+          "sm": "4px",
+          "lg": "0px",
+          "xl": "0px",
+          "full": "0px"
+        },
+        boxShadow: {
+          "hard": "4px 4px 0px #050505",
+          "hard-orange": "8px 8px 0px #FF5A00",
+        },
+        borderWidth: {
+          "thick": "2px",
+        },
+        animation: {
+          'harsh-shimmer': 'harshShimmer 1.5s infinite linear',
+        },
+        keyframes: {
+          harshShimmer: {
+            '0%': { backgroundPosition: '-200% 0' },
+            '100%': { backgroundPosition: '200% 0' },
+          }
+        }
+      },
+    },
+  }
+</script>
+<style>
+  .skeleton-shimmer {
+    background: linear-gradient(90deg, #F4F4F5 25%, #E4E4E7 50%, #F4F4F5 75%);
+    background-size: 200% 100%;
+  }
+</style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark text-primary dark:text-background-light font-body min-h-screen relative pb-32">
+<!-- TopAppBar -->
+<header class="sticky top-0 z-50 flex h-[64px] items-center justify-between bg-background-light dark:bg-primary border-b-thick border-primary dark:border-background-light px-4">
+<button aria-label="Menu" class="flex size-[48px] min-h-[48px] min-w-[48px] shrink-0 items-center justify-center text-primary dark:text-background-light focus:outline-none focus:ring-4 focus:ring-primary">
+<span class="material-symbols-outlined text-[32px]">menu</span>
+</button>
+<h1 class="font-display text-[20px] font-bold tracking-wider text-primary dark:text-background-light uppercase text-center flex-1">
+      MIS RUTAS
+    </h1>
+<div class="flex size-[48px] shrink-0 items-center justify-center border-thick border-primary dark:border-background-light bg-surface dark:bg-primary overflow-hidden">
+<span class="material-symbols-outlined text-[32px] text-muted">person</span>
+</div>
+</header>
+<!-- Main Content - Skeleton List -->
+<main class="p-4 flex flex-col gap-4">
+<!-- Skeleton Card 1 -->
+<div class="h-[140px] w-full border-thick border-primary dark:border-background-light shadow-hard bg-surface dark:bg-primary p-4 flex flex-col justify-between skeleton-shimmer animate-harsh-shimmer">
+<div class="flex justify-between items-start w-full">
+<div class="h-[24px] w-[60%] bg-muted/20 border-thick border-primary/10"></div>
+<div class="h-[20px] w-[60px] bg-muted/20 border-thick border-primary/10"></div>
+</div>
+<div class="flex justify-between items-end w-full">
+<div class="flex items-center gap-2">
+<div class="h-[16px] w-[80px] bg-muted/20 border-thick border-primary/10"></div>
+<div class="size-[20px] bg-muted/20 border-thick border-primary/10"></div>
+</div>
+<div class="h-[28px] w-[100px] bg-muted/20 border-thick border-primary/10 rounded-sm"></div>
+</div>
+</div>
+<!-- Skeleton Card 2 -->
+<div class="h-[140px] w-full border-thick border-primary dark:border-background-light shadow-hard bg-surface dark:bg-primary p-4 flex flex-col justify-between skeleton-shimmer animate-harsh-shimmer">
+<div class="flex justify-between items-start w-full">
+<div class="h-[24px] w-[75%] bg-muted/20 border-thick border-primary/10"></div>
+<div class="h-[20px] w-[50px] bg-muted/20 border-thick border-primary/10"></div>
+</div>
+<div class="flex justify-between items-end w-full">
+<div class="flex items-center gap-2">
+<div class="h-[16px] w-[90px] bg-muted/20 border-thick border-primary/10"></div>
+<div class="size-[20px] bg-muted/20 border-thick border-primary/10"></div>
+</div>
+<div class="h-[28px] w-[120px] bg-muted/20 border-thick border-primary/10 rounded-sm"></div>
+</div>
+</div>
+<!-- Skeleton Card 3 -->
+<div class="h-[140px] w-full border-thick border-primary dark:border-background-light shadow-hard bg-surface dark:bg-primary p-4 flex flex-col justify-between skeleton-shimmer animate-harsh-shimmer">
+<div class="flex justify-between items-start w-full">
+<div class="h-[24px] w-[50%] bg-muted/20 border-thick border-primary/10"></div>
+<div class="h-[20px] w-[70px] bg-muted/20 border-thick border-primary/10"></div>
+</div>
+<div class="flex justify-between items-end w-full">
+<div class="flex items-center gap-2">
+<div class="h-[16px] w-[70px] bg-muted/20 border-thick border-primary/10"></div>
+<div class="size-[20px] bg-muted/20 border-thick border-primary/10"></div>
+</div>
+<div class="h-[28px] w-[90px] bg-muted/20 border-thick border-primary/10 rounded-sm"></div>
+</div>
+</div>
+<!-- Skeleton Card 4 -->
+<div class="h-[140px] w-full border-thick border-primary dark:border-background-light shadow-hard bg-surface dark:bg-primary p-4 flex flex-col justify-between skeleton-shimmer animate-harsh-shimmer">
+<div class="flex justify-between items-start w-full">
+<div class="h-[24px] w-[80%] bg-muted/20 border-thick border-primary/10"></div>
+<div class="h-[20px] w-[40px] bg-muted/20 border-thick border-primary/10"></div>
+</div>
+<div class="flex justify-between items-end w-full">
+<div class="flex items-center gap-2">
+<div class="h-[16px] w-[85px] bg-muted/20 border-thick border-primary/10"></div>
+<div class="size-[20px] bg-muted/20 border-thick border-primary/10"></div>
+</div>
+<div class="h-[28px] w-[110px] bg-muted/20 border-thick border-primary/10 rounded-sm"></div>
+</div>
+</div>
+</main>
+<!-- Extended FAB (Disabled State) -->
+<div class="fixed bottom-[24px] right-[24px] z-50">
+<button class="flex h-[64px] min-h-[64px] items-center justify-center gap-3 bg-primary text-background-light border-thick border-primary px-6 shadow-hard-orange opacity-50 cursor-not-allowed" disabled="">
+<span class="material-symbols-outlined text-[24px] font-bold">add</span>
+<span class="font-display text-[18px] font-bold tracking-wide">NUEVA RUTA</span>
+</button>
+</div>
+</body></html>
