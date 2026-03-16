@@ -81,3 +81,6 @@ secrets.properties
 
 # ------ Diseños locales ------
 DISEÑOS/
+
+# ------ Instrucciones de desarrollo (no subir) ------
+instrucciones/
