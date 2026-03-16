@@ -2,7 +2,10 @@ package com.slior.ui.routes
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
@@ -41,6 +44,8 @@ fun CreateRouteScreen(
     viewModel: RouteViewModel = hiltViewModel()
 ) {
     val createState by viewModel.createState.collectAsStateWithLifecycle()
+    val addressSuggestions by viewModel.addressSuggestions.collectAsStateWithLifecycle()
+    val isLoadingAddresses by viewModel.isLoadingAddresses.collectAsStateWithLifecycle()
 
     var nombre by remember { mutableStateOf("") }
     var fecha by remember { mutableStateOf("") }
@@ -53,6 +58,7 @@ fun CreateRouteScreen(
     var stopTelefono by remember { mutableStateOf("") }
     var stopLat by remember { mutableStateOf("") }
     var stopLon by remember { mutableStateOf("") }
+    var showAddressSuggestions by remember { mutableStateOf(false) }
 
     // Navegar al éxito
     LaunchedEffect(createState) {
@@ -175,16 +181,87 @@ fun CreateRouteScreen(
                 color = BrutalistBlack
             )
 
-            // Campo: Dirección
+            // Campo: Dirección con autocompleta
             SliorFieldLabel("Dirección de entrega")
-            SliorTextField(
-                value = stopDireccion,
-                onValueChange = { stopDireccion = it },
-                placeholder = "Calle Principal, 123",
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .hardShadow()
-            )
+            Box(modifier = Modifier.fillMaxWidth()) {
+                SliorTextField(
+                    value = stopDireccion,
+                    onValueChange = {
+                        stopDireccion = it
+                        viewModel.onAddressQueryChange(it)
+                        showAddressSuggestions = it.isNotBlank()
+                    },
+                    placeholder = "Calle Principal, 123",
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .hardShadow()
+                )
+
+                if (showAddressSuggestions && (addressSuggestions.isNotEmpty() || isLoadingAddresses)) {
+                    Box(
+                        modifier = Modifier
+                            .align(Alignment.TopStart)
+                            .fillMaxWidth()
+                            .offset(y = 70.dp)
+                            .border(2.dp, BrutalistBlack)
+                            .background(BrutalistWhite)
+                            .zIndex(1000f)
+                    ) {
+                        if (isLoadingAddresses) {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(16.dp),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                CircularProgressIndicator(
+                                    modifier = Modifier.size(24.dp),
+                                    strokeWidth = 2.dp,
+                                    color = BrutalistBlack
+                                )
+                            }
+                        } else {
+                            LazyColumn(
+                                modifier = Modifier.fillMaxWidth()
+                            ) {
+                                items(addressSuggestions) { suggestion ->
+                                    Column(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .clickable {
+                                                stopDireccion = suggestion.displayName
+                                                stopLat = String.format("%.6f", suggestion.latitude)
+                                                stopLon = String.format("%.6f", suggestion.longitude)
+                                                showAddressSuggestions = false
+                                                viewModel.selectAddress(suggestion)
+                                            }
+                                            .padding(12.dp)
+                                            .border(
+                                                bottom = 1.dp,
+                                                color = BrutalistLightGray
+                                            )
+                                    ) {
+                                        Text(
+                                            text = suggestion.displayName,
+                                            fontFamily = SpaceGroteskFamily,
+                                            fontWeight = FontWeight.Bold,
+                                            fontSize = 12.sp,
+                                            color = BrutalistBlack
+                                        )
+                                        Text(
+                                            text = "${String.format("%.4f", suggestion.latitude)}, ${String.format("%.4f", suggestion.longitude)}",
+                                            fontFamily = SpaceGroteskFamily,
+                                            fontWeight = FontWeight.Normal,
+                                            fontSize = 11.sp,
+                                            color = BrutalistLightGray
+                                        )
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
 
             // Campo: Destinatario
             SliorFieldLabel("Destinatario")
@@ -209,34 +286,57 @@ fun CreateRouteScreen(
                     .hardShadow()
             )
 
-            // Campos: Latitud y Longitud
+            // Campos: Latitud y Longitud (solo lectura)
+            Text(
+                text = "COORDENADAS (automáticas)".uppercase(),
+                fontFamily = SpaceGroteskFamily,
+                fontWeight = FontWeight.Black,
+                fontSize = 11.sp,
+                letterSpacing = 0.5.sp,
+                color = BrutalistLightGray
+            )
+            
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 Column(modifier = Modifier.weight(1f)) {
                     SliorFieldLabel("Latitud")
-                    SliorTextField(
-                        value = stopLat,
-                        onValueChange = { stopLat = it },
-                        placeholder = "40.4168",
-                        keyboardType = KeyboardType.Decimal,
+                    Box(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .hardShadow()
-                    )
+                            .border(2.dp, BrutalistBlack)
+                            .background(BrutalistLightGray)
+                            .padding(12.dp),
+                        contentAlignment = Alignment.CenterStart
+                    ) {
+                        Text(
+                            text = if (stopLat.isBlank()) "--" else stopLat,
+                            fontFamily = SpaceGroteskFamily,
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 14.sp,
+                            color = BrutalistBlack
+                        )
+                    }
                 }
                 Column(modifier = Modifier.weight(1f)) {
                     SliorFieldLabel("Longitud")
-                    SliorTextField(
-                        value = stopLon,
-                        onValueChange = { stopLon = it },
-                        placeholder = "-3.7038",
-                        keyboardType = KeyboardType.Decimal,
+                    Box(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .hardShadow()
-                    )
+                            .border(2.dp, BrutalistBlack)
+                            .background(BrutalistLightGray)
+                            .padding(12.dp),
+                        contentAlignment = Alignment.CenterStart
+                    ) {
+                        Text(
+                            text = if (stopLon.isBlank()) "--" else stopLon,
+                            fontFamily = SpaceGroteskFamily,
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 14.sp,
+                            color = BrutalistBlack
+                        )
+                    }
                 }
             }
 
@@ -292,9 +392,10 @@ fun CreateRouteScreen(
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
+                            // MODIFICADOR CORREGIDO: sombra -> fondo -> borde
+                            .hardShadow()
                             .background(BrutalistLightGray)
                             .border(SliorDesignTokens.BorderWidth, BrutalistBlack)
-                            .hardShadow()
                             .padding(12.dp)
                     ) {
                         Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {

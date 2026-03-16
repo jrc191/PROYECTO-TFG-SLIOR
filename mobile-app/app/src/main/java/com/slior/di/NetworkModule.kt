@@ -3,6 +3,7 @@ package com.slior.di
 import com.slior.BuildConfig
 import com.slior.data.remote.ApiService
 import com.slior.data.remote.AuthInterceptor
+import com.slior.data.remote.NominatimApiService
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -48,5 +49,15 @@ object NetworkModule {
     @Singleton
     fun provideApiService(retrofit: Retrofit): ApiService {
         return retrofit.create(ApiService::class.java)
+    }
+
+    @Provides
+    @Singleton
+    fun provideNominatimApiService(): NominatimApiService {
+        return Retrofit.Builder()
+            .baseUrl(NominatimApiService.BASE_URL)
+            .addConverterFactory(GsonConverterFactory.create())
+            .build()
+            .create(NominatimApiService::class.java)
     }
 }

@@ -3,11 +3,15 @@ package com.slior.ui.routes
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.slior.data.local.dao.RouteDao
+import com.slior.data.remote.dto.AddressSuggestion
 import com.slior.data.remote.dto.CreateRouteRequest
+import com.slior.data.repository.GeocodeService
 import com.slior.data.repository.RouteRepository
 import com.slior.util.LocationHelper
 import com.slior.util.Result
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -18,7 +22,8 @@ import javax.inject.Inject
 class RouteViewModel @Inject constructor(
     private val routeRepository: RouteRepository,
     private val routeDao: RouteDao,
-    private val locationHelper: LocationHelper
+    private val locationHelper: LocationHelper,
+    private val geocodeService: GeocodeService
 ) : ViewModel() {
 
     private val _listState = MutableStateFlow<RouteListState>(RouteListState.Loading)
@@ -32,6 +37,14 @@ class RouteViewModel @Inject constructor(
 
     private val _createState = MutableStateFlow<CreateRouteState>(CreateRouteState.Idle)
     val createState: StateFlow<CreateRouteState> = _createState.asStateFlow()
+
+    private val _addressSuggestions = MutableStateFlow<List<AddressSuggestion>>(emptyList())
+    val addressSuggestions: StateFlow<List<AddressSuggestion>> = _addressSuggestions.asStateFlow()
+
+    private val _isLoadingAddresses = MutableStateFlow(false)
+    val isLoadingAddresses: StateFlow<Boolean> = _isLoadingAddresses.asStateFlow()
+
+    private var addressSearchJob: Job? = null
 
     fun loadRoutes(repartidorId: String) {
         viewModelScope.launch {
@@ -117,5 +130,27 @@ class RouteViewModel @Inject constructor(
 
     fun resetCreateState() {
         _createState.value = CreateRouteState.Idle
+    }
+
+    fun onAddressQueryChange(query: String) {
+        addressSearchJob?.cancel()
+        
+        if (query.isBlank()) {
+            _addressSuggestions.value = emptyList()
+            _isLoadingAddresses.value = false
+            return
+        }
+
+        addressSearchJob = viewModelScope.launch {
+            delay(300)
+            _isLoadingAddresses.value = true
+            val suggestions = geocodeService.searchAddresses(query)
+            _addressSuggestions.value = suggestions
+            _isLoadingAddresses.value = false
+        }
+    }
+
+    fun selectAddress(suggestion: AddressSuggestion) {
+        _addressSuggestions.value = emptyList()
     }
 }
