@@ -1,5 +1,7 @@
 package com.slior.ui.routes
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
@@ -9,15 +11,28 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.slior.data.remote.dto.CreateRouteRequest
 import com.slior.data.remote.dto.StopRequestDto
+import com.slior.ui.components.SliorDesignTokens
+import com.slior.ui.components.SliorFieldLabel
+import com.slior.ui.components.SliorPrimaryButton
+import com.slior.ui.components.SliorTextField
+import com.slior.ui.components.hardShadow
+import com.slior.ui.theme.BrutalistBlack
+import com.slior.ui.theme.BrutalistLightGray
+import com.slior.ui.theme.BrutalistWhite
+import com.slior.ui.theme.NeonGreen
+import com.slior.ui.theme.SafetyOrange
+import com.slior.ui.theme.SpaceGroteskFamily
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CreateRouteScreen(
     repartidorId: String,
@@ -47,135 +62,301 @@ fun CreateRouteScreen(
         }
     }
 
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text("Nueva ruta") },
-                navigationIcon = {
-                    IconButton(onClick = onBack) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Volver")
-                    }
-                }
-            )
-        }
-    ) { padding ->
-        Column(
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(BrutalistWhite)
+    ) {
+        // TopAppBar brutalista
+        Box(
             modifier = Modifier
-                .fillMaxSize()
-                .padding(padding)
-                .padding(16.dp)
-                .verticalScroll(rememberScrollState()),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
+                .fillMaxWidth()
+                .background(BrutalistWhite)
+                .border(4.dp, BrutalistBlack)
+                .padding(12.dp),
+            contentAlignment = Alignment.CenterStart
         ) {
-            // Datos de la ruta
-            Text("Datos de la ruta", style = MaterialTheme.typography.titleMedium)
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                IconButton(
+                    onClick = onBack,
+                    modifier = Modifier.size(40.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.ArrowBack,
+                        contentDescription = "Volver",
+                        tint = BrutalistBlack,
+                        modifier = Modifier.size(24.dp)
+                    )
+                }
 
-            OutlinedTextField(
-                value = nombre,
-                onValueChange = { nombre = it },
-                label = { Text("Nombre de la ruta") },
-                modifier = Modifier.fillMaxWidth()
-            )
-            OutlinedTextField(
-                value = fecha,
-                onValueChange = { fecha = it },
-                label = { Text("Fecha (YYYY-MM-DD)") },
-                modifier = Modifier.fillMaxWidth()
-            )
-            OutlinedTextField(
-                value = notas,
-                onValueChange = { notas = it },
-                label = { Text("Notas (opcional)") },
-                modifier = Modifier.fillMaxWidth()
-            )
-
-            Divider()
-
-            // Añadir parada
-            Text("Añadir parada", style = MaterialTheme.typography.titleMedium)
-
-            OutlinedTextField(
-                value = stopDireccion,
-                onValueChange = { stopDireccion = it },
-                label = { Text("Dirección") },
-                modifier = Modifier.fillMaxWidth()
-            )
-            OutlinedTextField(
-                value = stopDestinatario,
-                onValueChange = { stopDestinatario = it },
-                label = { Text("Destinatario") },
-                modifier = Modifier.fillMaxWidth()
-            )
-            OutlinedTextField(
-                value = stopTelefono,
-                onValueChange = { stopTelefono = it },
-                label = { Text("Teléfono") },
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
-                modifier = Modifier.fillMaxWidth()
-            )
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                OutlinedTextField(
-                    value = stopLat,
-                    onValueChange = { stopLat = it },
-                    label = { Text("Latitud") },
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
-                    modifier = Modifier.weight(1f)
-                )
-                OutlinedTextField(
-                    value = stopLon,
-                    onValueChange = { stopLon = it },
-                    label = { Text("Longitud") },
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+                Text(
+                    text = "NUEVA RUTA",
+                    fontFamily = SpaceGroteskFamily,
+                    fontWeight = FontWeight.Black,
+                    fontSize = 18.sp,
+                    letterSpacing = 2.sp,
+                    color = BrutalistBlack,
                     modifier = Modifier.weight(1f)
                 )
             }
+        }
 
-            OutlinedButton(
+        // Contenido scrollable
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .weight(1f)
+                .padding(16.dp)
+                .verticalScroll(rememberScrollState()),
+            verticalArrangement = Arrangement.spacedBy(14.dp)
+        ) {
+            // Sección: Datos de la ruta
+            Text(
+                text = "DATOS DE LA RUTA".uppercase(),
+                fontFamily = SpaceGroteskFamily,
+                fontWeight = FontWeight.Black,
+                fontSize = 13.sp,
+                letterSpacing = 1.5.sp,
+                color = BrutalistBlack
+            )
+
+            // Campo: Nombre
+            SliorFieldLabel("Nombre de la ruta")
+            SliorTextField(
+                value = nombre,
+                onValueChange = { nombre = it },
+                placeholder = "Ej: Ruta Centro-Este",
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .hardShadow()
+            )
+
+            // Campo: Fecha
+            SliorFieldLabel("Fecha (YYYY-MM-DD)")
+            SliorTextField(
+                value = fecha,
+                onValueChange = { fecha = it },
+                placeholder = "2026-03-20",
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .hardShadow()
+            )
+
+            // Campo: Notas
+            SliorFieldLabel("Notas (opcional)")
+            SliorTextField(
+                value = notas,
+                onValueChange = { notas = it },
+                placeholder = "Información adicional...",
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .hardShadow()
+            )
+
+            // Divisor brutalista
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(3.dp)
+                    .background(NeonGreen)
+            )
+
+            // Sección: Paradas
+            Text(
+                text = "AÑADIR PARADAS".uppercase(),
+                fontFamily = SpaceGroteskFamily,
+                fontWeight = FontWeight.Black,
+                fontSize = 13.sp,
+                letterSpacing = 1.5.sp,
+                color = BrutalistBlack
+            )
+
+            // Campo: Dirección
+            SliorFieldLabel("Dirección de entrega")
+            SliorTextField(
+                value = stopDireccion,
+                onValueChange = { stopDireccion = it },
+                placeholder = "Calle Principal, 123",
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .hardShadow()
+            )
+
+            // Campo: Destinatario
+            SliorFieldLabel("Destinatario")
+            SliorTextField(
+                value = stopDestinatario,
+                onValueChange = { stopDestinatario = it },
+                placeholder = "Nombre completo",
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .hardShadow()
+            )
+
+            // Campo: Teléfono
+            SliorFieldLabel("Teléfono")
+            SliorTextField(
+                value = stopTelefono,
+                onValueChange = { stopTelefono = it },
+                placeholder = "+34 6XX XXX XXX",
+                keyboardType = KeyboardType.Phone,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .hardShadow()
+            )
+
+            // Campos: Latitud y Longitud
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                Column(modifier = Modifier.weight(1f)) {
+                    SliorFieldLabel("Latitud")
+                    SliorTextField(
+                        value = stopLat,
+                        onValueChange = { stopLat = it },
+                        placeholder = "40.4168",
+                        keyboardType = KeyboardType.Decimal,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .hardShadow()
+                    )
+                }
+                Column(modifier = Modifier.weight(1f)) {
+                    SliorFieldLabel("Longitud")
+                    SliorTextField(
+                        value = stopLon,
+                        onValueChange = { stopLon = it },
+                        placeholder = "-3.7038",
+                        keyboardType = KeyboardType.Decimal,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .hardShadow()
+                    )
+                }
+            }
+
+            // Botón: Añadir parada
+            SliorPrimaryButton(
+                text = "AÑADIR PARADA (${paradas.size})",
+                icon = Icons.Default.Add,
+                backgroundColor = NeonGreen,
                 onClick = {
                     val lat = stopLat.toDoubleOrNull()
                     val lon = stopLon.toDoubleOrNull()
                     if (stopDireccion.isNotBlank() && stopDestinatario.isNotBlank()
                         && stopTelefono.isNotBlank() && lat != null && lon != null
                     ) {
-                        paradas.add(StopRequestDto(stopDireccion, stopDestinatario, stopTelefono,
-                            lat, lon))
-                        stopDireccion = ""; stopDestinatario = ""; stopTelefono = ""
-                        stopLat = ""; stopLon = ""
+                        paradas.add(
+                            StopRequestDto(stopDireccion, stopDestinatario, stopTelefono, lat, lon)
+                        )
+                        stopDireccion = ""
+                        stopDestinatario = ""
+                        stopTelefono = ""
+                        stopLat = ""
+                        stopLon = ""
                     }
                 },
                 modifier = Modifier.fillMaxWidth()
-            ) {
-                Icon(Icons.Default.Add, contentDescription = null)
-                Spacer(modifier = Modifier.width(8.dp))
-                Text("Añadir parada (${paradas.size} añadidas)")
-            }
+            )
 
-            // Error o botón guardar
-            if (createState is CreateRouteState.Error) {
-                Text(
-                    text = (createState as CreateRouteState.Error).message,
-                    color = MaterialTheme.colorScheme.error
+            // Lista de paradas añadidas
+            if (paradas.isNotEmpty()) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(3.dp)
+                        .background(SafetyOrange)
                 )
-            }
 
-            Button(
-                onClick = {
-                    viewModel.createRoute(
-                        CreateRouteRequest(nombre, fecha, repartidorId, paradas.toList(),
-                            notas.ifBlank { null })
-                    )
-                },
-                enabled = createState !is CreateRouteState.Loading
-                        && nombre.isNotBlank() && fecha.isNotBlank() && paradas.isNotEmpty(),
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                if (createState is CreateRouteState.Loading) {
-                    CircularProgressIndicator(modifier = Modifier.size(20.dp), strokeWidth =
-                        2.dp)
-                } else {
-                    Text("Guardar ruta")
+                Text(
+                    text = "PARADAS AÑADIDAS (${paradas.size})".uppercase(),
+                    fontFamily = SpaceGroteskFamily,
+                    fontWeight = FontWeight.Black,
+                    fontSize = 13.sp,
+                    letterSpacing = 1.5.sp,
+                    color = BrutalistBlack
+                )
+
+                paradas.forEachIndexed { index, parada ->
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .background(BrutalistLightGray)
+                            .border(SliorDesignTokens.BorderWidth, BrutalistBlack)
+                            .hardShadow()
+                            .padding(12.dp)
+                    ) {
+                        Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                            Text(
+                                text = "${index + 1}. ${parada.destinatario.uppercase()}",
+                                fontFamily = SpaceGroteskFamily,
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 12.sp,
+                                color = BrutalistBlack
+                            )
+                            Text(
+                                text = parada.direccion,
+                                fontFamily = SpaceGroteskFamily,
+                                fontSize = 11.sp,
+                                color = BrutalistBlack
+                            )
+                            Text(
+                                text = "${parada.latitud}, ${parada.longitud}",
+                                fontFamily = SpaceGroteskFamily,
+                                fontSize = 10.sp,
+                                color = SafetyOrange
+                            )
+                        }
+                    }
                 }
             }
+
+            // Error banner
+            if (createState is CreateRouteState.Error) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(SafetyOrange)
+                        .border(2.dp, BrutalistBlack)
+                        .padding(12.dp)
+                ) {
+                    Text(
+                        text = (createState as CreateRouteState.Error).message,
+                        fontFamily = SpaceGroteskFamily,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 12.sp,
+                        color = BrutalistBlack
+                    )
+                }
+            }
+
+            // Botón: Guardar ruta
+            val isEnabled =
+                createState !is CreateRouteState.Loading && nombre.isNotBlank() && fecha.isNotBlank() && paradas.isNotEmpty()
+
+            SliorPrimaryButton(
+                text = if (createState is CreateRouteState.Loading) "GUARDANDO..." else "GUARDAR RUTA",
+                onClick = {
+                    viewModel.createRoute(
+                        CreateRouteRequest(
+                            nombre,
+                            fecha,
+                            repartidorId,
+                            paradas.toList(),
+                            notas.ifBlank { null }
+                        )
+                    )
+                },
+                enabled = isEnabled,
+                modifier = Modifier.fillMaxWidth()
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
         }
     }
 }
