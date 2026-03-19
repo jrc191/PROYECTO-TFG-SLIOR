@@ -243,8 +243,6 @@ fun CreateRouteScreen(
             // Botón: Añadir parada
             SliorPrimaryButton(
                 text = "AÑADIR PARADA (${paradas.size})",
-                icon = Icons.Default.Add,
-                backgroundColor = NeonGreen,
                 onClick = {
                     val lat = stopLat.toDoubleOrNull()
                     val lon = stopLon.toDoubleOrNull()
@@ -261,7 +259,15 @@ fun CreateRouteScreen(
                         stopLon = ""
                     }
                 },
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
+                trailingIcon = {
+                    Icon(
+                        imageVector = Icons.Default.Add,
+                        contentDescription = null,
+                        tint = BrutalistBlack,
+                        modifier = Modifier.size(16.dp)
+                    )
+                }
             )
 
             // Lista de paradas añadidas

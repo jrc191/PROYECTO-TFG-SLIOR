@@ -143,9 +143,16 @@ fun RouteListScreen(
         ) {
             SliorPrimaryButton(
                 text = "NUEVA RUTA",
-                icon = Icons.Default.Add,
                 onClick = onCreateRoute,
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
+                trailingIcon = {
+                    Icon(
+                        imageVector = Icons.Default.Add,
+                        contentDescription = null,
+                        tint = BrutalistBlack,
+                        modifier = Modifier.size(16.dp)
+                    )
+                }
             )
         }
     }

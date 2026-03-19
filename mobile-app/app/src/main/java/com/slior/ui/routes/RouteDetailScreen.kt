@@ -17,6 +17,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.slior.data.remote.dto.StopResponseDto
 import com.slior.ui.components.SliorDesignTokens
 import com.slior.ui.components.SliorPrimaryButton
 import com.slior.ui.components.hardShadow
@@ -204,10 +205,16 @@ fun RouteDetailScreen(
                         item {
                             SliorPrimaryButton(
                                 text = "OPTIMIZAR RUTA",
-                                icon = Icons.Default.Route,
-                                backgroundColor = SafetyOrange,
                                 onClick = { viewModel.optimizeRoute(routeId) },
-                                modifier = Modifier.fillMaxWidth()
+                                modifier = Modifier.fillMaxWidth(),
+                                trailingIcon = {
+                                    Icon(
+                                        imageVector = Icons.Default.Route,
+                                        contentDescription = null,
+                                        tint = BrutalistBlack,
+                                        modifier = Modifier.size(20.dp)
+                                    )
+                                }
                             )
                         }
 
@@ -235,7 +242,7 @@ fun RouteDetailScreen(
 }
 
 @Composable
-private fun StopCard(stop: com.slior.data.remote.dto.StopResponse) {
+private fun StopCard(stop: StopResponseDto) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
