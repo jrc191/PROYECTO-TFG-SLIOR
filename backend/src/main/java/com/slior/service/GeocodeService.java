@@ -51,23 +51,32 @@ public class GeocodeService {
     public List<AddressSuggestionResponse> searchAddresses(String query) {
         String normalized = normalizeQuery(query);
         if (normalized.length() < 3) return Collections.emptyList();
+        String city = extractCityFromQuery(normalized);
+        boolean hasCity = !city.isBlank();
 
         String key = normalized.toLowerCase();
         CacheEntry cached = cache.get(key);
         if (cached != null && !cached.isExpired()) {
-            return cached.results();
+            List<AddressSuggestionResponse> cachedResults = keepCityMatches(prioritizeByCity(normalized, cached.results()), city, hasCity);
+            if (!cachedResults.isEmpty() || !hasCity) {
+                return cachedResults;
+            }
         }
 
         List<AddressSuggestionResponse> persistent = loadFromPersistentCache(key);
         if (!persistent.isEmpty()) {
-            cache.put(key, new CacheEntry(persistent, System.currentTimeMillis() + cacheTtlMs));
-            return persistent;
+            List<AddressSuggestionResponse> persistentResults = keepCityMatches(prioritizeByCity(normalized, persistent), city, hasCity);
+            if (!persistentResults.isEmpty() || !hasCity) {
+                cache.put(key, new CacheEntry(persistentResults, System.currentTimeMillis() + cacheTtlMs));
+                return persistentResults;
+            }
         }
 
         List<AddressSuggestionResponse> results = fetchWithRetries(normalized);
-        cache.put(key, new CacheEntry(results, System.currentTimeMillis() + cacheTtlMs));
-        saveToPersistentCache(key, results);
-        return results;
+        List<AddressSuggestionResponse> prioritizedResults = keepCityMatches(prioritizeByCity(normalized, results), city, hasCity);
+        cache.put(key, new CacheEntry(prioritizedResults, System.currentTimeMillis() + cacheTtlMs));
+        saveToPersistentCache(key, prioritizedResults);
+        return prioritizedResults;
     }
 
     private List<AddressSuggestionResponse> fetchWithRetries(String query) {
@@ -83,19 +92,35 @@ public class GeocodeService {
     }
 
     private List<AddressSuggestionResponse> fetchNominatimFallbacks(String query) {
-        List<AddressSuggestionResponse> structured = fetchStructured(query);
+        String city = extractCityFromQuery(query);
+        boolean hasCity = !city.isBlank();
+
+        List<AddressSuggestionResponse> structured = keepCityMatches(fetchStructured(query), city, hasCity);
         if (!structured.isEmpty()) return structured;
 
         if (query.matches("\\d{5}")) {
-            List<AddressSuggestionResponse> postal = fetchFromNominatim(query, true, true);
+            List<AddressSuggestionResponse> postal = keepCityMatches(fetchFromNominatim(query, true, true), city, hasCity);
             if (!postal.isEmpty()) return postal;
         }
 
-        List<AddressSuggestionResponse> exact = fetchFromNominatim(query, true, false);
+        List<AddressSuggestionResponse> exact = keepCityMatches(fetchFromNominatim(query, true, false), city, hasCity);
         if (!exact.isEmpty()) return exact;
 
-        List<AddressSuggestionResponse> noCountryFilter = fetchFromNominatim(query, false, false);
+        List<AddressSuggestionResponse> noCountryFilter = keepCityMatches(fetchFromNominatim(query, false, false), city, hasCity);
         if (!noCountryFilter.isEmpty()) return noCountryFilter;
+
+        if (hasCity) {
+            List<AddressSuggestionResponse> relaxedByCity = fetchRelaxedByCity(query, city);
+            if (!relaxedByCity.isEmpty()) {
+                return relaxedByCity;
+            }
+
+            List<AddressSuggestionResponse> tokenMatches = fetchByContainsTokens(query, city);
+            if (!tokenMatches.isEmpty()) {
+                return tokenMatches;
+            }
+            return Collections.emptyList();
+        }
 
         String[] tokens = query.split("\\s+");
         for (int i = tokens.length - 1; i >= 1; i--) {
@@ -393,16 +418,21 @@ public class GeocodeService {
     }
 
     private List<AddressSuggestionResponse> loadFromPersistentCache(String key) {
-        return geocodeCacheRepository.findById(key)
-                .filter(entry -> entry.getExpiresAtMs() > System.currentTimeMillis())
-                .map(entry -> {
-                    try {
-                        return objectMapper.readValue(entry.getPayload(), new TypeReference<List<AddressSuggestionResponse>>() {});
-                    } catch (Exception e) {
-                        return Collections.<AddressSuggestionResponse>emptyList();
-                    }
-                })
-                .orElse(Collections.emptyList());
+        try {
+            return geocodeCacheRepository.findById(key)
+                    .filter(entry -> entry.getExpiresAtMs() > System.currentTimeMillis())
+                    .map(entry -> {
+                        try {
+                            return objectMapper.readValue(entry.getPayload(), new TypeReference<List<AddressSuggestionResponse>>() {});
+                        } catch (Exception e) {
+                            return Collections.<AddressSuggestionResponse>emptyList();
+                        }
+                    })
+                    .orElse(Collections.emptyList());
+        } catch (Exception e) {
+            log.warn("Persistent geocode cache unavailable. Using live query only: {}", e.getMessage());
+            return Collections.emptyList();
+        }
     }
 
     private void saveToPersistentCache(String key, List<AddressSuggestionResponse> results) {
@@ -439,6 +469,168 @@ public class GeocodeService {
                 .replaceAll("[^\\p{L}\\p{N},\\s-]", "")
                 .replaceAll("\\s+", " ")
                 .trim();
+    }
+
+    private List<AddressSuggestionResponse> prioritizeByCity(String query, List<AddressSuggestionResponse> results) {
+        if (results == null || results.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        String city = extractCityFromQuery(query);
+        if (city.isBlank()) {
+            return results;
+        }
+
+        List<AddressSuggestionResponse> ordered = new ArrayList<>(results);
+        ordered.sort(Comparator.comparing(suggestion -> !containsCity(suggestion.displayName(), city)));
+        return ordered;
+    }
+
+    private String extractCityFromQuery(String query) {
+        if (query == null || query.isBlank()) {
+            return "";
+        }
+
+        String[] parts = query.split(",");
+        if (parts.length < 2) {
+            return "";
+        }
+
+        return parts[1].trim();
+    }
+
+    private boolean containsCity(String displayName, String city) {
+        if (displayName == null || city == null) {
+            return false;
+        }
+
+        return displayName.toLowerCase(Locale.ROOT).contains(city.toLowerCase(Locale.ROOT));
+    }
+
+    private List<AddressSuggestionResponse> keepCityMatches(List<AddressSuggestionResponse> results, String city, boolean hasCity) {
+        if (!hasCity || results == null || results.isEmpty()) {
+            return results;
+        }
+
+        List<AddressSuggestionResponse> filtered = new ArrayList<>();
+        for (AddressSuggestionResponse suggestion : results) {
+            if (containsCity(suggestion.displayName(), city)) {
+                filtered.add(suggestion);
+            }
+        }
+        return filtered;
+    }
+
+    private List<AddressSuggestionResponse> fetchRelaxedByCity(String query, String city) {
+        String street = extractStreetFromQuery(query);
+        if (street.isBlank()) {
+            return Collections.emptyList();
+        }
+
+        String[] tokens = street.split("\\s+");
+        for (int i = tokens.length; i >= 1; i--) {
+            String relaxedStreet = String.join(" ", Arrays.copyOf(tokens, i)).trim();
+            if (relaxedStreet.length() < 3) {
+                continue;
+            }
+
+            String relaxedQuery = relaxedStreet + ", " + city;
+            List<AddressSuggestionResponse> relaxedResults = keepCityMatches(
+                    fetchFromNominatim(relaxedQuery, true, false),
+                    city,
+                    true
+            );
+            if (!relaxedResults.isEmpty()) {
+                return relaxedResults;
+            }
+        }
+
+        return Collections.emptyList();
+    }
+
+    private List<AddressSuggestionResponse> fetchByContainsTokens(String query, String city) {
+        String street = extractStreetFromQuery(query);
+        if (street.isBlank()) {
+            return Collections.emptyList();
+        }
+
+        List<String> tokens = extractStreetTokens(street);
+        if (tokens.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        List<AddressSuggestionResponse> candidates = new ArrayList<>();
+        candidates.addAll(fetchFromNominatim(street + ", " + city, true, false));
+        candidates.addAll(fetchFromNominatim(street + " " + city, true, false));
+        candidates.addAll(fetchFromNominatim(city, true, false));
+
+        List<AddressSuggestionResponse> cityCandidates = keepCityMatches(removeDuplicates(candidates), city, true);
+        if (cityCandidates.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        List<AddressSuggestionResponse> strict = new ArrayList<>();
+        List<AddressSuggestionResponse> soft = new ArrayList<>();
+
+        for (AddressSuggestionResponse suggestion : cityCandidates) {
+            String text = suggestion.displayName() == null ? "" : suggestion.displayName().toLowerCase(Locale.ROOT);
+            long matches = tokens.stream().filter(text::contains).count();
+            if (matches == tokens.size()) {
+                strict.add(suggestion);
+            } else if (matches > 0) {
+                soft.add(suggestion);
+            }
+        }
+
+        if (!strict.isEmpty()) {
+            return strict;
+        }
+        return soft;
+    }
+
+    private List<String> extractStreetTokens(String street) {
+        if (street == null || street.isBlank()) {
+            return Collections.emptyList();
+        }
+
+        Set<String> stopWords = Set.of("calle", "avenida", "av", "de", "del", "la", "el", "los", "las");
+        List<String> tokens = new ArrayList<>();
+        for (String rawToken : street.toLowerCase(Locale.ROOT).split("\\s+")) {
+            String token = rawToken.trim();
+            if (token.length() < 3) {
+                continue;
+            }
+            if (stopWords.contains(token)) {
+                continue;
+            }
+            tokens.add(token);
+        }
+        return tokens;
+    }
+
+    private List<AddressSuggestionResponse> removeDuplicates(List<AddressSuggestionResponse> items) {
+        List<AddressSuggestionResponse> out = new ArrayList<>();
+        Set<String> seen = new HashSet<>();
+        for (AddressSuggestionResponse item : items) {
+            String key = item.displayName() + "|" + item.latitude() + "|" + item.longitude();
+            if (seen.add(key)) {
+                out.add(item);
+            }
+        }
+        return out;
+    }
+
+    private String extractStreetFromQuery(String query) {
+        if (query == null || query.isBlank()) {
+            return "";
+        }
+
+        String[] parts = query.split(",");
+        if (parts.length == 0) {
+            return "";
+        }
+
+        return parts[0].trim();
     }
 
     private record CacheEntry(List<AddressSuggestionResponse> results, long expiresAtMs) {
