@@ -1,5 +1,10 @@
 package com.slior.ui.routes
 
+import android.Manifest
+import android.content.Context
+import android.content.pm.PackageManager
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -10,11 +15,14 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.core.content.ContextCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.slior.ui.map.RouteMapView
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -23,13 +31,32 @@ fun RouteDetailScreen(
     onBack: () -> Unit,
     viewModel: RouteViewModel = hiltViewModel()
 ) {
+    val context = LocalContext.current
     val state by viewModel.detailState.collectAsStateWithLifecycle()
+    val snackbarHostState = remember { SnackbarHostState() }
+    val scope = rememberCoroutineScope()
+
+    val permissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestMultiplePermissions()
+    ) { permissions ->
+        val granted = permissions[Manifest.permission.ACCESS_FINE_LOCATION] == true ||
+                permissions[Manifest.permission.ACCESS_COARSE_LOCATION] == true
+
+        if (granted) {
+            viewModel.optimizeRoute(routeId)
+        } else {
+            scope.launch {
+                snackbarHostState.showSnackbar("Concede permiso de ubicación para optimizar la ruta")
+            }
+        }
+    }
 
     LaunchedEffect(routeId) {
         viewModel.loadRouteDetail(routeId)
     }
 
     Scaffold(
+        snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
         topBar = {
             TopAppBar(
                 title = { Text("Detalle de ruta") },
@@ -105,7 +132,18 @@ fun RouteDetailScreen(
                     // Botón optimizar
                     item {
                         Button(
-                            onClick = { viewModel.optimizeRoute(routeId) },
+                            onClick = {
+                                if (hasLocationPermission(context)) {
+                                    viewModel.optimizeRoute(routeId)
+                                } else {
+                                    permissionLauncher.launch(
+                                        arrayOf(
+                                            Manifest.permission.ACCESS_FINE_LOCATION,
+                                            Manifest.permission.ACCESS_COARSE_LOCATION
+                                        )
+                                    )
+                                }
+                            },
                             modifier = Modifier.fillMaxWidth()
                         ) {
                             Icon(Icons.Default.Route, contentDescription = null)
@@ -153,4 +191,14 @@ fun RouteDetailScreen(
             }
         }
     }
+}
+
+private fun hasLocationPermission(context: Context): Boolean {
+    val hasFine = ContextCompat.checkSelfPermission(
+        context, Manifest.permission.ACCESS_FINE_LOCATION
+    ) == PackageManager.PERMISSION_GRANTED
+    val hasCoarse = ContextCompat.checkSelfPermission(
+        context, Manifest.permission.ACCESS_COARSE_LOCATION
+    ) == PackageManager.PERMISSION_GRANTED
+    return hasFine || hasCoarse
 }
