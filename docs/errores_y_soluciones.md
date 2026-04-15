@@ -18,6 +18,7 @@
 | 7 | Fase 5 UI | `NetworkModule.kt` | URL Tailscale hardcodeada → timeout en emulador |  Resuelto |
 | 8 | Fase 4 Mapas | `GeocodeService` | 429 Nominatim (Varnish) al autocompletar direcciones |  Resuelto |
 | 9 | Fase 4 Mapas | UI Compose | Imports ausentes y props inválidas en campos y botones |  Resuelto |
+| 10 | Fase 4 Mapas | Optimización de ruta (Android) | `uid ... does not have ACCESS_FINE/COARSE_LOCATION` |  Resuelto |
 
 ---
 
@@ -451,3 +452,36 @@ Se creó una librería de componentes brutalistas (`SliorComponents`) pero falta
 ### Estado
 
 Resuelto. El módulo móvil vuelve a compilar con los nuevos componentes brutalistas.
+
+---
+
+## ERROR #10
+
+**Fecha:** 15/04/2026  
+**Fase:** Fase 4 — Mapas y Navegación  
+**Componente:** Android (`RouteDetailScreen` / `LocationHelper`)  
+**Severidad:** Alta (bloqueaba optimización en dispositivo físico)
+
+### Mensaje de error
+
+```
+uid 11021 does not have any of [android.permission.ACCESS_FINE_LOCATION, android.permission.ACCESS_COARSE_LOCATION]
+```
+
+### ¿Qué estaba pasando?
+
+La app ya declaraba permisos de ubicación en el `AndroidManifest`, pero durante el flujo de "Optimizar ruta" no se solicitaban en tiempo de ejecución. Al intentar obtener la ubicación actual con `FusedLocationProviderClient`, Android rechazaba la operación por falta de permiso concedido por el usuario.
+
+### Solución aplicada
+
+1. `RouteDetailScreen`:
+   - Añadido `rememberLauncherForActivityResult(RequestMultiplePermissions())`.
+   - Al pulsar **Optimizar ruta**, si no hay permiso se lanza la solicitud runtime.
+   - Si se deniega, se muestra mensaje al usuario (snackbar) y no se ejecuta la optimización.
+2. `LocationHelper`:
+   - Verificación explícita de `ACCESS_FINE_LOCATION`/`ACCESS_COARSE_LOCATION` antes de pedir ubicación.
+   - Si no hay permisos, lanza `SecurityException` con mensaje claro.
+
+### Estado
+
+Resuelto. En dispositivo físico el flujo vuelve a funcionar y `POST /api/routes/{id}/optimize` responde `200 OK`.

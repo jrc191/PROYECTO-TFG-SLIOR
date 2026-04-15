@@ -305,7 +305,7 @@ mvn clean compile
 ## FASE 1: Autenticación y Fundamentos — Backend
 
 **Fecha:** 09/03/2026  
-**Duración real:** ~15 minutos (guiado por IA)  
+**Duración real:** ~15 minutos  
 **Estado:**  Completada (backend)
 
 ### Archivos creados (16 en total)
@@ -1034,3 +1034,37 @@ Commits:
 ### Integración con arranque del backend
 - `scripts/start_backend.sh` ahora arranca Photon (jar 1.0.1 con `photon_data`) en `http://127.0.0.1:2322/api` si detecta que no está escuchando. Guarda log en `photon/photon.log` y el PID en `photon/photon.pid`.
 - La app móvil añade `BuildConfig.PHOTON_URL` (`http://10.0.2.2:2322/` en debug) y usa `PhotonApiService` como fallback si el backend no devuelve sugerencias.
+
+---
+
+## Ajustes MVP — estabilidad de rutas y permisos de ubicación
+
+**Fecha:** 15/04/2026  
+**Estado:** Completada  
+**Rama:** `feature/fase-4.1-geocoder-autohospedado`
+
+### Cambios aplicados
+
+#### Backend
+- Endpoint de salud explícito: `GET /health`.
+- Excepciones de dominio añadidas/ajustadas para rutas y usuarios no encontrados.
+- Mapeo de errores en `GlobalExceptionHandler` para evitar respuestas genéricas en casos controlados.
+
+#### Android
+- Estados de parada alineados con backend (`PENDIENTE`, `EN_CAMINO`, `ENTREGADO`).
+- `CreateRouteScreen` con autocompletado de direcciones conectado al backend y selección de sugerencias para rellenar lat/lon.
+- Flujo de optimización reforzado con permisos runtime de ubicación:
+  - Solicitud de `ACCESS_FINE_LOCATION` / `ACCESS_COARSE_LOCATION` en `RouteDetailScreen`.
+  - Mensaje visible si el permiso se deniega.
+  - Verificación defensiva en `LocationHelper` antes de consultar posición actual.
+
+### Validación funcional
+- Login y carga de rutas en dispositivo físico por Tailscale: OK.
+- Creación de ruta con fecha ISO: OK.
+- `POST /api/routes/{id}/optimize` desde móvil: `200 OK` con `distanciaTotal` y `tiempoEstimado` actualizados.
+
+### Próximo bloque planificado (Fase 4.2)
+- Sustituir línea recta en mapa por geometría real por calles:
+  - Motor de routing autoalojado (OSRM recomendado).
+  - Backend devuelve polyline/geojson de ruta.
+  - Android pinta recorrido vial en OSMDroid.
