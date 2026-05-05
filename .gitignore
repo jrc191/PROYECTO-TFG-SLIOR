@@ -1,0 +1,85 @@
+# ============================================================
+# .gitignore para SLIOR - Sistema de Optimización de Rutas
+# Backend: Java/Maven | Mobile: Android/Gradle | IDEs
+# ============================================================
+
+# ------ Java / Maven (Backend) ------
+target/
+*.class
+*.jar
+*.war
+*.ear
+*.nar
+*.zip
+*.tar.gz
+*.rar
+
+# Maven wrapper
+!.mvn/wrapper/maven-wrapper.jar
+!**/src/main/**/target/
+!**/src/test/**/target/
+
+# ------ Spring Boot ------
+application-prod.properties
+application-local.properties
+*.env
+.env
+
+# ------ Android / Gradle (Mobile App) ------
+*.iml
+.gradle/
+local.properties
+.idea/
+.DS_Store
+build/
+captures/
+.externalNativeBuild/
+.cxx/
+*.apk
+*.hprof
+*.aab
+*.ap_
+*.dex
+
+# Kotlin
+*.kotlin_module
+
+# Generated files
+bin/
+gen/
+out/
+release/
+
+# Gradle wrapper
+!gradle/wrapper/gradle-wrapper.jar
+!**/src/main/**/build/
+!**/src/test/**/build/
+
+# ------ IDEs ------
+# IntelliJ IDEA
+.idea/
+*.iws
+*.ipr
+out/
+# VSCode
+.vscode/
+# Eclipse
+.project
+.classpath
+.settings/
+# Cursor
+.cursor/
+
+# ------ Archivos sensibles ------
+*.pem
+*.key
+*.p12
+*.jks
+keystore.properties
+google-services.json
+secrets.properties
+
+# ------ Docker data directories (local development only) ------
+contenedores/slior-db-data/
+contenedores/photon-data/
+photon/photon_data/

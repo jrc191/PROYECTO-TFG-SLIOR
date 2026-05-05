@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- ======= Colores primarios (Material Design 3) ======= -->
+    <color name="primary">#1565C0</color>           <!-- Azul corporativo -->
+    <color name="primary_dark">#003C8F</color>       <!-- Azul oscuro (status bar) -->
+    <color name="primary_light">#5E92F3</color>      <!-- Azul claro -->
+    <color name="on_primary">#FFFFFF</color>         <!-- Texto sobre primario -->
+
+    <!-- ======= Colores secundarios ======= -->
+    <color name="secondary">#FF6F00</color>          <!-- Naranja (acción) -->
+    <color name="secondary_dark">#C43E00</color>
+    <color name="on_secondary">#FFFFFF</color>
+
+    <!-- ======= Fondos ======= -->
+    <color name="background">#F5F5F5</color>         <!-- Fondo general -->
+    <color name="surface">#FFFFFF</color>            <!-- Tarjetas -->
+    <color name="on_surface">#212121</color>         <!-- Texto principal -->
+    <color name="on_surface_variant">#757575</color> <!-- Texto secundario -->
+
+    <!-- ======= Estados de rutas ======= -->
+    <color name="status_planned">#90CAF9</color>     <!-- Azul claro — PLANIFICADA -->
+    <color name="status_in_progress">#FFF176</color>  <!-- Amarillo — EN_CURSO -->
+    <color name="status_completed">#A5D6A7</color>   <!-- Verde — COMPLETADA -->
+    <color name="status_cancelled">#EF9A9A</color>   <!-- Rojo — CANCELADA -->
+
+    <!-- ======= Conectividad ======= -->
+    <color name="offline_background">#D32F2F</color> <!-- Rojo — sin conexión -->
+    <color name="online_background">#388E3C</color>  <!-- Verde — conectado -->
+    <color name="on_status_bar">#FFFFFF</color>
+
+    <!-- ======= Otros ======= -->
+    <color name="divider">#E0E0E0</color>
+    <color name="error">#B00020</color>
+</resources>

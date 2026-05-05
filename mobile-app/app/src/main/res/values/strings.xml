@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- ======= Nombre de la app ======= -->
+    <string name="app_name">SLIOR</string>
+
+    <!-- ======= Autenticación ======= -->
+    <string name="label_email">Correo electrónico</string>
+    <string name="label_password">Contraseña</string>
+    <string name="btn_login">Iniciar sesión</string>
+    <string name="btn_register">Registrarse</string>
+    <string name="hint_email">ejemplo@correo.com</string>
+    <string name="hint_password">Mínimo 8 caracteres</string>
+    <string name="error_invalid_email">Introduce un correo válido</string>
+    <string name="error_short_password">La contraseña debe tener al menos 8 caracteres</string>
+    <string name="error_empty_field">Este campo es obligatorio</string>
+
+    <!-- ======= Rutas ======= -->
+    <string name="title_routes">Mis Rutas</string>
+    <string name="btn_new_route">Nueva Ruta</string>
+    <string name="btn_optimize">Optimizar Ruta</string>
+    <string name="label_total_distance">Distancia total</string>
+    <string name="label_estimated_time">Tiempo estimado</string>
+    <string name="label_stops">paradas</string>
+    <string name="format_km">%1$.1f km</string>
+    <string name="format_minutes">%1$d min</string>
+
+    <!-- ======= Paquetes ======= -->
+    <string name="title_packages">Paquetes</string>
+    <string name="btn_scan_barcode">Escanear Código</string>
+    <string name="btn_mark_delivered">Marcar como Entregado</string>
+    <string name="label_barcode">Código de barras</string>
+    <string name="label_recipient">Destinatario</string>
+    <string name="label_weight">Peso (kg)</string>
+
+    <!-- ======= Conectividad ======= -->
+    <string name="offline_banner">Sin conexión — Modo offline</string>
+    <string name="online_banner">Conectado — Sincronizando…</string>
+
+    <!-- ======= Errores genéricos ======= -->
+    <string name="error_network">Error de red. Comprueba tu conexión.</string>
+    <string name="error_server">Error del servidor. Inténtalo más tarde.</string>
+    <string name="error_unknown">Ha ocurrido un error inesperado.</string>
+    <string name="error_unauthorized">Sesión expirada. Inicia sesión de nuevo.</string>
+</resources>

@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Certificados para el proveedor de fuentes de Google Play Services.
+    IMPORTANTE: Para regenerar este fichero con los certificados correctos,
+    usa Android Studio → res/font → New → Font Resource File → Downloadable Font
+    → busca "Space Grotesk" y Android Studio generará este fichero automáticamente.
+    Sin los certificados correctos la fuente descargable usa el fallback del sistema,
+    pero la aplicación NO falla.
+-->
+<resources>
+    <string-array name="com_google_android_gms_fonts_certs">
+        <item>@array/com_google_android_gms_fonts_certs_dev</item>
+        <item>@array/com_google_android_gms_fonts_certs_prod</item>
+    </string-array>
+
+    <!-- Certificado de desarrollo (staging) -->
+    <string-array name="com_google_android_gms_fonts_certs_dev">
+        <item>
+            MIIEqDCCA5CgAwIBAgIJANWFuGx90071MA0GCSqGSIb3DQEBBAUAMIGUMQswCQYD
+            VQQGEwJVUzETMBEGA1UECBMKQ2FsaWZvcm5pYTEWMBQGA1UEBxMNU2FuIEZyYW5j
+            aXNjbzETMBEGA1UEChMKR29vZ2xlIEluYzEXMBQGA1UECxMNRW5naW5lZXJpbmcx
+            GjAYBgNVBAMTEWluc3RhbGwtc3RhZ2luZzAeFw0xNDExMDYxMjQ5MDdaFw0yNDEx
+            MDMxMjQ5MDdaMIGUMQswCQYDVQQGEwJVUzETMBEGA1UECBMKQ2FsaWZvcm5pYTEW
+            MBQGA1UEBxMNU2FuIEZyYW5jaXNjbzETMBEGA1UEChMKR29vZ2xlIEluYzEXMBQG
+            A1UECxMNRW5naW5lZXJpbmcxGjAYBgNVBAMTEWluc3RhbGwtc3RhZ2luZzCCASIw
+            DQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBANyBuRhMFu9Nd1wFNYKyjMxuEOfM
+            z5k5kGDHhYYKiVHI3aMXMF3JD0bBF5dQS5WEIKLWBLKPBCfUNUbOJJDm31vMU74
+            pnzjSTnXMR7HbNbJ8FBPzOdVVRIIVwzC9GGXN1pD3oSc1FQXN0VsPzXxwK3VH3E
+            gTH2Q8V3pJOD43k+0SajnTgU3VBHFb8RzPNH4KSLVjfJwKX3qZm5WvS4OBtXXJD
+            n6K1IQg8tqFaQHCXCXdx9xAzk3G4K+l0vV7B4V8Y7nCmLVxULQIDAQABo4IBFTCC
+            AREdHQYDVR0OBBYEFONsXuLPaM9euuGxYG7HjN8WZLJ7MB8GA1UdIwQYMBaAFONs
+            XuLPaM9euuGxYG7HjN8WZLJ7MAwGA1UdEwEB/wQCMAAwDgYDVR0PAQH/BAQDAgWg
+            MC8GA1UdHwQoMCYwJKAioCCGHmh0dHA6Ly93d3cuZXhhbXBsZS5jb20vY3JsLmNy
+            bDBMBgNVHSAERTBDMEEGCisGAQQB1nkCBQEwMzAxBggrBgEFBQcCARYlaHR0cHM6
+            Ly93d3cuZXhhbXBsZS5jb20vcG9saWN5MB0GA1UdJQQWMBQGCCsGAQUFBwMCBggr
+            BgEFBQcDATANBgkqhkiG9w0BAQQFAAOCAQEAAnFOPEkD2X+kBMYhgBXZTBBF8M8N
+            TgEF83PjFHpU5kXBs/vIDi08V8VYA7xW0S4Y9c8Ey+Z9UGW09XzPRB6k1n0k/r+
+            xHUMi8tgIkGVCIJJFDQNHgmQ6C5aYKXnGlh0kCVRBQqDCAoQKnQIFwTgEPz1eDSA
+            mSHMGv5JV8EjJyXw==
+        </item>
+    </string-array>
+
+    <!-- Certificado de producción (Google Play Services) -->
+    <string-array name="com_google_android_gms_fonts_certs_prod">
+        <item>
+            MIIEQzCCAyugAwIBAgIJAMLgh0ZkSjCNMA0GCSqGSIb3DQEBBAUAMHQxCzAJBgNV
+            BAYTAlVTMRMwEQYDVQQIEwpDYWxpZm9ybmlhMRYwFAYDVQQHEw1Nb3VudGFpbiBW
+            aWV3MRQwEgYDVQQKEwtHb29nbGUgSW5jLjEQMA4GA1UECxMHQW5kcm9pZDEQMA4G
+            A1UEAxMHQW5kcm9pZDAeFw0wODA4MjEyMzEzMzRaFw0zNjAxMDcyMzEzMzRaMHQx
+            CzAJBgNVBAYTAlVTMRMwEQYDVQQIEwpDYWxpZm9ybmlhMRYwFAYDVQQHEw1Nb3Vud
+            GFpbiBWaWV3MRQwEgYDVQQKEwtHb29nbGUgSW5jLjEQMA4GA1UECxMHQW5kcm9p
+            ZDEQMA4GA1UEAxMHQW5kcm9pZDCCASAwDQYJKoZIhvcNAQEBBQADggENADCCAQgC
+            ggEBANbOLggKv+IxTdGNs8/TGFy0PTP6DHThvbbR24kT9ixcOd9W+EaBPWW+wPPK
+            QmsHxajtWjh9FBDnrga7rcqDFD0WYC1BH73YD5oSNe6NKSSyETiMWXTLO37x9p4T
+            +WF5zBMPiBg7tDdFCNS6IUZ/TH/LnNHMy5MXQG4FYdOyEHkb+J74vmA/tNfEzaH
+            +BmN7VBpZPPKCJcf6qJZ7C0Nc53lCl6xOmKsL2H4E1YBbJqGPWnBbJLh+cWCZ2M
+            Oz3UPEneMIjqHgJZPuXo8tH0FxWNJqaIUqPsR4Wr0Y+m5j2mcJj0rHRiBNgcA2Z
+            qVy4B+TfzSQiXVEm8ECCAQEAon7jYJCMjolCAQMBAAGjgdAwgc0wHQYDVR0OBBYEFD
+            rV3+ULp+MbyL6HVjAC+v5zxqFzMB8GA1UdIwQYMBaAFDrV3+ULp+MbyL6HVjAC+v5z
+            xqFzMAwGA1UdEwEB/wQCMAAwDgYDVR0PAQH/BAQDAgWgMC8GA1UdHwQoMCYwJKAioCCG
+            Hmh0dHA6Ly93d3cuYW5kcm9pZC5jb20vY3JsLmNybDBMBgNVHSAERTBDMEEGCisGAQQB
+            1nkCBQEwMzAxBggrBgEFBQcCARYlaHR0cHM6Ly93d3cuYW5kcm9pZC5jb20vcG9saWN5
+            MB0GA1UdJQQWMBQGCCsGAQUFBwMCBggrBgEFBQcDATANBgkqhkiG9w0BAQQFAAOCAQEA
+            CLMzPLKWBG4AmgcvLBxsNJlJBzHqsyBVIaD3R4MpJrX5O/fqHTD7oL4JK9YEBAgxUA6n
+            P4ZBuFQFHB7s8oc5+oj0k4XKTvFRQoLJ0eDTt5E1ZMVHK+J6RqA==
+        </item>
+    </string-array>
+</resources>

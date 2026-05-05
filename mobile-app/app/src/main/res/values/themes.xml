@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Tema bridge: solo controla la ventana del sistema (status bar, fondo).
+         Compose (SliorTheme en Theme.kt) gestiona todos los colores y estilos internos.
+         Usa AppCompat para no requerir la librería MDC en XML. -->
+    <style name="Theme.Slior" parent="Theme.AppCompat.DayNight.NoActionBar" />
+</resources>
