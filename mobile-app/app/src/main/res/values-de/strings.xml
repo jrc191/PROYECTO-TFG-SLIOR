@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- ======= App-Name ======= -->
+    <string name="app_name">SLIOR</string>
+
+    <!-- ======= Authentifizierung ======= -->
+    <string name="label_email">E-MAIL</string>
+    <string name="label_password">PASSWORT</string>
+    <string name="label_password_alt">PASSWORT</string>
+    <string name="btn_login">ANMELDEN</string>
+    <string name="btn_register">HIER REGISTRIEREN</string>
+    <string name="btn_create_account">KONTO ERSTELLEN</string>
+    <string name="link_forgot_password">PASSWORT VERGESSEN?</string>
+    <string name="link_no_account">Kein Konto? </string>
+    <string name="link_has_account">HABEN SIE BEREITS EIN KONTO? </string>
+    <string name="label_new_courier">NEUER KURIER</string>
+    <string name="label_join_fleet">TRETEN SIE DER\nFLOTTE BEI</string>
+    <string name="label_full_name">VOLLSTÄNDIGER NAME</string>
+    <string name="label_vehicle_type">FAHRZEUGTYP</string>
+    
+    <!-- ======= Menü ======= -->
+    <string name="menu_my_routes">MEINE ROUTEN</string>
+    <string name="menu_statistics">STATISTIKEN</string>
+    <string name="menu_general_map">ALLGEMEINE KARTE</string>
+    <string name="menu_packages">PAKETE</string>
+    <string name="menu_settings">EINSTELLUNGEN</string>
+    <string name="menu_badge_soon">BALD</string>
+    <string name="menu_version_info">V 1.0.0 — TFG DAM 2026</string>
+    <string name="menu_system_status">SYSTEMSTATUS</string>
+    <string name="menu_device_id">GERÄTE-ID</string>
+    <string name="menu_courier">KURIER</string>
+    <string name="menu_active_profile">Aktives Profil</string>
+    <string name="menu_edit_profile">PROFIL BEARBEITEN</string>
+    <string name="menu_edit_profile_desc">Name und Daten</string>
+    <string name="menu_change_password">PASSWORT ÄNDERN</string>
+    <string name="menu_change_password_desc">Kontosicherheit</string>
+    <string name="menu_notifications">BENACHRICHTIGUNGEN</string>
+    <string name="menu_notifications_desc">Benachrichtigungseinstellungen</string>
+    <string name="menu_logout">ABMELDEN</string>
+    <string name="menu_logout_desc">Aktuelles Konto verlassen</string>
+
+    <!-- ======= Routen ======= -->
+    <string name="title_routes">MEINE ROUTEN</string>
+    <string name="title_new_route">NEUE ROUTE</string>
+    <string name="title_edit_route">ROUTE BEARBEITEN</string>
+    <string name="title_route_detail">ROUTENDETAILS</string>
+    <string name="label_route_data">ROUTENDATEN</string>
+    <string name="label_edit_data">DATEN BEARBEITEN</string>
+    <string name="btn_new_route">NEUE ROUTE</string>
+    <string name="btn_optimize">⚡ REIHENFOLGE OPTIMIEREN</string>
+    <string name="btn_start_navigation">NAVIGATION STARTEN</string>
+    <string name="label_total_distance">GESAMTSTRECKE</string>
+    <string name="label_estimated_time">GESCHÄTZTE ZEIT</string>
+    <string name="label_stops">Stopps</string>
+    <string name="label_stops_count">STOPPS (%1$d)</string>
+    <string name="format_km">%1$.1f KM</string>
+    <string name="format_minutes">%1$d MIN</string>
+    <string name="label_route_name">NAME</string>
+    <string name="label_planned_date">DATUM (JJJJ-MM-TT)</string>
+    <string name="label_notes_optional">NOTIZEN (OPTIONAL)</string>
+    <string name="btn_save_route">ROUTE SPEICHERN</string>
+    <string name="btn_update_route">AKTUALISIEREN</string>
+    <string name="placeholder_route_name">Z.B. NORDROUTE</string>
+    <string name="placeholder_date">Datum auswählen</string>
+    <string name="placeholder_notes">Beobachtungen...</string>
+    
+    <!-- ======= Stopps ======= -->
+    <string name="label_new_stop">NEUER STOPP</string>
+    <string name="btn_add_stop">STOPP HINZUFÜGEN</string>
+    <string name="btn_cancel_stop">STOPP ABBRECHEN</string>
+    <string name="btn_confirm_stop">✓  STOPP BESTÄTIGEN</string>
+    <string name="label_address">ADRESSE</string>
+    <string name="label_recipient">EMPFÄNGER</string>
+    <string name="label_phone">TELEFON</string>
+    <string name="label_latitude">BREITENGRAD</string>
+    <string name="label_longitude">LÄNGENGRAD</string>
+    <string name="label_stop_notes_optional">STOPP-NOTIZEN (OPTIONAL)</string>
+    <string name="placeholder_stop_address">Tippen, um zu suchen oder auf Karte zu wählen...</string>
+    <string name="placeholder_recipient">Name des Empfängers</string>
+    <string name="placeholder_phone">0150 0000000</string>
+    <string name="placeholder_notes_stop">An der Rezeption abgeben...</string>
+
+    <!-- ======= Karte ======= -->
+    <string name="map_label_you">SIE SIND HIER</string>
+    <string name="map_label_selected">AUSGEWÄHLTER STANDORT</string>
+    <string name="map_label_stop">STOPP %1$d</string>
+    <string name="map_info_name">Name: %1$s</string>
+    <string name="map_info_address">Adresse: %1$s</string>
+    <string name="map_info_phone">Telefon: %1$s</string>
+    <string name="placeholder_search_address">Adresse suchen...</string>
+    <string name="btn_confirm_address">✓ ADRESSE BESTÄTIGEN</string>
+
+    <!-- ======= Konnektivität ======= -->
+    <string name="status_online">SERVER ONLINE</string>
+    <string name="status_offline">KEINE VERBINDUNG</string>
+    <string name="status_checking">WIRD GEPRÜFT...</string>
+    <string name="status_verifying">WIRD ÜBERPRÜFT...</string>
+    <string name="status_disconnected">GETRENNT</string>
+    <string name="banner_offline">OFFLINE-MODUS</string>
+    <string name="banner_offline_local">KEINE VERBINDUNG — LOKALER MODUS</string>
+    <string name="label_no_cache">KEINE DATEN IM CACHE</string>
+
+    <!-- ======= Dialoge ======= -->
+    <string name="dialog_delete_route_title">ROUTE LÖSCHEN?</string>
+    <string name="dialog_delete_route_desc">Diese Aktion kann nicht rückgängig gemacht werden. Alle zugehörigen Stopps werden gelöscht.</string>
+    <string name="dialog_call_title">%1$s ANRUFEN?</string>
+    <string name="dialog_call_desc">Die Telefon-App wird geöffnet.</string>
+    <string name="btn_delete">LÖSCHEN</string>
+    <string name="btn_call">ANRUFEN</string>
+    <string name="btn_cancel">ABBRECHEN</string>
+    <string name="btn_ok">OK</string>
+    <string name="btn_back">Zurück</string>
+
+    <!-- ======= Fahrzeuge ======= -->
+    <string name="vehicle_car">AUTO</string>
+    <string name="vehicle_van">LIEFERWAGEN</string>
+    <string name="vehicle_truck">LKW</string>
+
+    <!-- ======= Fehler ======= -->
+    <string name="state_no_routes">KEINE ROUTEN</string>
+    <string name="state_create_first">Erstellen Sie Ihre erste Route mit der +-Taste</string>
+    <string name="state_error_loading">LADEFEHLER</string>
+    <string name="state_pull_to_refresh">Zum Aktualisieren nach unten ziehen</string>
+    <string name="error_empty_email">E-Mail darf nicht leer sein</string>
+    <string name="error_invalid_email">Ungültiges E-Mail-Format</string>
+    <string name="error_empty_password">Passwort darf nicht leer sein</string>
+    <string name="error_short_password">Passwort muss mindestens 8 Zeichen lang sein</string>
+    <string name="error_empty_name">Name darf nicht leer sein</string>
+    <string name="error_long_name">Name ist zu lang (max. 100 Zeichen)</string>
+    <string name="error_empty_date">Datum darf nicht leer sein</string>
+    <string name="error_invalid_date">Ungültiges Datumsformat (JJJJ-MM-TT verwenden)</string>
+    <string name="error_empty_phone">Telefon darf nicht leer sein</string>
+    <string name="error_invalid_phone">Ungültige Telefonnummer</string>
+    <string name="error_empty_lat">Breitengrad darf nicht leer sein</string>
+    <string name="error_invalid_lat">Ungültiger Breitengrad (muss zwischen -90 und 90 liegen)</string>
+    <string name="error_empty_lon">Längengrad darf nicht leer sein</string>
+    <string name="error_invalid_lon">Ungültiger Längengrad (muss zwischen -180 und 180 liegen)</string>
+    <string name="error_session_expired">Sitzung abgelaufen. Bitte melden Sie sich erneut an.</string>
+</resources>

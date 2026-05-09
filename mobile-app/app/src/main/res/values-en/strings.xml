@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- ======= App Name ======= -->
+    <string name="app_name">SLIOR</string>
+
+    <!-- ======= Auth ======= -->
+    <string name="label_email">EMAIL</string>
+    <string name="label_password">PASSWORD</string>
+    <string name="label_password_alt">PASSWORD</string>
+    <string name="btn_login">LOG IN</string>
+    <string name="btn_register">REGISTER HERE</string>
+    <string name="btn_create_account">CREATE ACCOUNT</string>
+    <string name="link_forgot_password">FORGOT YOUR PASSWORD?</string>
+    <string name="link_no_account">Don\'t have an account? </string>
+    <string name="link_has_account">ALREADY HAVE AN ACCOUNT? </string>
+    <string name="label_new_courier">NEW COURIER</string>
+    <string name="label_join_fleet">JOIN THE\nFLEET</string>
+    <string name="label_full_name">FULL NAME</string>
+    <string name="label_vehicle_type">VEHICLE TYPE</string>
+    
+    <!-- ======= Drawer ======= -->
+    <string name="menu_my_routes">MY ROUTES</string>
+    <string name="menu_statistics">STATISTICS</string>
+    <string name="menu_general_map">GENERAL MAP</string>
+    <string name="menu_packages">PACKAGES</string>
+    <string name="menu_settings">SETTINGS</string>
+    <string name="menu_badge_soon">SOON</string>
+    <string name="menu_version_info">V 1.0.0 — TFG DAM 2026</string>
+    <string name="menu_system_status">SYSTEM STATUS</string>
+    <string name="menu_device_id">DEVICE ID</string>
+    <string name="menu_courier">COURIER</string>
+    <string name="menu_active_profile">Active profile</string>
+    <string name="menu_edit_profile">EDIT PROFILE</string>
+    <string name="menu_edit_profile_desc">Name and data</string>
+    <string name="menu_change_password">CHANGE PASSWORD</string>
+    <string name="menu_change_password_desc">Account security</string>
+    <string name="menu_notifications">NOTIFICATIONS</string>
+    <string name="menu_notifications_desc">Alert preferences</string>
+    <string name="menu_logout">LOG OUT</string>
+    <string name="menu_logout_desc">Exit current account</string>
+
+    <!-- ======= Routes ======= -->
+    <string name="title_routes">MY ROUTES</string>
+    <string name="title_new_route">NEW ROUTE</string>
+    <string name="title_edit_route">EDIT ROUTE</string>
+    <string name="title_route_detail">ROUTE DETAILS</string>
+    <string name="label_route_data">ROUTE DATA</string>
+    <string name="label_edit_data">EDIT DATA</string>
+    <string name="btn_new_route">NEW ROUTE</string>
+    <string name="btn_optimize">⚡ OPTIMIZE ORDER</string>
+    <string name="btn_start_navigation">START NAVIGATION</string>
+    <string name="label_total_distance">TOTAL DISTANCE</string>
+    <string name="label_estimated_time">ESTIMATED TIME</string>
+    <string name="label_stops">stops</string>
+    <string name="label_stops_count">STOPS (%1$d)</string>
+    <string name="format_km">%1$.1f KM</string>
+    <string name="format_minutes">%1$d MIN</string>
+    <string name="label_route_name">NAME</string>
+    <string name="label_planned_date">DATE (YYYY-MM-DD)</string>
+    <string name="label_notes_optional">NOTES (OPTIONAL)</string>
+    <string name="btn_save_route">SAVE ROUTE</string>
+    <string name="btn_update_route">UPDATE ROUTE</string>
+    <string name="placeholder_route_name">EX. NORTH ROUTE</string>
+    <string name="placeholder_date">Select a date</string>
+    <string name="placeholder_notes">Observations...</string>
+    
+    <!-- ======= Stops ======= -->
+    <string name="label_new_stop">NEW STOP</string>
+    <string name="btn_add_stop">ADD STOP</string>
+    <string name="btn_cancel_stop">CANCEL STOP</string>
+    <string name="btn_confirm_stop">✓  CONFIRM STOP</string>
+    <string name="label_address">ADDRESS</string>
+    <string name="label_recipient">RECIPIENT</string>
+    <string name="label_phone">PHONE</string>
+    <string name="label_latitude">LATITUDE</string>
+    <string name="label_longitude">LONGITUDE</string>
+    <string name="label_stop_notes_optional">STOP NOTES (OPTIONAL)</string>
+    <string name="placeholder_stop_address">Tap to search or pick on map...</string>
+    <string name="placeholder_recipient">Recipient name</string>
+    <string name="placeholder_phone">600 000 000</string>
+    <string name="placeholder_notes_stop">Leave at front desk...</string>
+
+    <!-- ======= Map ======= -->
+    <string name="map_label_you">YOU ARE HERE</string>
+    <string name="map_label_selected">SELECTED LOCATION</string>
+    <string name="map_label_stop">STOP %1$d</string>
+    <string name="map_info_name">Name: %1$s</string>
+    <string name="map_info_address">Address: %1$s</string>
+    <string name="map_info_phone">Phone: %1$s</string>
+    <string name="placeholder_search_address">Search address...</string>
+    <string name="btn_confirm_address">✓ CONFIRM ADDRESS</string>
+
+    <!-- ======= Connectivity ======= -->
+    <string name="status_online">SERVER ONLINE</string>
+    <string name="status_offline">NO CONNECTION</string>
+    <string name="status_checking">CHECKING...</string>
+    <string name="status_verifying">VERIFYING...</string>
+    <string name="status_disconnected">DISCONNECTED</string>
+    <string name="banner_offline">OFFLINE MODE</string>
+    <string name="banner_offline_local">NO CONNECTION — LOCAL MODE</string>
+    <string name="label_no_cache">NO DATA IN CACHE</string>
+
+    <!-- ======= Dialogs ======= -->
+    <string name="dialog_delete_route_title">DELETE ROUTE?</string>
+    <string name="dialog_delete_route_desc">This action cannot be undone. All associated stops will be deleted.</string>
+    <string name="dialog_call_title">CALL %1$s?</string>
+    <string name="dialog_call_desc">The system dialer will open.</string>
+    <string name="btn_delete">DELETE</string>
+    <string name="btn_call">CALL</string>
+    <string name="btn_cancel">CANCEL</string>
+    <string name="btn_ok">OK</string>
+    <string name="btn_back">Back</string>
+
+    <!-- ======= Vehicles ======= -->
+    <string name="vehicle_car">CAR</string>
+    <string name="vehicle_van">VAN</string>
+    <string name="vehicle_truck">TRUCK</string>
+
+    <!-- ======= Errors and States ======= -->
+    <string name="state_no_routes">NO ROUTES</string>
+    <string name="state_create_first">Create your first route with the + button</string>
+    <string name="state_error_loading">LOADING ERROR</string>
+    <string name="state_pull_to_refresh">Pull down to retry</string>
+    <string name="error_empty_email">Email cannot be empty</string>
+    <string name="error_invalid_email">Invalid email format</string>
+    <string name="error_empty_password">Password cannot be empty</string>
+    <string name="error_short_password">Password must be at least 8 characters</string>
+    <string name="error_empty_name">Name cannot be empty</string>
+    <string name="error_long_name">Name is too long (max. 100 characters)</string>
+    <string name="error_empty_date">Date cannot be empty</string>
+    <string name="error_invalid_date">Invalid date format (use YYYY-MM-DD)</string>
+    <string name="error_empty_phone">Phone cannot be empty</string>
+    <string name="error_invalid_phone">Invalid phone number</string>
+    <string name="error_empty_lat">Latitude cannot be empty</string>
+    <string name="error_invalid_lat">Invalid latitude (must be between -90 and 90)</string>
+    <string name="error_empty_lon">Longitude cannot be empty</string>
+    <string name="error_invalid_lon">Invalid longitude (must be between -180 and 180)</string>
+    <string name="error_session_expired">Session expired. Please log in again.</string>
+</resources>

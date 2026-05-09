@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- ======= Nom de l'app ======= -->
+    <string name="app_name">SLIOR</string>
+
+    <!-- ======= Auth ======= -->
+    <string name="label_email">EMAIL</string>
+    <string name="label_password">MOT DE PASSE</string>
+    <string name="label_password_alt">MOT DE PASSE</string>
+    <string name="btn_login">SE CONNECTER</string>
+    <string name="btn_register">S\'INSCRIRE ICI</string>
+    <string name="btn_create_account">CRÉER UN COMPTE</string>
+    <string name="link_forgot_password">MOT DE PASSE OUBLIÉ ?</string>
+    <string name="link_no_account">Pas de compte ? </string>
+    <string name="link_has_account">VOUS AVEZ DÉJÀ UN COMPTE ? </string>
+    <string name="label_new_courier">NOUVEAU LIVREUR</string>
+    <string name="label_join_fleet">REJOIGNEZ LA\nFLOTTE</string>
+    <string name="label_full_name">NOM COMPLET</string>
+    <string name="label_vehicle_type">TYPE DE VÉHICULE</string>
+    
+    <!-- ======= Menu ======= -->
+    <string name="menu_my_routes">MES ITINÉRAIRES</string>
+    <string name="menu_statistics">STATISTIQUES</string>
+    <string name="menu_general_map">CARTE GÉNÉRALE</string>
+    <string name="menu_packages">COLIS</string>
+    <string name="menu_settings">PARAMÈTRES</string>
+    <string name="menu_badge_soon">BIENTÔT</string>
+    <string name="menu_version_info">V 1.0.0 — TFG DAM 2026</string>
+    <string name="menu_system_status">ÉTAT DU SYSTÈME</string>
+    <string name="menu_device_id">ID APPAREIL</string>
+    <string name="menu_courier">LIVREUR</string>
+    <string name="menu_active_profile">Profil actif</string>
+    <string name="menu_edit_profile">MODIFIER LE PROFIL</string>
+    <string name="menu_edit_profile_desc">Nom et données</string>
+    <string name="menu_change_password">CHANGER LE MOT DE PASSE</string>
+    <string name="menu_change_password_desc">Sécurité du compte</string>
+    <string name="menu_notifications">NOTIFICATIONS</string>
+    <string name="menu_notifications_desc">Préférences d\'alerte</string>
+    <string name="menu_logout">SE DÉCONNECTER</string>
+    <string name="menu_logout_desc">Quitter le compte actuel</string>
+
+    <!-- ======= Itinéraires ======= -->
+    <string name="title_routes">MES ITINÉRAIRES</string>
+    <string name="title_new_route">NOUVEL ITINÉRAIRE</string>
+    <string name="title_edit_route">MODIFIER L\'ITINÉRAIRE</string>
+    <string name="title_route_detail">DÉTAIL DE L\'ITINÉRAIRE</string>
+    <string name="label_route_data">DONNÉES DE L\'ITINÉRAIRE</string>
+    <string name="label_edit_data">MODIFIER LES DONNÉES</string>
+    <string name="btn_new_route">NOUVEL ITINÉRAIRE</string>
+    <string name="btn_optimize">⚡ OPTIMISER L\'ORDRE</string>
+    <string name="btn_start_navigation">LANCER LA NAVIGATION</string>
+    <string name="label_total_distance">DISTANCE TOTALE</string>
+    <string name="label_estimated_time">TEMPS ESTIMÉ</string>
+    <string name="label_stops">arrêts</string>
+    <string name="label_stops_count">ARRÊTS (%1$d)</string>
+    <string name="format_km">%1$.1f KM</string>
+    <string name="format_minutes">%1$d MIN</string>
+    <string name="label_route_name">NOM</string>
+    <string name="label_planned_date">DATE (AAAA-MM-JJ)</string>
+    <string name="label_notes_optional">NOTES (OPTIONNEL)</string>
+    <string name="btn_save_route">ENREGISTRER L\'ITINÉRAIRE</string>
+    <string name="btn_update_route">METTRE À JOUR</string>
+    <string name="placeholder_route_name">EX. ROUTE DU NORD</string>
+    <string name="placeholder_date">Sélectionnez une date</string>
+    <string name="placeholder_notes">Observations...</string>
+    
+    <!-- ======= Arrêts ======= -->
+    <string name="label_new_stop">NOUVEL ARRÊT</string>
+    <string name="btn_add_stop">AJOUTER UN ARRÊT</string>
+    <string name="btn_cancel_stop">ANNULER L\'ARRÊT</string>
+    <string name="btn_confirm_stop">✓  CONFIRMER L\'ARRÊT</string>
+    <string name="label_address">ADRESSE</string>
+    <string name="label_recipient">DESTINATAIRE</string>
+    <string name="label_phone">TÉLÉPHONE</string>
+    <string name="label_latitude">LATITUDE</string>
+    <string name="label_longitude">LONGITUDE</string>
+    <string name="label_stop_notes_optional">NOTES D\'ARRÊT (OPTIONNEL)</string>
+    <string name="placeholder_stop_address">Appuyez pour chercher ou choisir sur carte...</string>
+    <string name="placeholder_recipient">Nom du destinataire</string>
+    <string name="placeholder_phone">06 00 00 00 00</string>
+    <string name="placeholder_notes_stop">Laisser à l\'accueil...</string>
+
+    <!-- ======= Carte ======= -->
+    <string name="map_label_you">VOUS ÊTES ICI</string>
+    <string name="map_label_selected">EMPLACEMENT SÉLECTIONNÉ</string>
+    <string name="map_label_stop">ARRÊT %1$d</string>
+    <string name="map_info_name">Nom : %1$s</string>
+    <string name="map_info_address">Adresse : %1$s</string>
+    <string name="map_info_phone">Téléphone : %1$s</string>
+    <string name="placeholder_search_address">Rechercher une adresse...</string>
+    <string name="btn_confirm_address">✓ CONFIRMER L\'ADRESSE</string>
+
+    <!-- ======= Connectivité ======= -->
+    <string name="status_online">SERVEUR EN LIGNE</string>
+    <string name="status_offline">PAS DE CONNEXION</string>
+    <string name="status_checking">VÉRIFICATION...</string>
+    <string name="status_verifying">VÉRIFICATION...</string>
+    <string name="status_disconnected">DÉCONNECTÉ</string>
+    <string name="banner_offline">MODE HORS LIGNE</string>
+    <string name="banner_offline_local">PAS DE CONNEXION — MODE LOCAL</string>
+    <string name="label_no_cache">PAS DE DONNÉES EN CACHE</string>
+
+    <!-- ======= Dialogues ======= -->
+    <string name="dialog_delete_route_title">SUPPRIMER L\'ITINÉRAIRE ?</string>
+    <string name="dialog_delete_route_desc">Cette action est irréversible. Tous les arrêts associés seront supprimés.</string>
+    <string name="dialog_call_title">APPELER LE %1$s ?</string>
+    <string name="dialog_call_desc">L\'application téléphone va s\'ouvrir.</string>
+    <string name="btn_delete">SUPPRIMER</string>
+    <string name="btn_call">APPELER</string>
+    <string name="btn_cancel">ANNULER</string>
+    <string name="btn_ok">OK</string>
+    <string name="btn_back">Retour</string>
+
+    <!-- ======= Véhicules ======= -->
+    <string name="vehicle_car">AUTO</string>
+    <string name="vehicle_van">FOURGONNETTE</string>
+    <string name="vehicle_truck">CAMION</string>
+
+    <!-- ======= Erreurs ======= -->
+    <string name="state_no_routes">PAS D\'ITINÉRAIRES</string>
+    <string name="state_create_first">Créez votre premier itinéraire avec le bouton +</string>
+    <string name="state_error_loading">ERREUR DE CHARGEMENT</string>
+    <string name="state_pull_to_refresh">Glissez vers le bas pour réessayer</string>
+    <string name="error_empty_email">L\'email ne peut pas être vide</string>
+    <string name="error_invalid_email">Format d\'email invalide</string>
+    <string name="error_empty_password">Le mot de passe ne peut pas être vide</string>
+    <string name="error_short_password">Le mot de passe doit faire au moins 8 caractères</string>
+    <string name="error_empty_name">Le nom ne peut pas être vide</string>
+    <string name="error_long_name">Le nom est trop long (max. 100 caractères)</string>
+    <string name="error_empty_date">La date ne puede pas être vide</string>
+    <string name="error_invalid_date">Format de date invalide (utilisez AAAA-MM-JJ)</string>
+    <string name="error_empty_phone">Le téléphone ne puede pas être vide</string>
+    <string name="error_invalid_phone">Numéro de téléphone invalide</string>
+    <string name="error_empty_lat">La latitude ne puede pas être vide</string>
+    <string name="error_invalid_lat">Latitude invalide (doit être entre -90 et 90)</string>
+    <string name="error_empty_lon">La longitude ne puede pas être vide</string>
+    <string name="error_invalid_lon">Longitude invalide (doit être entre -180 et 180)</string>
+    <string name="error_session_expired">Session expirée. Veuillez vous reconnecter.</string>
+</resources>

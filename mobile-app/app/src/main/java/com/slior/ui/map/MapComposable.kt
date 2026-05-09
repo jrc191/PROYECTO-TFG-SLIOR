@@ -26,6 +26,9 @@ import android.text.SpannableStringBuilder
 import android.text.style.ClickableSpan
 import android.text.style.URLSpan
 import android.view.View
+import androidx.appcompat.app.AlertDialog
+import androidx.compose.ui.res.stringResource
+import com.slior.R
 
 @Composable
 fun RouteMapView(
@@ -33,9 +36,16 @@ fun RouteMapView(
     modifier: Modifier = Modifier,
     userLocation: Pair<Double, Double>? = null,
     centerKey: Any? = null,
-    onCallRequest: (String) -> Unit = {} // Nueva callback para manejar la llamada externamente
+    onCallRequest: (String) -> Unit = {}
 ) {
     var hasCentered by remember { mutableStateOf(false) }
+
+    // Obtenemos los strings localizados fuera del update del AndroidView
+    val youLabel = stringResource(R.string.map_label_you)
+    val stopLabel = stringResource(R.string.map_label_stop)
+    val nameLabel = stringResource(R.string.map_info_name)
+    val addressLabel = stringResource(R.string.map_info_address)
+    val phoneLabel = stringResource(R.string.map_info_phone)
 
     AndroidView(
         modifier = modifier,
@@ -50,7 +60,6 @@ fun RouteMapView(
         update = { mapView ->
             mapView.overlays.clear()
 
-            // InfoWindow personalizado que intercepta el click del teléfono
             val customInfoWindow = object : MarkerInfoWindow(org.osmdroid.library.R.layout.bonuspack_bubble, mapView) {
                 override fun onOpen(item: Any?) {
                     super.onOpen(item)
@@ -59,38 +68,30 @@ fun RouteMapView(
                     }
                     val m = item as? Marker
                     val description = view.findViewById<TextView>(org.osmdroid.library.R.id.bubble_description)
-                    
                     val htmlContent = Html.fromHtml(m?.snippet ?: "", Html.FROM_HTML_MODE_LEGACY)
                     val spannable = SpannableStringBuilder(htmlContent)
-                    
                     val spans = spannable.getSpans(0, spannable.length, URLSpan::class.java)
                     for (span in spans) {
                         if (span.url.startsWith("tel:")) {
                             val start = spannable.getSpanStart(span)
                             val end = spannable.getSpanEnd(span)
                             val phoneNumber = span.url.substring(4)
-                            
-                            // Reemplazamos el comportamiento por defecto con nuestra callback
                             val clickableSpan = object : ClickableSpan() {
-                                override fun onClick(widget: View) {
-                                    onCallRequest(phoneNumber)
-                                }
+                                override fun onClick(widget: View) { onCallRequest(phoneNumber) }
                             }
                             spannable.removeSpan(span)
                             spannable.setSpan(clickableSpan, start, end, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
                         }
                     }
-                    
                     description?.movementMethod = LinkMovementMethod.getInstance()
                     description?.text = spannable
                 }
             }
 
-            // 1. Línea de ruta
+            // 1. Línea
             val points = mutableListOf<GeoPoint>()
             userLocation?.let { points.add(GeoPoint(it.first, it.second)) }
             points.addAll(stops.map { GeoPoint(it.latitud, it.longitud) })
-
             if (points.size >= 2) {
                 val polyline = Polyline(mapView).apply {
                     setPoints(points)
@@ -101,47 +102,42 @@ fun RouteMapView(
                 mapView.overlays.add(polyline)
             }
 
-            // 2. Marcador de USUARIO
+            // 2. Usuario
             userLocation?.let {
                 val courierMarker = Marker(mapView).apply {
                     position = GeoPoint(it.first, it.second)
-                    title = "USTED ESTÁ AQUÍ"
+                    title = youLabel
                     infoWindow = customInfoWindow
-                    
                     val rawDrawable = mapView.context.resources.getDrawable(org.osmdroid.library.R.drawable.marker_default, null).mutate()
                     val wrappedDrawable = DrawableCompat.wrap(rawDrawable)
                     DrawableCompat.setTint(wrappedDrawable, Color.parseColor("#FF5722"))
                     DrawableCompat.setTintMode(wrappedDrawable, PorterDuff.Mode.SRC_IN)
-                    
                     icon = wrappedDrawable
                     setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
                     setOnMarkerClickListener { m, _ -> m.showInfoWindow(); true }
+                    showInfoWindow()
                 }
                 mapView.overlays.add(courierMarker)
             }
 
-            // 3. Marcadores de PARADAS
+            // 3. Paradas
             stops.forEachIndexed { index, stop ->
                 val marker = Marker(mapView).apply {
                     position = GeoPoint(stop.latitud, stop.longitud)
-                    title = "PARADA ${index + 1}"
+                    title = stopLabel.replace("%1$d", (index + 1).toString())
                     infoWindow = customInfoWindow
                     
                     val sb = StringBuilder()
-                    sb.append("<b>Nombre:</b> ${stop.destinatario}<br>")
-                    sb.append("<b>Dirección:</b> ${stop.direccion}<br>")
-
+                    sb.append("<b>${nameLabel.split(":")[0]}:</b> ${stop.destinatario}<br>")
+                    sb.append("<b>${addressLabel.split(":")[0]}:</b> ${stop.direccion}<br>")
                     if (stop.telefono.isNotEmpty()) {
-                        sb.append("<b>Teléfono:</b> <a href=\"tel:${stop.telefono}\">${stop.telefono}</a>")
+                        sb.append("<b>${phoneLabel.split(":")[0]}:</b> <a href=\"tel:${stop.telefono}\">${stop.telefono}</a>")
                     }
                     snippet = sb.toString()
 
                     setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
                     icon = mapView.context.resources.getDrawable(org.osmdroid.library.R.drawable.marker_default, null).mutate()
-                    
-                    if (stop.isCompleted) {
-                        alpha = 0.5f
-                    }
+                    if (stop.isCompleted) alpha = 0.5f
                     setOnMarkerClickListener { m, _ -> m.showInfoWindow(); true }
                 }
                 mapView.overlays.add(marker)
@@ -150,15 +146,10 @@ fun RouteMapView(
             // 4. Centrado
             val shouldCenter = !hasCentered || centerKey != null
             if (shouldCenter) {
-                if (stops.isNotEmpty()) {
-                    val lastStop = stops.last()
-                    mapView.controller.animateTo(GeoPoint(lastStop.latitud, lastStop.longitud))
-                } else if (userLocation != null) {
-                    mapView.controller.animateTo(GeoPoint(userLocation.first, userLocation.second))
-                }
+                if (stops.isNotEmpty()) mapView.controller.animateTo(GeoPoint(stops.last().latitud, stops.last().longitud))
+                else if (userLocation != null) mapView.controller.animateTo(GeoPoint(userLocation.first, userLocation.second))
                 hasCentered = true
             }
-
             mapView.invalidate()
         }
     )

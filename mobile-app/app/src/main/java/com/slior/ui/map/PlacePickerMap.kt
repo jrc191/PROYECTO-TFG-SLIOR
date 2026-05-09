@@ -23,6 +23,8 @@ import android.text.SpannableStringBuilder
 import android.text.style.ClickableSpan
 import android.text.style.URLSpan
 import android.view.View
+import androidx.compose.ui.res.stringResource
+import com.slior.R
 
 /**
  * Mapa interactivo para seleccionar una ubicación.
@@ -43,6 +45,13 @@ fun PlacePickerMap(
     centerKey: Any? = null,
     onCallRequest: (String) -> Unit = {}
 ) {
+    val youLabel = stringResource(R.string.map_label_you)
+    val selectedLabel = stringResource(R.string.map_label_selected)
+    val stopLabel = stringResource(R.string.map_label_stop)
+    val nameLabel = stringResource(R.string.map_info_name)
+    val addressLabel = stringResource(R.string.map_info_address)
+    val phoneLabel = stringResource(R.string.map_info_phone)
+
     AndroidView(
         modifier = modifier,
         factory = { context ->
@@ -51,161 +60,90 @@ fun PlacePickerMap(
                 setTileSource(TileSourceFactory.MAPNIK)
                 setMultiTouchControls(true)
                 controller.setZoom(initialZoom)
-                
-                initialCenter?.let {
-                    controller.setCenter(GeoPoint(it.first, it.second))
-                }
-
-                // Listener para clics en el mapa
+                initialCenter?.let { controller.setCenter(GeoPoint(it.first, it.second)) }
                 val eventsReceiver = object : MapEventsReceiver {
-                    override fun singleTapConfirmedHelper(p: GeoPoint): Boolean {
-                        onLocationSelected(p.latitude, p.longitude)
-                        return true
-                    }
-
-                    override fun longPressHelper(p: GeoPoint): Boolean {
-                        onLocationSelected(p.latitude, p.longitude)
-                        return true
-                    }
+                    override fun singleTapConfirmedHelper(p: GeoPoint): Boolean { onLocationSelected(p.latitude, p.longitude); return true }
+                    override fun longPressHelper(p: GeoPoint): Boolean { onLocationSelected(p.latitude, p.longitude); return true }
                 }
-                
                 overlays.add(MapEventsOverlay(eventsReceiver))
-
                 addMapListener(object : org.osmdroid.events.MapListener {
-                    override fun onScroll(event: org.osmdroid.events.ScrollEvent?): Boolean {
-                        val center = mapCenter
-                        onCenterChanged(center.latitude, center.longitude)
-                        return true
-                    }
-                    override fun onZoom(event: org.osmdroid.events.ZoomEvent?): Boolean {
-                        event?.zoomLevel?.let { onZoomChanged(it) }
-                        return true
-                    }
+                    override fun onScroll(event: org.osmdroid.events.ScrollEvent?): Boolean { val center = mapCenter; onCenterChanged(center.latitude, center.longitude); return true }
+                    override fun onZoom(event: org.osmdroid.events.ZoomEvent?): Boolean { event?.zoomLevel?.let { onZoomChanged(it) }; return true }
                 })
             }
         },
         update = { mapView ->
-            // InfoWindow personalizado que intercepta el click del teléfono
             val customInfoWindow = object : MarkerInfoWindow(org.osmdroid.library.R.layout.bonuspack_bubble, mapView) {
                 override fun onOpen(item: Any?) {
                     super.onOpen(item)
-                    mapView.overlays.filterIsInstance<Marker>().forEach { 
-                        if (it != item && it.isInfoWindowShown) it.closeInfoWindow()
-                    }
-                    val m = item as? Marker
+                    mapView.overlays.filterIsInstance<Marker>().forEach { if (it != item && it.isInfoWindowShown) it.closeInfoWindow() }
                     val description = view.findViewById<TextView>(org.osmdroid.library.R.id.bubble_description)
-                    
-                    val htmlContent = Html.fromHtml(m?.snippet ?: "", Html.FROM_HTML_MODE_LEGACY)
-                    val spannable = SpannableStringBuilder(htmlContent)
-                    
+                    val spannable = SpannableStringBuilder(Html.fromHtml((item as? Marker)?.snippet ?: "", Html.FROM_HTML_MODE_LEGACY))
                     val spans = spannable.getSpans(0, spannable.length, URLSpan::class.java)
                     for (span in spans) {
                         if (span.url.startsWith("tel:")) {
                             val start = spannable.getSpanStart(span)
                             val end = spannable.getSpanEnd(span)
-                            val phoneNumber = span.url.substring(4)
-                            
-                            val clickableSpan = object : ClickableSpan() {
-                                override fun onClick(widget: View) {
-                                    onCallRequest(phoneNumber)
-                                }
-                            }
-                            spannable.removeSpan(span)
-                            spannable.setSpan(clickableSpan, start, end, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
+                            val phone = span.url.substring(4)
+                            val clickable = object : ClickableSpan() { override fun onClick(widget: View) { onCallRequest(phone) } }
+                            spannable.removeSpan(span); spannable.setSpan(clickable, start, end, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
                         }
                     }
-                    
-                    description?.movementMethod = LinkMovementMethod.getInstance()
-                    description?.text = spannable
+                    description?.movementMethod = LinkMovementMethod.getInstance(); description?.text = spannable
                 }
             }
 
-            // 1. Lógica de centrado
+            // 1. Centrado
             if (centerKey != null) {
-                if (selectedLocation != null) {
-                    mapView.controller.animateTo(GeoPoint(selectedLocation.latitude, selectedLocation.longitude))
-                } else if (defaultCenter != null) {
-                    mapView.controller.animateTo(GeoPoint(defaultCenter.first, defaultCenter.second))
-                }
+                if (selectedLocation != null) mapView.controller.animateTo(GeoPoint(selectedLocation.latitude, selectedLocation.longitude))
+                else if (defaultCenter != null) mapView.controller.animateTo(GeoPoint(defaultCenter.first, defaultCenter.second))
             } else if (selectedLocation != null) {
                 val point = GeoPoint(selectedLocation.latitude, selectedLocation.longitude)
-                if (mapView.mapCenter.latitude != point.latitude || mapView.mapCenter.longitude != point.longitude) {
-                    mapView.controller.animateTo(point)
-                }
+                if (mapView.mapCenter.latitude != point.latitude || mapView.mapCenter.longitude != point.longitude) mapView.controller.animateTo(point)
             } else if (!hasCenteredOnce && defaultCenter != null) {
-                val point = GeoPoint(defaultCenter.first, defaultCenter.second)
-                mapView.controller.setCenter(point)
-                onCentered()
+                mapView.controller.setCenter(GeoPoint(defaultCenter.first, defaultCenter.second)); onCentered()
             }
 
-            // 2. Gestión de overlays
+            // 2. Overlays
             val eventOverlay = mapView.overlays.find { it is MapEventsOverlay }
-            mapView.overlays.clear()
-            eventOverlay?.let { mapView.overlays.add(it) }
+            mapView.overlays.clear(); eventOverlay?.let { mapView.overlays.add(it) }
 
             // 3. Paradas existentes
             existingStops.forEachIndexed { index, stop ->
                 val marker = Marker(mapView).apply {
                     position = GeoPoint(stop.latitud, stop.longitud)
-                    title = "PARADA ${index + 1}"
+                    title = stopLabel.replace("%1$d", (index + 1).toString())
                     infoWindow = customInfoWindow
-                    
-                    val sb = StringBuilder()
-                    sb.append("<b>Nombre:</b> ${stop.destinatario}<br>")
-                    sb.append("<b>Dirección:</b> ${stop.direccion}<br>")
-
-                    if (stop.telefono.isNotEmpty()) {
-                        sb.append("<b>Teléfono:</b> <a href=\"tel:${stop.telefono}\">${stop.telefono}</a>")
-                    }
-                    snippet = sb.toString()
-
+                    snippet = "<b>${nameLabel.split(":")[0]}:</b> ${stop.destinatario}<br><b>${addressLabel.split(":")[0]}:</b> ${stop.direccion}"
                     setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
                     icon = mapView.context.resources.getDrawable(org.osmdroid.library.R.drawable.marker_default, null).mutate()
-                    alpha = 0.6f
-                    setOnMarkerClickListener { m, _ -> m.showInfoWindow(); true }
+                    alpha = 0.6f; setOnMarkerClickListener { m, _ -> m.showInfoWindow(); true }
                 }
                 mapView.overlays.add(marker)
             }
 
-            // 4. TU UBICACIÓN
+            // 4. Usuario
             defaultCenter?.let { loc ->
                 val marker = Marker(mapView).apply {
-                    position = GeoPoint(loc.first, loc.second)
-                    title = "USTED ESTÁ AQUÍ"
-                    infoWindow = customInfoWindow
-                    setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
-                    
-                    val rawDrawable = mapView.context.resources.getDrawable(org.osmdroid.library.R.drawable.marker_default, null).mutate()
-                    val wrappedDrawable = DrawableCompat.wrap(rawDrawable)
-                    DrawableCompat.setTint(wrappedDrawable, Color.parseColor("#FF5722"))
-                    DrawableCompat.setTintMode(wrappedDrawable, PorterDuff.Mode.SRC_IN)
-                    
-                    icon = wrappedDrawable
-                    showInfoWindow()
-                    setOnMarkerClickListener { m, _ -> m.showInfoWindow(); true }
+                    position = GeoPoint(loc.first, loc.second); title = youLabel; infoWindow = customInfoWindow; setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
+                    val raw = mapView.context.resources.getDrawable(org.osmdroid.library.R.drawable.marker_default, null).mutate()
+                    val wrapped = DrawableCompat.wrap(raw); DrawableCompat.setTint(wrapped, Color.parseColor("#FF5722")); DrawableCompat.setTintMode(wrapped, PorterDuff.Mode.SRC_IN)
+                    icon = wrapped; showInfoWindow(); setOnMarkerClickListener { m, _ -> m.showInfoWindow(); true }
                 }
                 mapView.overlays.add(marker)
             }
 
-            // 5. Selección actual
+            // 5. Selección
             selectedLocation?.let { loc ->
                 val marker = Marker(mapView).apply {
-                    position = GeoPoint(loc.latitude, loc.longitude)
-                    title = "UBICACIÓN SELECCIONADA"
-                    infoWindow = customInfoWindow
-                    
-                    val sb = StringBuilder()
-                    sb.append("<b>Dirección:</b> ${loc.displayName}<br>")
-                    snippet = sb.toString()
-
+                    position = GeoPoint(loc.latitude, loc.longitude); title = selectedLabel; infoWindow = customInfoWindow
+                    snippet = "<b>${addressLabel.split(":")[0]}:</b> ${loc.displayName}"
                     setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
                     icon = mapView.context.resources.getDrawable(org.osmdroid.library.R.drawable.marker_default, null).mutate()
-                    showInfoWindow()
-                    setOnMarkerClickListener { m, _ -> m.showInfoWindow(); true }
+                    showInfoWindow(); setOnMarkerClickListener { m, _ -> m.showInfoWindow(); true }
                 }
                 mapView.overlays.add(marker)
             }
-
             mapView.invalidate()
         }
     )

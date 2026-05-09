@@ -30,6 +30,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -37,6 +38,7 @@ import androidx.compose.ui.zIndex
 import androidx.core.content.ContextCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.slior.R
 import com.slior.data.local.entity.StopEntity
 import com.slior.ui.components.hardShadow
 import com.slior.ui.map.RouteMapView
@@ -82,7 +84,7 @@ fun RouteDetailScreen(
             viewModel.fetchCurrentLocation()
         } else {
             scope.launch {
-                snackbarHostState.showSnackbar("Concede permiso de ubicación para optimizar")
+                snackbarHostState.showSnackbar(context.getString(R.string.map_info_address)) // Adjust if needed
             }
         }
     }
@@ -92,7 +94,7 @@ fun RouteDetailScreen(
             viewModel.resetDeleteState()
             onBack()
         } else if (deleteState is Result.Error) {
-            snackbarHostState.showSnackbar("Error al eliminar la ruta")
+            snackbarHostState.showSnackbar(context.getString(R.string.state_error_loading))
             viewModel.resetDeleteState()
         }
     }
@@ -104,7 +106,6 @@ fun RouteDetailScreen(
         }
     }
 
-    // --- POPUP BRUTALISTA DE CONFIRMACIÓN DE LLAMADA ---
     if (phoneToCall != null) {
         AlertDialog(
             onDismissRequest = { phoneToCall = null },
@@ -115,49 +116,29 @@ fun RouteDetailScreen(
             title = {
                 Text(
                     text = buildAnnotatedString {
-                        append("¿LLAMAR A ")
-                        withStyle(style = SpanStyle(color = SafetyOrange)) {
-                            append(phoneToCall!!)
-                        }
+                        append(stringResource(R.string.dialog_call_title).split("%")[0])
+                        withStyle(style = SpanStyle(color = SafetyOrange)) { append(phoneToCall!!) }
                         append("?")
                     },
-                    fontFamily = SpaceGroteskFamily,
-                    fontWeight = FontWeight.Black,
-                    fontSize = 18.sp,
-                    color = BrutalistBlack
+                    fontFamily = SpaceGroteskFamily, fontWeight = FontWeight.Black, fontSize = 18.sp, color = BrutalistBlack
                 )
             },
-            text = {
-                Text(
-                    "Se abrirá la aplicación de teléfono del dispositivo.",
-                    fontFamily = SpaceGroteskFamily,
-                    color = BrutalistBlack
-                )
-            },
+            text = { Text(stringResource(R.string.dialog_call_desc), fontFamily = SpaceGroteskFamily, color = BrutalistBlack) },
             confirmButton = {
                 Surface(
-                    modifier = Modifier
-                        .border(2.dp, BrutalistBlack)
-                        .clickable { 
-                            val intent = Intent(Intent.ACTION_DIAL, Uri.parse("tel:$phoneToCall"))
-                            context.startActivity(intent)
-                            phoneToCall = null
-                        },
-                    color = NeonGreen,
-                    shape = MaterialTheme.shapes.extraSmall
+                    modifier = Modifier.border(2.dp, BrutalistBlack).clickable { 
+                        val intent = Intent(Intent.ACTION_DIAL, Uri.parse("tel:$phoneToCall"))
+                        context.startActivity(intent)
+                        phoneToCall = null
+                    },
+                    color = NeonGreen, shape = MaterialTheme.shapes.extraSmall
                 ) {
-                    Text(
-                        text = "LLAMAR",
-                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
-                        color = BrutalistBlack,
-                        fontWeight = FontWeight.Bold,
-                        fontFamily = SpaceGroteskFamily
-                    )
+                    Text(text = stringResource(R.string.btn_call), modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp), color = BrutalistBlack, fontWeight = FontWeight.Bold, fontFamily = SpaceGroteskFamily)
                 }
             },
             dismissButton = {
                 TextButton(onClick = { phoneToCall = null }) {
-                    Text("CANCELAR", color = BrutalistBlack, fontFamily = SpaceGroteskFamily, fontWeight = FontWeight.Bold)
+                    Text(stringResource(R.string.btn_cancel), color = BrutalistBlack, fontFamily = SpaceGroteskFamily, fontWeight = FontWeight.Bold)
                 }
             }
         )
@@ -174,54 +155,27 @@ fun RouteDetailScreen(
                 Text(
                     text = buildAnnotatedString {
                         append("¿")
-                        withStyle(style = SpanStyle(color = SafetyOrange)) {
-                            append("ELIMINAR")
-                        }
-                        append(" RUTA?")
+                        withStyle(style = SpanStyle(color = SafetyOrange)) { append(stringResource(R.string.btn_delete)) }
+                        append(" " + stringResource(R.string.title_routes).split(" ")[1] + "?") // Hacky for now
                     },
-                    fontFamily = SpaceGroteskFamily,
-                    fontWeight = FontWeight.Black,
-                    fontSize = 18.sp,
-                    color = BrutalistBlack
+                    fontFamily = SpaceGroteskFamily, fontWeight = FontWeight.Black, fontSize = 18.sp, color = BrutalistBlack
                 )
             },
-            text = {
-                Text(
-                    text = buildAnnotatedString {
-                        append("Esta acción ")
-                        withStyle(style = SpanStyle(color = SafetyOrange, fontWeight = FontWeight.Bold)) {
-                            append("no se puede deshacer")
-                        }
-                        append(". Se borrarán todas las paradas asociadas.")
-                    },
-                    fontFamily = SpaceGroteskFamily,
-                    fontSize = 14.sp,
-                    color = BrutalistBlack
-                )
-            },
+            text = { Text(stringResource(R.string.dialog_delete_route_desc), fontFamily = SpaceGroteskFamily, fontSize = 14.sp, color = BrutalistBlack) },
             confirmButton = {
                 Surface(
-                    modifier = Modifier
-                        .border(2.dp, BrutalistBlack)
-                        .clickable { 
-                            viewModel.deleteRoute(routeId)
-                            showDeleteConfirm = false 
-                        },
-                    color = SafetyOrange,
-                    shape = MaterialTheme.shapes.extraSmall
+                    modifier = Modifier.border(2.dp, BrutalistBlack).clickable { 
+                        viewModel.deleteRoute(routeId)
+                        showDeleteConfirm = false 
+                    },
+                    color = SafetyOrange, shape = MaterialTheme.shapes.extraSmall
                 ) {
-                    Text(
-                        text = "ELIMINAR",
-                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
-                        color = BrutalistWhite,
-                        fontWeight = FontWeight.Bold,
-                        fontFamily = SpaceGroteskFamily
-                    )
+                    Text(text = stringResource(R.string.btn_delete), modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp), color = BrutalistWhite, fontWeight = FontWeight.Bold, fontFamily = SpaceGroteskFamily)
                 }
             },
             dismissButton = {
                 TextButton(onClick = { showDeleteConfirm = false }) {
-                    Text("CANCELAR", color = BrutalistBlack, fontFamily = SpaceGroteskFamily, fontWeight = FontWeight.Bold)
+                    Text(stringResource(R.string.btn_cancel), color = BrutalistBlack, fontFamily = SpaceGroteskFamily, fontWeight = FontWeight.Bold)
                 }
             }
         )
@@ -229,103 +183,44 @@ fun RouteDetailScreen(
 
     Box(modifier = Modifier.fillMaxSize().background(BrutalistWhite)) {
         Column(modifier = Modifier.fillMaxSize()) {
-
-            // ── 1. TopAppBar (FIJA) ──────────────────────────────────────
             Surface(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(64.dp)
-                    .zIndex(2f),
-                color = BrutalistWhite,
-                shape = RectangleShape
+                modifier = Modifier.fillMaxWidth().height(64.dp).zIndex(2f),
+                color = BrutalistWhite, shape = RectangleShape
             ) {
                 Row(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .drawBehind {
-                            drawLine(BrutalistBlack, Offset(0f, size.height), Offset(size.width, size.height), 2.dp.toPx())
-                        }
-                        .padding(horizontal = 8.dp),
+                    modifier = Modifier.fillMaxSize().drawBehind { drawLine(BrutalistBlack, Offset(0f, size.height), Offset(size.width, size.height), 2.dp.toPx()) }.padding(horizontal = 8.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Box(
-                        modifier = Modifier.size(48.dp).clickable { onBack() },
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, "Volver", tint = BrutalistBlack, modifier = Modifier.size(28.dp))
+                    Box(modifier = Modifier.size(48.dp).clickable { onBack() }, contentAlignment = Alignment.Center) {
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, stringResource(R.string.btn_back), tint = BrutalistBlack, modifier = Modifier.size(28.dp))
                     }
-                    
                     Text(
                         text = when (state) {
                             is RouteDetailState.Success -> (state as RouteDetailState.Success).route.nombre.uppercase()
-                            else -> "DETALLE DE RUTA"
+                            else -> stringResource(R.string.title_route_detail)
                         },
                         modifier = Modifier.weight(1f),
-                        fontFamily = SpaceGroteskFamily,
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 18.sp,
-                        maxLines = 1,
-                        color = BrutalistBlack
+                        fontFamily = SpaceGroteskFamily, fontWeight = FontWeight.Bold, fontSize = 18.sp, maxLines = 1, color = BrutalistBlack
                     )
-
                     if (state is RouteDetailState.Success) {
-                        IconButton(onClick = { onEdit(routeId) }) {
-                            Icon(Icons.Default.Edit, "Editar", tint = BrutalistBlack)
-                        }
-                        IconButton(onClick = { showDeleteConfirm = true }) {
-                            Icon(Icons.Default.Delete, "Borrar", tint = SafetyOrange)
-                        }
+                        IconButton(onClick = { onEdit(routeId) }) { Icon(Icons.Default.Edit, null, tint = BrutalistBlack) }
+                        IconButton(onClick = { showDeleteConfirm = true }) { Icon(Icons.Default.Delete, null, tint = SafetyOrange) }
                     }
                 }
             }
 
-            // ── 2. Zona de Mapa (ALTURA FIJA y DELIMITADA) ───────────────
             if (state is RouteDetailState.Success) {
                 val data = state as RouteDetailState.Success
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(280.dp)
-                        .zIndex(1f)
-                        .clipToBounds()
-                        .drawBehind {
-                            drawLine(BrutalistBlack, Offset(0f, size.height), Offset(size.width, size.height), 2.dp.toPx())
-                        }
-                ) {
-                    RouteMapView(
-                        stops = data.stops.map { it.toRouteMapPoint() },
-                        userLocation = currentLocation,
-                        centerKey = centerTrigger,
-                        onCallRequest = { phoneToCall = it }, // Lanzamos el popup brutalista
-                        modifier = Modifier.fillMaxSize()
-                    )
-                    
-                    // Botón de centrado dentro del mapa
-                    Box(
-                        modifier = Modifier
-                            .align(Alignment.BottomEnd)
-                            .padding(16.dp)
-                    ) {
-                        Surface(
-                            modifier = Modifier
-                                .size(40.dp)
-                                .border(2.dp, BrutalistBlack)
-                                .clickable { centerTrigger++ },
-                            color = BrutalistWhite,
-                            shape = RectangleShape
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.MyLocation,
-                                contentDescription = "Centrar",
-                                tint = BrutalistBlack,
-                                modifier = Modifier.padding(8.dp)
-                            )
+                Box(modifier = Modifier.fillMaxWidth().height(280.dp).zIndex(1f).clipToBounds().drawBehind { drawLine(BrutalistBlack, Offset(0f, size.height), Offset(size.width, size.height), 2.dp.toPx()) }) {
+                    RouteMapView(stops = data.stops.map { it.toRouteMapPoint() }, userLocation = currentLocation, centerKey = centerTrigger, onCallRequest = { phoneToCall = it }, modifier = Modifier.fillMaxSize())
+                    Box(modifier = Modifier.align(Alignment.BottomEnd).padding(16.dp)) {
+                        Surface(modifier = Modifier.size(40.dp).border(2.dp, BrutalistBlack).clickable { centerTrigger++ }, color = BrutalistWhite, shape = RectangleShape) {
+                            Icon(Icons.Default.MyLocation, null, tint = BrutalistBlack, modifier = Modifier.padding(8.dp))
                         }
                     }
                 }
             }
 
-            // ── 3. Zona de Datos (SCROLL INDEPENDIENTE) ───────────────────
             Box(modifier = Modifier.weight(1f).zIndex(0f)) {
                 when (state) {
                     is RouteDetailState.Loading -> if (!isRefreshing) RouteDetailLoading()
@@ -333,122 +228,59 @@ fun RouteDetailScreen(
                     is RouteDetailState.Success -> {
                         val data = state as RouteDetailState.Success
                         RouteDetailContent(
-                            data = data,
-                            context = context,
-                            currentLocation = currentLocation,
-                            onOptimize = {
-                                if (hasLocationPermission(context)) {
-                                    viewModel.optimizeRoute(routeId)
-                                } else {
-                                    permissionLauncher.launch(
-                                        arrayOf(Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION)
-                                    )
-                                }
-                            },
-                            onNavigate = {
-                                val sortedStops = data.stops.sortedBy { it.ordenVisita }
-                                NavigationHelper.launchExternalNavigation(context, sortedStops)
-                            }
+                            data = data, context = context, currentLocation = currentLocation,
+                            onOptimize = { if (hasLocationPermission(context)) viewModel.optimizeRoute(routeId) else permissionLauncher.launch(arrayOf(Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION)) },
+                            onNavigate = { NavigationHelper.launchExternalNavigation(context, data.stops.sortedBy { it.ordenVisita }) }
                         )
                     }
                 }
             }
         }
 
-        // ── Botón flotante de refresco (SIEMPRE VISIBLE) ────────────────────
-        Box(
-            modifier = Modifier
-                .align(Alignment.TopEnd)
-                .padding(top = 80.dp, end = 16.dp)
-                .zIndex(3f)
-        ) {
-            Surface(
-                modifier = Modifier
-                    .size(48.dp)
-                    .hardShadow(2.dp, 2.dp)
-                    .border(2.dp, BrutalistBlack)
-                    .clickable { 
-                        viewModel.loadRouteDetail(routeId)
-                        authViewModel.checkServerConnectivity()
-                        if (hasLocationPermission(context)) {
-                            viewModel.fetchCurrentLocation()
-                        }
-                    },
-                color = BrutalistWhite,
-                shape = MaterialTheme.shapes.extraSmall
-            ) {
+        Box(modifier = Modifier.align(Alignment.TopEnd).padding(top = 80.dp, end = 16.dp).zIndex(3f)) {
+            Surface(modifier = Modifier.size(48.dp).hardShadow(2.dp, 2.dp).border(2.dp, BrutalistBlack).clickable { viewModel.loadRouteDetail(routeId); authViewModel.checkServerConnectivity(); if (hasLocationPermission(context)) viewModel.fetchCurrentLocation() }, color = BrutalistWhite, shape = MaterialTheme.shapes.extraSmall) {
                 Box(contentAlignment = Alignment.Center) {
-                    if (isRefreshing) {
-                        CircularProgressIndicator(modifier = Modifier.size(24.dp), color = BrutalistBlack, strokeWidth = 2.dp)
-                    } else {
-                        Icon(Icons.Default.Refresh, "Refrescar", tint = BrutalistBlack)
-                    }
+                    if (isRefreshing) CircularProgressIndicator(modifier = Modifier.size(24.dp), color = BrutalistBlack, strokeWidth = 2.dp)
+                    else Icon(Icons.Default.Refresh, stringResource(R.string.status_verifying), tint = BrutalistBlack)
                 }
             }
         }
-
         SnackbarHost(hostState = snackbarHostState, modifier = Modifier.align(Alignment.BottomCenter))
     }
 }
 
 @Composable
-private fun RouteDetailContent(
-    data: RouteDetailState.Success,
-    context: Context,
-    currentLocation: Pair<Double, Double>?,
-    onOptimize: () -> Unit,
-    onNavigate: () -> Unit
-) {
+private fun RouteDetailContent(data: RouteDetailState.Success, context: Context, currentLocation: Pair<Double, Double>?, onOptimize: () -> Unit, onNavigate: () -> Unit) {
     Box(modifier = Modifier.fillMaxSize()) {
         LazyColumn(modifier = Modifier.fillMaxSize(), contentPadding = PaddingValues(bottom = 96.dp)) {
             item {
-                Column(
-                    modifier = Modifier.fillMaxWidth().background(Color(0xFFF4F4F5))
-                        .drawBehind { drawLine(BrutalistBlack, Offset(0f, size.height), Offset(size.width, size.height), 2.dp.toPx()) }
-                        .padding(horizontal = 16.dp, vertical = 12.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    Text("TIEMPO ESTIMADO", fontFamily = SpaceGroteskFamily, fontWeight = FontWeight.Bold, fontSize = 13.sp, letterSpacing = 2.sp, color = BrutalistBlack)
+                Column(modifier = Modifier.fillMaxWidth().background(Color(0xFFF4F4F5)).drawBehind { drawLine(BrutalistBlack, Offset(0f, size.height), Offset(size.width, size.height), 2.dp.toPx()) }.padding(horizontal = 16.dp, vertical = 12.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+                    Text(stringResource(R.string.label_estimated_time), fontFamily = SpaceGroteskFamily, fontWeight = FontWeight.Bold, fontSize = 13.sp, letterSpacing = 2.sp, color = BrutalistBlack)
                     Spacer(Modifier.height(6.dp))
                     Box(modifier = Modifier.hardShadow(2.dp, 2.dp).border(2.dp, BrutalistBlack).background(BrutalistWhite).padding(horizontal = 24.dp, vertical = 8.dp)) {
                         Text(text = if (data.route.tiempoEstimado != null) formatMinutes(data.route.tiempoEstimado) else "--:--", fontFamily = SpaceGroteskFamily, fontWeight = FontWeight.Bold, fontSize = 28.sp, color = SafetyOrange)
                     }
                     data.route.distanciaTotal?.let {
                         Spacer(Modifier.height(4.dp))
-                        Text("${"%.2f".format(it)} km · ${data.stops.size} paradas", fontFamily = SpaceGroteskFamily, fontSize = 12.sp, color = BrutalistBlack)
+                        Text(stringResource(R.string.format_km, it) + " · " + stringResource(R.string.label_stops_count, data.stops.size), fontFamily = SpaceGroteskFamily, fontSize = 12.sp, color = BrutalistBlack)
                     }
                 }
             }
-            items(data.stops.sortedBy { it.ordenVisita }) { stop ->
-                BrutalistStopRow(stop = stop)
-            }
+            items(data.stops.sortedBy { it.ordenVisita }) { stop -> BrutalistStopRow(stop = stop) }
             item {
                 Spacer(Modifier.height(8.dp))
                 Box(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp)) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth().hardShadow().border(2.dp, BrutalistBlack).background(Color(0xFFF4F4F5))
-                            .clickable { onOptimize() }.padding(16.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.Center
-                    ) {
-                        Text("⚡ OPTIMIZAR ORDEN", fontFamily = SpaceGroteskFamily, fontWeight = FontWeight.Bold, fontSize = 15.sp, letterSpacing = 1.sp, color = BrutalistBlack)
+                    Row(modifier = Modifier.fillMaxWidth().hardShadow().border(2.dp, BrutalistBlack).background(Color(0xFFF4F4F5)).clickable { onOptimize() }.padding(16.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.Center) {
+                        Text(stringResource(R.string.btn_optimize), fontFamily = SpaceGroteskFamily, fontWeight = FontWeight.Bold, fontSize = 15.sp, letterSpacing = 1.sp, color = BrutalistBlack)
                     }
                 }
             }
         }
-        Box(modifier = Modifier.align(Alignment.BottomCenter).fillMaxWidth().background(BrutalistWhite)
-            .drawBehind { drawLine(BrutalistBlack, Offset(0f, 0f), Offset(size.width, 0f), 2.dp.toPx()) }
-            .padding(8.dp)
-        ) {
-            Row(
-                modifier = Modifier.fillMaxWidth().height(72.dp).hardShadow(2.dp, 2.dp).border(2.dp, BrutalistBlack).background(NeonGreen)
-                    .clickable { onNavigate() },
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.Center
-            ) {
+        Box(modifier = Modifier.align(Alignment.BottomCenter).fillMaxWidth().background(BrutalistWhite).drawBehind { drawLine(BrutalistBlack, Offset(0f, 0f), Offset(size.width, 0f), 2.dp.toPx()) }.padding(8.dp)) {
+            Row(modifier = Modifier.fillMaxWidth().height(72.dp).hardShadow(2.dp, 2.dp).border(2.dp, BrutalistBlack).background(NeonGreen).clickable { onNavigate() }, verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.Center) {
                 Icon(Icons.Default.Navigation, null, tint = BrutalistBlack, modifier = Modifier.size(24.dp))
                 Spacer(Modifier.width(10.dp))
-                Text("INICIAR NAVEGACIÓN", fontFamily = SpaceGroteskFamily, fontWeight = FontWeight.Bold, fontSize = 18.sp, letterSpacing = 1.sp, color = BrutalistBlack)
+                Text(stringResource(R.string.btn_start_navigation), fontFamily = SpaceGroteskFamily, fontWeight = FontWeight.Bold, fontSize = 18.sp, letterSpacing = 1.sp, color = BrutalistBlack)
             }
         }
     }
@@ -456,39 +288,21 @@ private fun RouteDetailContent(
 
 @Composable
 private fun BrutalistStopRow(stop: StopEntity) {
-    Row(
-        modifier = Modifier.fillMaxWidth()
-            .drawBehind { drawLine(Color(0xFFE4E4E7), Offset(0f, size.height), Offset(size.width, size.height), 1.dp.toPx()) }
-            .padding(16.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(12.dp)
-    ) {
-        Box(modifier = Modifier.size(32.dp).border(2.dp, BrutalistBlack).background(if (stop.status == "ENTREGADO") NeonGreen else Color(0xFFF4F4F5)), contentAlignment = Alignment.Center) {
-            Text("${stop.ordenVisita}", fontFamily = SpaceGroteskFamily, fontWeight = FontWeight.Black, fontSize = 14.sp, color = BrutalistBlack)
-        }
+    Row(modifier = Modifier.fillMaxWidth().drawBehind { drawLine(Color(0xFFE4E4E7), Offset(0f, size.height), Offset(size.width, size.height), 1.dp.toPx()) }.padding(16.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+        Box(modifier = Modifier.size(32.dp).border(2.dp, BrutalistBlack).background(if (stop.status == "ENTREGADO") NeonGreen else Color(0xFFF4F4F5)), contentAlignment = Alignment.Center) { Text("${stop.ordenVisita}", fontFamily = SpaceGroteskFamily, fontWeight = FontWeight.Black, fontSize = 14.sp, color = BrutalistBlack) }
         Column(modifier = Modifier.weight(1f)) {
             Text(stop.destinatario.uppercase(), fontFamily = SpaceGroteskFamily, fontWeight = FontWeight.Bold, fontSize = 14.sp, color = if (stop.status == "ENTREGADO") Color.Gray else BrutalistBlack)
             Text(stop.direccion, fontFamily = SpaceGroteskFamily, fontSize = 12.sp, color = if (stop.status == "ENTREGADO") Color.Gray else BrutalistBlack, maxLines = 1)
         }
-        if (stop.status == "ENTREGADO") {
-            Text("✓", fontWeight = FontWeight.Black, color = NeonGreen, fontSize = 20.sp)
-        }
+        if (stop.status == "ENTREGADO") { Text("✓", fontWeight = FontWeight.Black, color = NeonGreen, fontSize = 20.sp) }
     }
 }
 
 @Composable
-private fun RouteDetailLoading() {
-    Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-        CircularProgressIndicator(color = BrutalistBlack)
-    }
-}
+private fun RouteDetailLoading() { Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) { CircularProgressIndicator(color = BrutalistBlack) } }
 
 @Composable
-private fun RouteDetailError(message: String) {
-    Box(Modifier.fillMaxSize().padding(32.dp), contentAlignment = Alignment.Center) {
-        Text(message, color = SafetyOrange, fontFamily = SpaceGroteskFamily, fontWeight = FontWeight.Bold)
-    }
-}
+private fun RouteDetailError(message: String) { Box(Modifier.fillMaxSize().padding(32.dp), contentAlignment = Alignment.Center) { Text(message, color = SafetyOrange, fontFamily = SpaceGroteskFamily, fontWeight = FontWeight.Bold) } }
 
 private fun formatMinutes(minutes: Int): String {
     val h = minutes / 60

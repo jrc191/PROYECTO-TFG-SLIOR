@@ -7,16 +7,17 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
-import androidx.compose.runtime.*
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
+import androidx.compose.ui.graphics.Color
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -26,11 +27,12 @@ import com.slior.ui.auth.RegisterScreen
 import com.slior.ui.routes.CreateRouteScreen
 import com.slior.ui.routes.RouteDetailScreen
 import com.slior.ui.routes.RouteListScreen
+import com.slior.ui.settings.SettingsScreen
 import com.slior.ui.theme.BrutalistBlack
 import com.slior.ui.theme.BrutalistWhite
 import com.slior.ui.theme.SliorTheme
-import com.slior.viewmodel.AuthViewModel
 import com.slior.ui.components.ConnectivityBanner
+import com.slior.viewmodel.AuthViewModel
 import com.slior.viewmodel.ConnectivityViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
@@ -58,43 +60,20 @@ class MainActivity : ComponentActivity() {
                 val snackbarHostState = remember { SnackbarHostState() }
                 val scope = rememberCoroutineScope()
 
-                // Emitimos cambios de conectividad al bus global para que otros (AuthViewModel) reaccionen
+                // Emitimos cambios de conectividad
                 LaunchedEffect(isConnected) {
                     globalEventBus.emitConnectivityChanged(isConnected)
                 }
 
-                // Si detectamos 401 (Unauthorized) redirigimos al login
-                LaunchedEffect(unauthenticated) {
-                    if (unauthenticated) {
-                        scope.launch {
-                            snackbarHostState.showSnackbar("Sesión expirada. Por favor, identifícate de nuevo.")
-                        }
-                        navController.navigate("login") {
-                            popUpTo(0) { inclusive = true }
-                        }
-                        authViewModel.consumeUnauthorizedEvent()
-                    }
-                }
-
-                // Mientras comprobamos la sesión, mostrar pantalla de carga
+                // Redirigir al login si no hay sesión (y no estamos cargando)
                 if (sessionUserId == null) {
-                    Box(
-                        modifier         = Modifier
-                            .fillMaxSize()
-                            .background(BrutalistWhite),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        CircularProgressIndicator(
-                            color       = BrutalistBlack,
-                            strokeWidth = 3.dp
-                        )
-                    }
+                    Box(Modifier.fillMaxSize().background(BrutalistWhite))
                     return@SliorTheme
                 }
 
                 Column(modifier = Modifier.fillMaxSize()) {
                     ConnectivityBanner(isConnected = isConnected)
-                    
+
                     Box(modifier = Modifier.weight(1f)) {
                         val startDestination = if (sessionUserId!!.isNotBlank()) {
                             "routes/${sessionUserId}"
@@ -116,60 +95,43 @@ class MainActivity : ComponentActivity() {
                                     onGoToRegister = { navController.navigate("register") }
                                 )
                             }
-
                             composable("register") {
                                 RegisterScreen(
                                     onRegisterSuccess = { repartidorId ->
                                         navController.navigate("routes/$repartidorId") {
-                                            popUpTo("login") { inclusive = true }
+                                            popUpTo("register") { inclusive = true }
                                         }
                                     },
-                                    onGoToLogin = { navController.popBackStack() }
+                                    onBack = { navController.popBackStack() }
                                 )
                             }
-
                             composable("routes/{repartidorId}") { backStackEntry ->
-                                val repartidorId = backStackEntry.arguments
-                                    ?.getString("repartidorId") ?: ""
+                                val repartidorId = backStackEntry.arguments?.getString("repartidorId") ?: ""
                                 RouteListScreen(
-                                    repartidorId = repartidorId,
-                                    onRouteClick = { routeId ->
-                                        navController.navigate("route-detail/$routeId")
-                                    },
-                                    onCreateRoute = {
-                                        navController.navigate("create-route/$repartidorId")
-                                    },
-                                    onLogout = {
-                                        navController.navigate("login") {
-                                            popUpTo(0) { inclusive = true }
-                                        }
-                                    }
+                                    repartidorId  = repartidorId,
+                                    onRouteClick  = { routeId -> navController.navigate("route_detail/$routeId") },
+                                    onCreateRoute = { navController.navigate("create_route/$repartidorId") },
+                                    onLogout      = { navController.navigate("login") { popUpTo(0) { inclusive = true } } },
+                                    onSettings    = { navController.navigate("settings") } // Callback para ajustes
                                 )
                             }
-
-                            composable("route-detail/{routeId}") { backStackEntry ->
-                                val routeId = backStackEntry.arguments
-                                    ?.getString("routeId") ?: ""
+                            composable("route_detail/{routeId}") { backStackEntry ->
+                                val routeId = backStackEntry.arguments?.getString("routeId") ?: ""
                                 RouteDetailScreen(
                                     routeId = routeId,
                                     onBack  = { navController.popBackStack() },
-                                    onEdit  = { id ->
-                                        navController.navigate("create-route/${sessionUserId}?routeId=$id")
-                                    }
+                                    onEdit  = { id -> navController.navigate("create_route/${sessionUserId}/$id") }
                                 )
                             }
-
-                            composable(
-                                "create-route/{repartidorId}?routeId={routeId}",
-                                arguments = listOf(
-                                    navArgument("repartidorId") { type = NavType.StringType },
-                                    navArgument("routeId") { 
-                                        type = NavType.StringType
-                                        nullable = true
-                                        defaultValue = null
-                                    }
+                            composable("create_route/{repartidorId}") { backStackEntry ->
+                                val repartidorId = backStackEntry.arguments?.getString("repartidorId") ?: ""
+                                CreateRouteScreen(
+                                    repartidorId  = repartidorId,
+                                    onBack        = { navController.popBackStack() },
+                                    onRouteCreated = { navController.popBackStack() }
                                 )
-                            ) { backStackEntry ->
+                            }
+                            composable("create_route/{repartidorId}/{routeId}") { backStackEntry ->
                                 val repartidorId = backStackEntry.arguments?.getString("repartidorId") ?: ""
                                 val routeId = backStackEntry.arguments?.getString("routeId")
                                 CreateRouteScreen(
@@ -179,11 +141,25 @@ class MainActivity : ComponentActivity() {
                                     onRouteCreated = { navController.popBackStack() }
                                 )
                             }
+                            composable("settings") {
+                                SettingsScreen(
+                                    onBack = { navController.popBackStack() }
+                                )
+                            }
                         }
                     }
                 }
 
                 SnackbarHost(hostState = snackbarHostState)
+                
+                // Efecto global de desautorización
+                LaunchedEffect(unauthenticated) {
+                    if (unauthenticated) {
+                        scope.launch { snackbarHostState.showSnackbar("Sesión expirada") }
+                        navController.navigate("login") { popUpTo(0) { inclusive = true } }
+                        authViewModel.consumeUnauthorizedEvent()
+                    }
+                }
             }
         }
     }

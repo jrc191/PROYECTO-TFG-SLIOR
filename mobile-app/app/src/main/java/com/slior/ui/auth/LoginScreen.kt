@@ -12,12 +12,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.widthIn
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -29,34 +24,34 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.slior.R
+import com.slior.ui.components.SliorAccentBar
 import com.slior.ui.components.SliorErrorBanner
 import com.slior.ui.components.SliorFieldLabel
-import com.slior.ui.components.SliorLoadingButton
 import com.slior.ui.components.SliorPasswordField
 import com.slior.ui.components.SliorPrimaryButton
+import com.slior.ui.components.SliorLoadingButton
 import com.slior.ui.components.SliorTextField
-import com.slior.ui.components.hardShadow
 import com.slior.ui.theme.BrutalistBlack
 import com.slior.ui.theme.BrutalistWhite
 import com.slior.ui.theme.NeonGreen
 import com.slior.ui.theme.OfflineRed
 import com.slior.ui.theme.SpaceGroteskFamily
-import com.slior.util.Validators
 import com.slior.viewmodel.AuthViewModel
 
 @Composable
 fun LoginScreen(
-    onLoginSuccess: (repartidorId: String) -> Unit,
+    onLoginSuccess: (String) -> Unit,
     onGoToRegister: () -> Unit,
     viewModel: AuthViewModel = hiltViewModel()
 ) {
-    val loginState  by viewModel.loginState.collectAsStateWithLifecycle()
+    val loginState by viewModel.loginState.collectAsStateWithLifecycle()
     val serverStatus by viewModel.serverStatus.collectAsStateWithLifecycle()
 
     var email by rememberSaveable { mutableStateOf("") }
@@ -65,197 +60,150 @@ fun LoginScreen(
 
     LaunchedEffect(loginState) {
         if (loginState is LoginState.Success) {
-            onLoginSuccess((loginState as LoginState.Success).repartidorId)
+            onLoginSuccess((loginState as LoginState.Success).userId)
         }
     }
 
     Box(
-        modifier         = Modifier
+        modifier = Modifier
             .fillMaxSize()
-            .background(Color.White),
-        contentAlignment = Alignment.Center
+            .background(BrutalistWhite)
     ) {
         Column(
             modifier = Modifier
-                .widthIn(max = 480.dp)
-                .fillMaxWidth()
-                .padding(horizontal = 24.dp)
-                .verticalScroll(rememberScrollState())
-                .padding(vertical = 32.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
+                .fillMaxSize()
+                .padding(24.dp)
         ) {
-            //  Card 
-            Column(
+            // Cabecera Decorativa
+            SliorAccentBar()
+            Spacer(Modifier.height(48.dp))
+
+            // Logo / Título
+            Text(
+                text = stringResource(R.string.app_name),
+                fontFamily = SpaceGroteskFamily,
+                fontWeight = FontWeight.Black,
+                fontSize = 64.sp,
+                letterSpacing = (-2).sp,
+                color = BrutalistBlack,
+                modifier = Modifier.padding(bottom = 8.dp)
+            )
+            
+            Text(
+                text = stringResource(R.string.menu_system_status).uppercase(),
+                fontFamily = SpaceGroteskFamily,
+                fontWeight = FontWeight.Bold,
+                fontSize = 14.sp,
+                letterSpacing = 4.sp,
+                color = BrutalistBlack,
+                modifier = Modifier.alpha(0.6f)
+            )
+
+            Spacer(Modifier.height(48.dp))
+
+            // Formulario
+            SliorFieldLabel(stringResource(R.string.label_email))
+            SliorTextField(
+                value = email,
+                onValueChange = { email = it },
+                placeholder = "user@slior.com",
+                withShadow = true
+            )
+
+            Spacer(Modifier.height(24.dp))
+
+            SliorFieldLabel(stringResource(R.string.label_password))
+            SliorPasswordField(
+                value = password,
+                onValueChange = { password = it },
+                placeholder = "••••••••",
+                visible = passwordVisible,
+                onToggleVisibility = { passwordVisible = !passwordVisible },
+                withShadow = true
+            )
+
+            Spacer(Modifier.height(16.dp))
+
+            // Olvido de contraseña
+            Text(
+                text = stringResource(R.string.link_forgot_password),
+                fontFamily = SpaceGroteskFamily,
+                fontWeight = FontWeight.Bold,
+                fontSize = 12.sp,
+                color = BrutalistBlack,
+                modifier = Modifier
+                    .align(Alignment.End)
+                    .clickable { /* TODO */ }
+            )
+
+            Spacer(Modifier.height(32.dp))
+
+            // Botón Login
+            if (loginState is LoginState.Loading) {
+                SliorLoadingButton(modifier = Modifier.fillMaxWidth())
+            } else {
+                SliorPrimaryButton(
+                    text = stringResource(R.string.btn_login),
+                    onClick = { viewModel.login(email, password) },
+                    modifier = Modifier.fillMaxWidth(),
+                    enabled = email.isNotBlank() && password.isNotBlank()
+                )
+            }
+
+            // Error
+            if (loginState is LoginState.Error) {
+                Spacer(Modifier.height(16.dp))
+                SliorErrorBanner(message = (loginState as LoginState.Error).message)
+            }
+
+            Spacer(Modifier.weight(1f))
+
+            // Registro
+            Row(
+                modifier = Modifier.align(Alignment.CenterHorizontally),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = stringResource(R.string.link_no_account),
+                    fontFamily = SpaceGroteskFamily,
+                    fontSize = 14.sp,
+                    color = BrutalistBlack
+                )
+                Text(
+                    text = stringResource(R.string.btn_register),
+                    fontFamily = SpaceGroteskFamily,
+                    fontWeight = FontWeight.Black,
+                    fontSize = 14.sp,
+                    color = BrutalistBlack,
+                    modifier = Modifier.clickable { onGoToRegister() }
+                )
+            }
+            
+            Spacer(Modifier.height(16.dp))
+
+            // Status del servidor
+            Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .hardShadow(offsetX = 6.dp, offsetY = 6.dp)
-                    .border(3.dp, BrutalistBlack)
-                    .background(BrutalistWhite)
-                    .padding(32.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
+                    .border(2.dp, BrutalistBlack)
+                    .background(BrutalistBlack)
+                    .padding(8.dp),
+                contentAlignment = Alignment.Center
             ) {
-
-                //  Header 
-                Text(
-                    text          = "SLIOR",
-                    fontFamily    = SpaceGroteskFamily,
-                    fontWeight    = FontWeight.Black,
-                    fontSize      = 72.sp,
-                    letterSpacing = (-2).sp,
-                    lineHeight    = 72.sp,
-                    color         = BrutalistBlack
-                )
-                Box(
-                    modifier = Modifier
-                        .background(BrutalistBlack)
-                        .padding(horizontal = 16.dp, vertical = 4.dp)
-                ) {
-                    Text(
-                        text          = "SISTEMA DE RUTAS",
-                        fontFamily    = SpaceGroteskFamily,
-                        fontWeight    = FontWeight.Bold,
-                        fontSize      = 13.sp,
-                        letterSpacing = 4.sp,
-                        color         = Color.White
-                    )
-                }
-
-                Spacer(Modifier.height(32.dp))
-
-                //  Banner de error 
-                if (loginState is LoginState.Error) {
-                    SliorErrorBanner(
-                        message  = (loginState as LoginState.Error).message.uppercase(),
-                        modifier = Modifier.fillMaxWidth()
-                    )
-                    Spacer(Modifier.height(20.dp))
-                }
-
-                //  Email 
-                SliorFieldLabel(text = "EMAIL", modifier = Modifier.fillMaxWidth())
-                SliorTextField(
-                    value         = email,
-                    onValueChange = { email = it; viewModel.resetState() },
-                    placeholder   = "USER@SYSTEM.COM",
-                    keyboardType  = KeyboardType.Email,
-                    modifier      = Modifier.fillMaxWidth()
-                )
-
-                Spacer(Modifier.height(20.dp))
-
-                //  Contraseña 
-                SliorFieldLabel(text = "PASSWORD", modifier = Modifier.fillMaxWidth())
-                SliorPasswordField(
-                    value              = password,
-                    onValueChange      = { password = it; viewModel.resetState() },
-                    placeholder        = "••••••••",
-                    visible            = passwordVisible,
-                    onToggleVisibility = { passwordVisible = !passwordVisible },
-                    loginStyle         = true,
-                    modifier           = Modifier.fillMaxWidth()
-                )
-
-                Spacer(Modifier.height(24.dp))
-
-                //  Botón 
-                if (loginState is LoginState.Loading) {
-                    SliorLoadingButton(modifier = Modifier.fillMaxWidth())
-                } else {
-                    SliorPrimaryButton(
-                        text     = "INICIAR SESIÓN",
-                        onClick  = {
-                            val emailError = Validators.getValidationError("email", email)
-                            val passwordError = Validators.getValidationError("password", password)
-                            
-                            when {
-                                emailError != null -> viewModel.setError(emailError)
-                                passwordError != null -> viewModel.setError(passwordError)
-                                else -> viewModel.login(email, password)
-                            }
-                        },
-                        modifier = Modifier.fillMaxWidth()
-                    )
-                }
-
-                //  Links 
-                Column(
-                    modifier            = Modifier
-                        .fillMaxWidth()
-                        .padding(top = 28.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    Text(
-                        text          = "¿OLVIDASTE TU CONTRASEÑA?",
-                        fontFamily    = SpaceGroteskFamily,
-                        fontWeight    = FontWeight.Bold,
-                        fontSize      = 12.sp,
-                        letterSpacing = 1.sp,
-                        color         = BrutalistBlack
-                    )
-                    Spacer(Modifier.height(10.dp))
-                    Row {
-                        Text(
-                            text       = "¿No tienes cuenta? ",
-                            fontFamily = SpaceGroteskFamily,
-                            fontSize   = 12.sp,
-                            color      = Color(0xFF757575)
-                        )
-                        Text(
-                            text          = "REGÍSTRATE AQUÍ",
-                            fontFamily    = SpaceGroteskFamily,
-                            fontWeight    = FontWeight.Black,
-                            fontSize      = 12.sp,
-                            color         = BrutalistBlack,
-                            modifier      = Modifier.clickable { onGoToRegister() }
-                        )
-                    }
-                }
-
-                //  Footer: versión + estado del servidor 
                 Row(
-                    modifier          = Modifier
-                        .fillMaxWidth()
-                        .padding(top = 28.dp)
-                        .alpha(0.25f),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    HorizontalDivider(
-                        modifier  = Modifier.weight(1f),
-                        color     = BrutalistBlack,
-                        thickness = 2.dp
-                    )
-                    Text(
-                        text          = "V 4.0.1 - RUGGED SYSTEM",
-                        fontFamily    = SpaceGroteskFamily,
-                        fontWeight    = FontWeight.Black,
-                        fontSize      = 9.sp,
-                        letterSpacing = 3.sp,
-                        color         = BrutalistBlack,
-                        modifier      = Modifier.padding(horizontal = 8.dp)
-                    )
-                    HorizontalDivider(
-                        modifier  = Modifier.weight(1f),
-                        color     = BrutalistBlack,
-                        thickness = 2.dp
-                    )
-                }
-
-                //  Indicador estado servidor 
-                Row(
-                    modifier          = Modifier.padding(top = 10.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     val (dotColor, label) = when (serverStatus) {
-                        is ServerStatus.Online   -> NeonGreen  to "SERVIDOR EN LÍNEA"
-                        is ServerStatus.Offline  -> OfflineRed to "SIN CONEXIÓN"
-                        is ServerStatus.Checking -> Color(0xFFFFAA00) to "COMPROBANDO..."
+                        is ServerStatus.Online   -> NeonGreen  to stringResource(R.string.status_online)
+                        is ServerStatus.Offline  -> OfflineRed to stringResource(R.string.status_offline)
+                        is ServerStatus.Checking -> Color(0xFFFFAA00) to stringResource(R.string.status_checking)
                     }
                     Box(
                         modifier = Modifier
                             .size(7.dp)
                             .background(dotColor, shape = CircleShape)
                     )
-                    Spacer(Modifier.width(5.dp))
+                    Spacer(Modifier.padding(horizontal = 4.dp))
                     Text(
                         text          = label,
                         fontFamily    = SpaceGroteskFamily,

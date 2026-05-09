@@ -4,41 +4,136 @@
     <string name="app_name">SLIOR</string>
 
     <!-- ======= Autenticación ======= -->
-    <string name="label_email">Correo electrónico</string>
-    <string name="label_password">Contraseña</string>
-    <string name="btn_login">Iniciar sesión</string>
-    <string name="btn_register">Registrarse</string>
-    <string name="hint_email">ejemplo@correo.com</string>
-    <string name="hint_password">Mínimo 8 caracteres</string>
-    <string name="error_invalid_email">Introduce un correo válido</string>
-    <string name="error_short_password">La contraseña debe tener al menos 8 caracteres</string>
-    <string name="error_empty_field">Este campo es obligatorio</string>
+    <string name="label_email">EMAIL</string>
+    <string name="label_password">PASSWORD</string>
+    <string name="label_password_alt">CONTRASEÑA</string>
+    <string name="btn_login">INICIAR SESIÓN</string>
+    <string name="btn_register">REGÍSTRATE AQUÍ</string>
+    <string name="btn_create_account">CREAR CUENTA</string>
+    <string name="link_forgot_password">¿OLVIDASTE TU CONTRASEÑA?</string>
+    <string name="link_no_account">¿No tienes cuenta? </string>
+    <string name="link_has_account">¿YA TIENES CUENTA? </string>
+    <string name="label_new_courier">NUEVO REPARTIDOR</string>
+    <string name="label_join_fleet">ÚNETE A LA\nFLOTA</string>
+    <string name="label_full_name">NOMBRE COMPLETO</string>
+    <string name="label_vehicle_type">TIPO DE VEHÍCULO</string>
+    
+    <!-- ======= Menú Lateral ======= -->
+    <string name="menu_my_routes">MIS RUTAS</string>
+    <string name="menu_statistics">ESTADÍSTICAS</string>
+    <string name="menu_general_map">MAPA GENERAL</string>
+    <string name="menu_packages">PAQUETES</string>
+    <string name="menu_settings">AJUSTES</string>
+    <string name="menu_badge_soon">PRÓX.</string>
+    <string name="menu_version_info">V 1.0.0 — TFG DAM 2026</string>
+    <string name="menu_system_status">SYSTEM STATUS</string>
+    <string name="menu_device_id">DEVICE ID</string>
+    <string name="menu_courier">REPARTIDOR</string>
+    <string name="menu_active_profile">Perfil activo</string>
+    <string name="menu_edit_profile">EDITAR PERFIL</string>
+    <string name="menu_edit_profile_desc">Nombre y datos</string>
+    <string name="menu_change_password">CAMBIAR CONTRASEÑA</string>
+    <string name="menu_change_password_desc">Seguridad de la cuenta</string>
+    <string name="menu_notifications">NOTIFICACIONES</string>
+    <string name="menu_notifications_desc">Preferencias de avisos</string>
+    <string name="menu_logout">CERRAR SESIÓN</string>
+    <string name="menu_logout_desc">Salir de la cuenta actual</string>
 
     <!-- ======= Rutas ======= -->
-    <string name="title_routes">Mis Rutas</string>
-    <string name="btn_new_route">Nueva Ruta</string>
-    <string name="btn_optimize">Optimizar Ruta</string>
-    <string name="label_total_distance">Distancia total</string>
-    <string name="label_estimated_time">Tiempo estimado</string>
+    <string name="title_routes">MIS RUTAS</string>
+    <string name="title_new_route">NUEVA RUTA</string>
+    <string name="title_edit_route">EDITAR RUTA</string>
+    <string name="title_route_detail">DETALLE DE RUTA</string>
+    <string name="label_route_data">DATOS DE LA RUTA</string>
+    <string name="label_edit_data">EDITAR DATOS</string>
+    <string name="btn_new_route">NUEVA RUTA</string>
+    <string name="btn_optimize">⚡ OPTIMIZAR ORDEN</string>
+    <string name="btn_start_navigation">INICIAR NAVEGACIÓN</string>
+    <string name="label_total_distance">DISTANCIA TOTAL</string>
+    <string name="label_estimated_time">TIEMPO ESTIMADO</string>
     <string name="label_stops">paradas</string>
-    <string name="format_km">%1$.1f km</string>
-    <string name="format_minutes">%1$d min</string>
+    <string name="label_stops_count">PARADAS (%1$d)</string>
+    <string name="format_km">%1$.1f KM</string>
+    <string name="format_minutes">%1$d MIN</string>
+    <string name="label_route_name">NOMBRE</string>
+    <string name="label_planned_date">FECHA (YYYY-MM-DD)</string>
+    <string name="label_notes_optional">NOTAS (OPCIONAL)</string>
+    <string name="btn_save_route">GUARDAR RUTA</string>
+    <string name="btn_update_route">ACTUALIZAR RUTA</string>
+    <string name="placeholder_route_name">EJ. RUTA NORTE</string>
+    <string name="placeholder_date">Selecciona una fecha</string>
+    <string name="placeholder_notes">Observaciones...</string>
+    
+    <!-- ======= Paradas ======= -->
+    <string name="label_new_stop">NUEVA PARADA</string>
+    <string name="btn_add_stop">AÑADIR PARADA</string>
+    <string name="btn_cancel_stop">CANCELAR PARADA</string>
+    <string name="btn_confirm_stop">✓  CONFIRMAR PARADA</string>
+    <string name="label_address">DIRECCIÓN</string>
+    <string name="label_recipient">DESTINATARIO</string>
+    <string name="label_phone">TELÉFONO</string>
+    <string name="label_latitude">LATITUD</string>
+    <string name="label_longitude">LONGITUD</string>
+    <string name="label_stop_notes_optional">NOTAS PARADA (OPCIONAL)</string>
+    <string name="placeholder_stop_address">Toca para buscar o seleccionar en mapa...</string>
+    <string name="placeholder_recipient">Nombre del destinatario</string>
+    <string name="placeholder_phone">600 000 000</string>
+    <string name="placeholder_notes_stop">Dejar en portería...</string>
 
-    <!-- ======= Paquetes ======= -->
-    <string name="title_packages">Paquetes</string>
-    <string name="btn_scan_barcode">Escanear Código</string>
-    <string name="btn_mark_delivered">Marcar como Entregado</string>
-    <string name="label_barcode">Código de barras</string>
-    <string name="label_recipient">Destinatario</string>
-    <string name="label_weight">Peso (kg)</string>
+    <!-- ======= Mapa ======= -->
+    <string name="map_label_you">USTED ESTÁ AQUÍ</string>
+    <string name="map_label_selected">UBICACIÓN SELECCIONADA</string>
+    <string name="map_label_stop">PARADA %1$d</string>
+    <string name="map_info_name">Nombre: %1$s</string>
+    <string name="map_info_address">Dirección: %1$s</string>
+    <string name="map_info_phone">Teléfono: %1$s</string>
+    <string name="placeholder_search_address">Buscar dirección...</string>
+    <string name="btn_confirm_address">✓ CONFIRMAR DIRECCIÓN</string>
 
     <!-- ======= Conectividad ======= -->
-    <string name="offline_banner">Sin conexión — Modo offline</string>
-    <string name="online_banner">Conectado — Sincronizando…</string>
+    <string name="status_online">SERVIDOR EN LÍNEA</string>
+    <string name="status_offline">SIN CONEXIÓN</string>
+    <string name="status_checking">COMPROBANDO...</string>
+    <string name="status_verifying">VERIFICANDO...</string>
+    <string name="status_disconnected">DESCONECTADO</string>
+    <string name="banner_offline">MODO SIN CONEXIÓN</string>
+    <string name="banner_offline_local">SIN CONEXIÓN — MODO LOCAL</string>
+    <string name="label_no_cache">SIN DATOS EN CACHÉ</string>
 
-    <!-- ======= Errores genéricos ======= -->
-    <string name="error_network">Error de red. Comprueba tu conexión.</string>
-    <string name="error_server">Error del servidor. Inténtalo más tarde.</string>
-    <string name="error_unknown">Ha ocurrido un error inesperado.</string>
-    <string name="error_unauthorized">Sesión expirada. Inicia sesión de nuevo.</string>
+    <!-- ======= Diálogos ======= -->
+    <string name="dialog_delete_route_title">¿ELIMINAR RUTA?</string>
+    <string name="dialog_delete_route_desc">Esta acción no se puede deshacer. Se borrarán todas las paradas asociadas.</string>
+    <string name="dialog_call_title">¿LLAMAR A %1$s?</string>
+    <string name="dialog_call_desc">Se abrirá la aplicación de teléfono del dispositivo.</string>
+    <string name="btn_delete">ELIMINAR</string>
+    <string name="btn_call">LLAMAR</string>
+    <string name="btn_cancel">CANCELAR</string>
+    <string name="btn_ok">OK</string>
+    <string name="btn_back">Volver</string>
+
+    <!-- ======= Vehículos ======= -->
+    <string name="vehicle_car">AUTO</string>
+    <string name="vehicle_van">FURGONETA</string>
+    <string name="vehicle_truck">CAMIÓN</string>
+
+    <!-- ======= Errores y Estados ======= -->
+    <string name="state_no_routes">SIN RUTAS</string>
+    <string name="state_create_first">Crea tu primera ruta con el botón +</string>
+    <string name="state_error_loading">ERROR DE CARGA</string>
+    <string name="state_pull_to_refresh">Desliza hacia abajo para reintentar</string>
+    <string name="error_empty_email">El correo no puede estar vacío</string>
+    <string name="error_invalid_email">Formato de correo inválido</string>
+    <string name="error_empty_password">La contraseña no puede estar vacía</string>
+    <string name="error_short_password">La contraseña debe tener al menos 8 caracteres</string>
+    <string name="error_empty_name">El nombre no puede estar vacío</string>
+    <string name="error_long_name">El nombre es demasiado largo (máx. 100 caracteres)</string>
+    <string name="error_empty_date">La fecha no puede estar vacía</string>
+    <string name="error_invalid_date">Formato de fecha inválido (usa YYYY-MM-DD)</string>
+    <string name="error_empty_phone">El teléfono no puede estar vacío</string>
+    <string name="error_invalid_phone">Teléfono inválido</string>
+    <string name="error_empty_lat">La latitud no puede estar vacía</string>
+    <string name="error_invalid_lat">Latitud inválida (debe estar entre -90 y 90)</string>
+    <string name="error_empty_lon">La longitud no puede estar vacía</string>
+    <string name="error_invalid_lon">Longitud inválida (debe estar entre -180 y 180)</string>
+    <string name="error_session_expired">Sesión expirada. Por favor, identifícate de nuevo.</string>
 </resources>
