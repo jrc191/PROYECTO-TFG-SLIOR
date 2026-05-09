@@ -7,6 +7,7 @@ import com.slior.data.remote.ApiService
 import com.slior.data.remote.dto.CreateRouteRequest
 import com.slior.data.remote.dto.RouteResponseDto
 import com.slior.data.remote.dto.OptimizeRouteRequest
+import com.slior.data.remote.dto.UpdateRouteRequest
 import com.slior.util.Result
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
@@ -43,6 +44,32 @@ class RouteRepository @Inject constructor(
             val created = apiService.createRoute(request)
             routeDao.insertRoutes(listOf(created.toRouteEntity()))
             routeDao.insertStops(created.paradas.map { it.toStopEntity(created.id) })
+            Result.Success(Unit)
+        } catch (e: Exception) {
+            Result.Error(e)
+        }
+    }
+
+    suspend fun updateRoute(routeId: String, request: UpdateRouteRequest): Result<Unit> {
+        return try {
+            val updated = apiService.updateRoute(routeId, request)
+            // Actualizar localmente
+            routeDao.insertRoutes(listOf(updated.toRouteEntity()))
+            // Para las paradas, borramos las antiguas de esta ruta y ponemos las nuevas
+            // (Simulando el comportamiento del backend para consistencia)
+            routeDao.deleteStopsByRouteId(routeId)
+            routeDao.insertStops(updated.paradas.map { it.toStopEntity(updated.id) })
+            Result.Success(Unit)
+        } catch (e: Exception) {
+            Result.Error(e)
+        }
+    }
+
+    suspend fun deleteRoute(routeId: String): Result<Unit> {
+        return try {
+            apiService.deleteRoute(routeId)
+            routeDao.deleteRouteById(routeId)
+            routeDao.deleteStopsByRouteId(routeId)
             Result.Success(Unit)
         } catch (e: Exception) {
             Result.Error(e)

@@ -1,0 +1,37 @@
+services:
+  slior-db:
+    container_name: slior-db
+    image: postgres:14
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: slior
+      POSTGRES_USER: slior
+      POSTGRES_PASSWORD: slior
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./slior-db-data:/var/lib/postgresql/data
+    networks:
+      - slior-net
+
+  photon-serve:
+    image: eclipse-temurin:21-jre
+    volumes:
+      - ../photon/photon-1.0.1.jar:/opt/photon/photon.jar:ro
+      - D:/slior-data:/data
+    networks:
+      - slior-net
+    ports:
+      - "2322:2322"
+    command: >
+      java -Xmx2G -jar /opt/photon/photon.jar serve
+      -data-dir /data/photon_data
+      -listen-ip 0.0.0.0
+      -listen-port 2322
+
+networks:
+  slior-net:
+    name: slior-net
+
+volumes:
+  slior-db-data:

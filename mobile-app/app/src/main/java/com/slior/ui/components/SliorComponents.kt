@@ -408,6 +408,34 @@ fun SliorErrorBanner(
 }
 
 // 
+// ConnectivityBanner – banner de estado de conexión
+// 
+@Composable
+fun ConnectivityBanner(
+    isConnected: Boolean,
+    modifier: Modifier = Modifier
+) {
+    if (!isConnected) {
+        Box(
+            modifier = modifier
+                .fillMaxWidth()
+                .background(BrutalistBlack)
+                .padding(vertical = 4.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                text = "MODO SIN CONEXIÓN",
+                color = NeonGreen,
+                fontFamily = SpaceGroteskFamily,
+                fontWeight = FontWeight.Black,
+                fontSize = 11.sp,
+                letterSpacing = 2.sp
+            )
+        }
+    }
+}
+
+// 
 // SliorAccentBar – barra decorativa
 // 
 @Composable

@@ -2,6 +2,7 @@ package com.slior.controller;
 
 import com.slior.dto.route.CreateRouteRequest;
 import com.slior.dto.route.RouteResponse;
+import com.slior.dto.route.UpdateRouteRequest;
 import com.slior.service.RouteService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -42,6 +43,13 @@ public class RouteController {
     public ResponseEntity<Void> deleteRoute(@PathVariable UUID id) {
         routeService.deleteRoute(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<RouteResponse> updateRoute(
+            @PathVariable UUID id,
+            @Valid @RequestBody UpdateRouteRequest request) {
+        return ResponseEntity.ok(routeService.updateRoute(id, request));
     }
 
     @PostMapping("/{id}/optimize")

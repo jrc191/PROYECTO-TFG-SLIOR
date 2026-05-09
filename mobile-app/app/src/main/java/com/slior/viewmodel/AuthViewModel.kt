@@ -1,14 +1,18 @@
 package com.slior.viewmodel
 
+import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.google.gson.Gson
 import com.slior.data.remote.AuthInterceptor.Companion.TOKEN_KEY
 import com.slior.data.remote.dataStore
 import com.slior.data.repository.AuthRepository
 import com.slior.ui.auth.LoginState
 import com.slior.ui.auth.ServerStatus
+import com.slior.util.GlobalEventBus
 import com.slior.util.Result
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.first
@@ -18,14 +22,16 @@ import java.io.IOException
 import java.net.SocketTimeoutException
 import java.net.UnknownHostException
 import javax.inject.Inject
-import android.content.Context
-import dagger.hilt.android.qualifiers.ApplicationContext
 
 @HiltViewModel
 class AuthViewModel @Inject constructor(
     private val authRepository: AuthRepository,
-    @ApplicationContext private val context: Context
+    @ApplicationContext private val context: Context,
+    private val globalEventBus: GlobalEventBus
 ) : ViewModel() {
+
+    private val _unauthorizedEvent = MutableStateFlow(false)
+    val unauthorizedEvent: StateFlow<Boolean> = _unauthorizedEvent
 
     private val _loginState = MutableStateFlow<LoginState>(LoginState.Idle)
     val loginState: StateFlow<LoginState> = _loginState
@@ -33,19 +39,40 @@ class AuthViewModel @Inject constructor(
     private val _serverStatus = MutableStateFlow<ServerStatus>(ServerStatus.Checking)
     val serverStatus: StateFlow<ServerStatus> = _serverStatus
 
-    // Estado de sesión: null = comprobando, "" = sin sesión, "uuid" = con sesión
     private val _sessionUserId = MutableStateFlow<String?>(null)
     val sessionUserId: StateFlow<String?> = _sessionUserId
 
     init {
         checkExistingSession()
         checkServerConnectivity()
+        observeUnauthorizedEvents()
+        observeConnectivity()
     }
 
-    /**
-     * Al arrancar, comprueba si hay un token guardado en DataStore
-     * y si hay un usuario en Room. Si existe, navega directo a rutas.
-     */
+    private fun observeConnectivity() {
+        viewModelScope.launch {
+            globalEventBus.connectivityEvent.collect { isConnected ->
+                if (isConnected) {
+                    checkServerConnectivity()
+                } else {
+                    _serverStatus.value = ServerStatus.Offline
+                }
+            }
+        }
+    }
+
+    private fun observeUnauthorizedEvents() {
+        viewModelScope.launch {
+            globalEventBus.unauthorizedEvent.collect {
+                _unauthorizedEvent.value = true
+            }
+        }
+    }
+
+    fun consumeUnauthorizedEvent() {
+        _unauthorizedEvent.value = false
+    }
+
     private fun checkExistingSession() {
         viewModelScope.launch {
             try {
@@ -53,14 +80,12 @@ class AuthViewModel @Inject constructor(
                 val token = prefs[TOKEN_KEY]
 
                 if (!token.isNullOrBlank()) {
-                    // Hay token — buscar userId en Room
                     val userId = authRepository.getSavedUserId()
                     if (!userId.isNullOrBlank()) {
                         _sessionUserId.value = userId
                         return@launch
                     }
                 }
-                // Sin token o sin usuario local
                 _sessionUserId.value = ""
             } catch (e: Exception) {
                 _sessionUserId.value = ""
@@ -136,18 +161,28 @@ class AuthViewModel @Inject constructor(
     fun setError(message: String) {
         _loginState.value = LoginState.Error(message)
     }
-}
 
-private fun Exception.toUserMessage(isLogin: Boolean): String = when (this) {
-    is UnknownHostException   -> "Sin conexión al servidor"
-    is SocketTimeoutException -> "Tiempo de espera agotado"
-    is IOException            -> "Error de conexión"
-    is HttpException          -> when (code()) {
-        401  -> "Email o contraseña incorrectos"
-        409  -> "Este email ya está registrado"
-        422  -> "Los datos no cumplen los requisitos"
-        in 500..599 -> "Error del servidor. Inténtalo más tarde"
-        else -> "Error del servidor (${code()})"
+    private fun Exception.toUserMessage(isLogin: Boolean): String = when (this) {
+        is UnknownHostException   -> "Sin conexión al servidor"
+        is SocketTimeoutException -> "Tiempo de espera agotado"
+        is IOException            -> "Error de conexión"
+        is HttpException          -> {
+            val errorBody = response()?.errorBody()?.string()
+            val backendMessage = try {
+                val map = Gson().fromJson(errorBody, Map::class.java)
+                map["message"] as? String
+            } catch (e: Exception) {
+                null
+            }
+
+            backendMessage ?: when (code()) {
+                401  -> if (isLogin) "Email o contraseña incorrectos" else "Sesión no válida o expirada"
+                409  -> "Este email ya está registrado"
+                422  -> "Los datos no cumplen los requisitos"
+                in 500..599 -> "Error del servidor. Inténtalo más tarde"
+                else -> "Error del servidor (${code()})"
+            }
+        }
+        else -> "Error inesperado"
     }
-    else -> "Error inesperado"
 }

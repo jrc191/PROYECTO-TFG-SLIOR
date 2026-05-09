@@ -17,6 +17,9 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.util.*;
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -77,6 +80,46 @@ public class GeocodeService {
         cache.put(key, new CacheEntry(prioritizedResults, System.currentTimeMillis() + cacheTtlMs));
         saveToPersistentCache(key, prioritizedResults);
         return prioritizedResults;
+    }
+
+    public AddressSuggestionResponse reverseGeocode(double lat, double lon) {
+        RestTemplate restTemplate = new RestTemplate(createRequestFactory());
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("User-Agent", "SliorBackend/1.0 (student project)");
+        headers.set("Accept-Language", "es");
+
+        UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(nominatimUrl.replace("/search", "/reverse"))
+                .queryParam("format", "json")
+                .queryParam("lat", lat)
+                .queryParam("lon", lon)
+                .queryParam("addressdetails", 1)
+                .queryParam("email", "slior.student@example.com");
+
+        String url = builder.toUriString();
+
+        try {
+            applyThrottle();
+            ResponseEntity<String> response = restTemplate.exchange(
+                    url,
+                    HttpMethod.GET,
+                    new HttpEntity<>(headers),
+                    String.class
+            );
+
+            if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
+                JsonNode node = objectMapper.readTree(response.getBody());
+                String displayName = node.path("display_name").asText(null);
+                if (displayName != null) {
+                    return new AddressSuggestionResponse(displayName, lat, lon);
+                }
+            }
+        } catch (Exception e) {
+            log.warn("Reverse geocode error for lat={}, lon={}, errorType={}",
+                    lat, lon, e.getClass().getSimpleName());
+        }
+
+        return new AddressSuggestionResponse("Dirección desconocida", lat, lon);
     }
 
     private List<AddressSuggestionResponse> fetchWithRetries(String query) {
@@ -192,7 +235,8 @@ public class GeocodeService {
                 HttpStatusCode status = response.getStatusCode();
                 if (status.value() == 429 || status.is5xxServerError()) {
                     long waitMs = getRetryAfterMs(response.getHeaders().getFirst("Retry-After"), RETRY_BACKOFF_MS);
-                    log.warn("Nominatim structured {} for '{}', attempt {}/2. Waiting {}ms", status.value(), query, attempt, waitMs);
+                    log.warn("Nominatim structured {} for queryHash={}, attempt {}/2. Waiting {}ms",
+                            status.value(), hashForLog(query), attempt, waitMs);
                     if (attempt == 2) {
                         return Collections.emptyList();
                     }
@@ -206,7 +250,8 @@ public class GeocodeService {
 
                 return parseAddresses(response.getBody());
             } catch (Exception e) {
-                log.warn("Nominatim structured error for '{}': {}", query, e.getMessage());
+                log.warn("Nominatim structured error for queryHash={}, errorType={}",
+                        hashForLog(query), e.getClass().getSimpleName());
                 return Collections.emptyList();
             }
         }
@@ -252,7 +297,8 @@ public class GeocodeService {
                 HttpStatusCode status = response.getStatusCode();
                 if (status.value() == 429 || status.is5xxServerError()) {
                     long waitMs = getRetryAfterMs(response.getHeaders().getFirst("Retry-After"), RETRY_BACKOFF_MS);
-                    log.warn("Nominatim {} for '{}', attempt {}/2. Waiting {}ms", status.value(), query, attempt, waitMs);
+                    log.warn("Nominatim {} for queryHash={}, attempt {}/2. Waiting {}ms",
+                            status.value(), hashForLog(query), attempt, waitMs);
                     if (attempt == 2) {
                         return Collections.emptyList();
                     }
@@ -266,7 +312,8 @@ public class GeocodeService {
 
                 return parseAddresses(response.getBody());
             } catch (Exception e) {
-                log.warn("Nominatim error for '{}': {}", query, e.getMessage());
+                log.warn("Nominatim error for queryHash={}, errorType={}",
+                        hashForLog(query), e.getClass().getSimpleName());
                 return Collections.emptyList();
             }
         }
@@ -296,7 +343,8 @@ public class GeocodeService {
                 HttpStatusCode status = response.getStatusCode();
                 if (status.value() == 429 || status.is5xxServerError()) {
                     long waitMs = getRetryAfterMs(response.getHeaders().getFirst("Retry-After"), RETRY_BACKOFF_MS);
-                    log.warn("Photon {} for '{}', attempt {}/2. Waiting {}ms", status.value(), query, attempt, waitMs);
+                    log.warn("Photon {} for queryHash={}, attempt {}/2. Waiting {}ms",
+                            status.value(), hashForLog(query), attempt, waitMs);
                     if (attempt == 2) {
                         return Collections.emptyList();
                     }
@@ -310,7 +358,8 @@ public class GeocodeService {
 
                 return parsePhoton(response.getBody());
             } catch (Exception e) {
-                log.warn("Photon error for '{}': {}", query, e.getMessage());
+                log.warn("Photon error for queryHash={}, errorType={}",
+                        hashForLog(query), e.getClass().getSimpleName());
                 return Collections.emptyList();
             }
         }
@@ -419,18 +468,22 @@ public class GeocodeService {
 
     private List<AddressSuggestionResponse> loadFromPersistentCache(String key) {
         try {
-            return geocodeCacheRepository.findById(key)
-                    .filter(entry -> entry.getExpiresAtMs() > System.currentTimeMillis())
+            return geocodeCacheRepository.findByQueryNormalized(key)
                     .map(entry -> {
                         try {
-                            return objectMapper.readValue(entry.getPayload(), new TypeReference<List<AddressSuggestionResponse>>() {});
+                            // Actualizar último acceso para mantenimiento de caché
+                            entry.setLastAccessedAt(java.time.LocalDateTime.now());
+                            geocodeCacheRepository.save(entry);
+                            
+                            return objectMapper.readValue(entry.getResults(), new TypeReference<List<AddressSuggestionResponse>>() {});
                         } catch (Exception e) {
                             return Collections.<AddressSuggestionResponse>emptyList();
                         }
                     })
                     .orElse(Collections.emptyList());
         } catch (Exception e) {
-            log.warn("Persistent geocode cache unavailable. Using live query only: {}", e.getMessage());
+            log.warn("Persistent geocode cache unavailable. Using live query only. errorType={}",
+                    e.getClass().getSimpleName());
             return Collections.emptyList();
         }
     }
@@ -439,13 +492,29 @@ public class GeocodeService {
         try {
             String payload = objectMapper.writeValueAsString(results);
             GeocodeCacheEntry entry = GeocodeCacheEntry.builder()
-                    .query(key)
-                    .payload(payload)
-                    .expiresAtMs(System.currentTimeMillis() + cacheTtlMs)
+                    .queryNormalized(key)
+                    .results(payload)
+                    .source(geocoderProvider)
+                    .lastAccessedAt(java.time.LocalDateTime.now())
                     .build();
             geocodeCacheRepository.save(entry);
         } catch (Exception e) {
-            log.warn("Unable to persist geocode cache for '{}': {}", key, e.getMessage());
+            log.warn("Unable to persist geocode cache for queryHash={}, errorType={}",
+                    hashForLog(key), e.getClass().getSimpleName());
+        }
+    }
+
+    private String hashForLog(String value) {
+        try {
+            MessageDigest digest = MessageDigest.getInstance("SHA-256");
+            byte[] hash = digest.digest(value.getBytes(StandardCharsets.UTF_8));
+            StringBuilder hex = new StringBuilder(hash.length * 2);
+            for (byte b : hash) {
+                hex.append(String.format("%02x", b));
+            }
+            return hex.toString();
+        } catch (NoSuchAlgorithmException e) {
+            return "sha256-unavailable";
         }
     }
 
@@ -639,3 +708,4 @@ public class GeocodeService {
         }
     }
 }
+

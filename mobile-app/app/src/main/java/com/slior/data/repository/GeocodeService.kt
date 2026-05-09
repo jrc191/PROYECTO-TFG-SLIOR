@@ -51,6 +51,18 @@ class GeocodeService @Inject constructor(
         }
     }
 
+    suspend fun reverseGeocode(lat: Double, lon: Double): Result<AddressSuggestion> {
+        return withContext(Dispatchers.IO) {
+            try {
+                val result = apiService.reverseGeocode(lat, lon)
+                Result.Success(result)
+            } catch (e: Exception) {
+                // Fallback: Devolver una dirección genérica si falla el servidor
+                Result.Success(AddressSuggestion("Ubicación seleccionada ($lat, $lon)", lat, lon))
+            }
+        }
+    }
+
     fun clearCache() {
         cache.clear()
     }

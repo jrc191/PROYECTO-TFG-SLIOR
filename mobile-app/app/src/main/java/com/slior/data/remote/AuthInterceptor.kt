@@ -5,6 +5,7 @@ import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
+import com.slior.util.GlobalEventBus
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
@@ -19,7 +20,8 @@ val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "sl
 // Interceptor que añade el JWT en el header Authorization de cada petición
 @Singleton
 class AuthInterceptor @Inject constructor(
-    @ApplicationContext private val context: Context
+    @ApplicationContext private val context: Context,
+    private val globalEventBus: GlobalEventBus
 ) : Interceptor {
 
     companion object {
@@ -39,6 +41,14 @@ class AuthInterceptor @Inject constructor(
             chain.request()
         }
 
-        return chain.proceed(request)
+        val response = chain.proceed(request)
+
+        if (response.code == 401) {
+            runBlocking {
+                globalEventBus.emitUnauthorized()
+            }
+        }
+
+        return response
     }
 }

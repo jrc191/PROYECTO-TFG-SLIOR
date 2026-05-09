@@ -13,13 +13,17 @@ import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import javax.inject.Singleton
 
+import com.slior.util.ConnectivityMonitor
+import com.slior.util.ConnectivityMonitorImpl
+
 @Module
 @InstallIn(SingletonComponent::class)
 object NetworkModule {
 
-    // La URL se inyecta desde build.gradle.kts según el build type:
-    //   debug   → http://10.0.2.2:8080/   (emulador → localhost del PC)
-    //   release → URL pública
+    @Provides
+    @Singleton
+    fun provideConnectivityMonitor(impl: ConnectivityMonitorImpl): ConnectivityMonitor = impl
+
     private val BASE_URL = BuildConfig.BASE_URL
 
     @Provides

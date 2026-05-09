@@ -1,16 +1,14 @@
 package com.slior.exception;
 
+import com.slior.dto.ErrorResponse;
 import jakarta.servlet.http.HttpServletRequest;
+import org.slf4j.MDC;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-
-import java.time.LocalDateTime;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * Manejador global de excepciones.
@@ -19,20 +17,17 @@ import java.util.Map;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
+    private static final String MDC_KEY = "requestId";
+
     // --- Estructura de respuesta de error ---
-    private Map<String, Object> buildError(HttpStatus status, String message, String path) {
-        Map<String, Object> body = new HashMap<>();
-        body.put("timestamp", LocalDateTime.now().toString());
-        body.put("status", status.value());
-        body.put("error", status.getReasonPhrase());
-        body.put("message", message);
-        body.put("path", path);
-        return body;
+    private ErrorResponse buildError(HttpStatus status, String message, String path) {
+        String requestId = MDC.get(MDC_KEY);
+        return ErrorResponse.of(status.value(), status.getReasonPhrase(), message, path, requestId);
     }
 
     /** Email duplicado → 400 Bad Request */
     @ExceptionHandler(EmailAlreadyExistsException.class)
-    public ResponseEntity<Map<String, Object>> handleEmailExists(
+    public ResponseEntity<ErrorResponse> handleEmailExists(
             EmailAlreadyExistsException ex, HttpServletRequest request) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                 .body(buildError(HttpStatus.BAD_REQUEST, ex.getMessage(), request.getRequestURI()));
@@ -40,7 +35,7 @@ public class GlobalExceptionHandler {
 
     /** Credenciales incorrectas → 401 Unauthorized */
     @ExceptionHandler(InvalidCredentialsException.class)
-    public ResponseEntity<Map<String, Object>> handleInvalidCredentials(
+    public ResponseEntity<ErrorResponse> handleInvalidCredentials(
             InvalidCredentialsException ex, HttpServletRequest request) {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                 .body(buildError(HttpStatus.UNAUTHORIZED, ex.getMessage(), request.getRequestURI()));
@@ -48,7 +43,7 @@ public class GlobalExceptionHandler {
 
     /** Validaciones de DTOs fallidas (@NotBlank, @Email, etc.) → 400 */
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<Map<String, Object>> handleValidationErrors(
+    public ResponseEntity<ErrorResponse> handleValidationErrors(
             MethodArgumentNotValidException ex, HttpServletRequest request) {
         String firstError = ex.getBindingResult().getFieldErrors().stream()
                 .findFirst()
@@ -60,7 +55,7 @@ public class GlobalExceptionHandler {
 
     /** Ruta no encontrada → 404 */
     @ExceptionHandler(RouteNotFoundException.class)
-    public ResponseEntity<Map<String, Object>> handleRouteNotFound(
+    public ResponseEntity<ErrorResponse> handleRouteNotFound(
             RouteNotFoundException ex, HttpServletRequest request) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND)
                 .body(buildError(HttpStatus.NOT_FOUND, ex.getMessage(), request.getRequestURI()));
@@ -68,7 +63,7 @@ public class GlobalExceptionHandler {
 
     /** Usuario no encontrado → 404 */
     @ExceptionHandler(UserNotFoundException.class)
-    public ResponseEntity<Map<String, Object>> handleUserNotFound(
+    public ResponseEntity<ErrorResponse> handleUserNotFound(
             UserNotFoundException ex, HttpServletRequest request) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND)
                 .body(buildError(HttpStatus.NOT_FOUND, ex.getMessage(), request.getRequestURI()));
@@ -76,7 +71,7 @@ public class GlobalExceptionHandler {
 
     /** Acceso no autorizado a un recurso → 403 */
     @ExceptionHandler(UnauthorizedAccessException.class)
-    public ResponseEntity<Map<String, Object>> handleUnauthorizedAccess(
+    public ResponseEntity<ErrorResponse> handleUnauthorizedAccess(
             UnauthorizedAccessException ex, HttpServletRequest request) {
         return ResponseEntity.status(HttpStatus.FORBIDDEN)
                 .body(buildError(HttpStatus.FORBIDDEN, ex.getMessage(), request.getRequestURI()));
@@ -84,10 +79,11 @@ public class GlobalExceptionHandler {
 
     /** Cualquier otro error no controlado → 500 */
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<Map<String, Object>> handleGeneral(
+    public ResponseEntity<ErrorResponse> handleGeneral(
             Exception ex, HttpServletRequest request) {
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body(buildError(HttpStatus.INTERNAL_SERVER_ERROR,
                         "Error interno del servidor", request.getRequestURI()));
     }
 }
+

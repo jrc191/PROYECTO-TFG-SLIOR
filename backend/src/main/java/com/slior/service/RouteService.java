@@ -1,5 +1,6 @@
 package com.slior.service;
 
+import com.slior.dto.route.RouteResponse;
 import com.slior.dto.route.*;
 import com.slior.model.Route;
 import com.slior.model.Stop;
@@ -12,7 +13,9 @@ import com.slior.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import com.slior.exception.RouteNotFoundException;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -75,4 +78,39 @@ public class RouteService {
         route.setDeleted(true);
         routeRepository.save(route);
     }
+
+    @Transactional
+    public RouteResponse updateRoute(UUID id, UpdateRouteRequest request) {
+        Route route = routeRepository.findByIdAndIsDeletedFalse(id)
+                .orElseThrow(() -> new RouteNotFoundException(id.toString()));
+
+        route.setNombre(request.nombre());
+        route.setFechaPlanificada(request.fechaPlanificada());
+        route.setNotas(request.notas());
+
+        // Para simplificar la actualización, eliminamos las paradas actuales y creamos las nuevas
+        // En una app real se podría hacer un "diff", pero para un TFG recrearlas es más limpio y evita bugs de estado.
+        route.getStops().clear();
+        
+        List<Stop> nuevasParadas = new ArrayList<>();
+        for (int i = 0; i < request.paradas().size(); i++) {
+            StopRequest sr = request.paradas().get(i);
+            Stop stop = new Stop();
+            stop.setDireccion(sr.direccion());
+            stop.setLatitud(sr.latitud());
+            stop.setLongitud(sr.longitud());
+            stop.setDestinatario(sr.destinatario());
+            stop.setTelefonoDestinatario(sr.telefonoDestinatario());
+            stop.setNotas(sr.notas());
+            stop.setOrdenVisita(i + 1);
+            stop.setStatus(StopStatus.PENDIENTE);
+            stop.setRoute(route);
+            nuevasParadas.add(stop);
+        }
+        route.getStops().addAll(nuevasParadas);
+
+        Route updated = routeRepository.save(route);
+        return RouteResponse.from(updated);
+    }
 }
+

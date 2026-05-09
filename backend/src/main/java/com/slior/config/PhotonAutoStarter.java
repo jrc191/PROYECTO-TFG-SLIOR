@@ -119,3 +119,4 @@ public class PhotonAutoStarter implements CommandLineRunner {
         }
     }
 }
+

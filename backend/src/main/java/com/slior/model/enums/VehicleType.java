@@ -5,13 +5,13 @@ package com.slior.model.enums;
  * Afecta la velocidad promedio y capacidad de carga.
  */
 public enum VehicleType {
-    CAR("Automóvil", 80, 0.5),           // 80 km/h, factor multiplicador 0.5 (rápido)
-    VAN("Furgoneta", 70, 0.75),          // 70 km/h, factor 0.75 (medio)
-    TRUCK("Camión", 60, 1.0);            // 60 km/h, factor 1.0 (lento)
+    CAR("Automóvil", 50, 1.2),           // 50 km/h prom., +20% por semáforos/giros
+    VAN("Furgoneta", 40, 1.4),          // 40 km/h prom., +40% por paradas/carga
+    TRUCK("Camión", 30, 1.6);            // 30 km/h prom., +60% por maniobras/lento
 
     private final String displayName;
     private final int averageSpeed;      // km/h
-    private final double timeMultiplier;  // Factor multiplicador para el tiempo
+    private final double timeMultiplier;  // Factor multiplicador para el tiempo (realismo)
 
     VehicleType(String displayName, int averageSpeed, double timeMultiplier) {
         this.displayName = displayName;
@@ -31,3 +31,4 @@ public enum VehicleType {
         return timeMultiplier;
     }
 }
+

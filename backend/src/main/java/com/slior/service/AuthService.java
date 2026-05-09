@@ -28,6 +28,7 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final JwtUtil jwtUtil;
     private final UserDetailsService userDetailsService;
+    private final AuditService auditService;
 
     /**
      * Registra un nuevo usuario en el sistema.
@@ -49,6 +50,10 @@ public class AuthService {
                 .build();
 
         User saved = userRepository.save(user);
+        
+        // Registrar en auditoría
+        auditService.log(saved.getId(), "REGISTER", "User");
+        
         String token = generateTokenForEmail(saved.getEmail());
 
         return new AuthResponse(token, "Bearer", saved.getId(),
@@ -58,6 +63,7 @@ public class AuthService {
     /**
      * Autentica un usuario existente y retorna un JWT.
      */
+    @Transactional
     public AuthResponse login(LoginRequest request) {
         User user = userRepository.findByEmail(request.email())
                 .orElseThrow(InvalidCredentialsException::new);
@@ -65,6 +71,9 @@ public class AuthService {
         if (!passwordEncoder.matches(request.password(), user.getPassword())) {
             throw new InvalidCredentialsException();
         }
+
+        // Registrar en auditoría
+        auditService.log(user.getId(), "LOGIN", "User");
 
         String token = generateTokenForEmail(user.getEmail());
 

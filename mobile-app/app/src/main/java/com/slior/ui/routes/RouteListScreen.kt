@@ -33,6 +33,12 @@ import com.slior.viewmodel.AuthViewModel
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.compose.animation.core.tween
 
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
+import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
+
+import androidx.compose.material3.ExperimentalMaterial3Api
+
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RouteListScreen(
     repartidorId: String,
@@ -40,10 +46,14 @@ fun RouteListScreen(
     onCreateRoute: () -> Unit,
     onLogout: () -> Unit,
     viewModel: RouteViewModel = hiltViewModel(),
-    authViewModel: AuthViewModel = hiltViewModel()
+    authViewModel: AuthViewModel = hiltViewModel(),
+    connViewModel: com.slior.viewmodel.ConnectivityViewModel = hiltViewModel()
 ) {
     val state      by viewModel.listState.collectAsStateWithLifecycle()
     val drawerOpen by viewModel.drawerOpen.collectAsStateWithLifecycle()
+    val isConnected by connViewModel.isConnected.collectAsStateWithLifecycle()
+    
+    val isRefreshing = state is RouteListState.Loading
 
     LaunchedEffect(repartidorId) {
         viewModel.loadRoutes(repartidorId)
@@ -63,12 +73,32 @@ fun RouteListScreen(
                 onProfileClick = { viewModel.openDrawer(RouteViewModel.DrawerType.PROFILE) }
             )
 
-            Box(modifier = Modifier.weight(1f)) {
+            PullToRefreshBox(
+                isRefreshing = isRefreshing,
+                onRefresh = { 
+                    viewModel.loadRoutes(repartidorId)
+                    authViewModel.checkServerConnectivity()
+                },
+                modifier = Modifier.weight(1f)
+            ) {
                 when (state) {
-                    is RouteListState.Loading -> RouteListLoading()
-                    is RouteListState.Error   -> RouteListOffline(
-                        message = (state as RouteListState.Error).message
-                    )
+                    is RouteListState.Loading -> if (isRefreshing && (state as? RouteListState.Success)?.routes?.isNotEmpty() == true) {
+                        // Si ya hay rutas, PullToRefreshBox ya muestra el indicador, no mostramos el Skeleton
+                        RouteListSuccess(routes = (state as RouteListState.Success).routes, onRouteClick = onRouteClick)
+                    } else {
+                        RouteListLoading()
+                    }
+                    is RouteListState.Error   -> {
+                        // Solo mostramos la pantalla de error "offline" (naranja) si no hay rutas cargadas y estamos desconectados
+                        // Si ya hay rutas (cache), PullToRefresh se encarga de mostrar que falló la actualización si fuera necesario
+                        val currentRoutes = (state as? RouteListState.Success)?.routes ?: emptyList()
+                        
+                        if (currentRoutes.isEmpty() && !isConnected) {
+                            RouteListOffline(message = (state as RouteListState.Error).message)
+                        } else {
+                            RouteListError(message = (state as RouteListState.Error).message)
+                        }
+                    }
                     is RouteListState.Success -> {
                         val routes = (state as RouteListState.Success).routes
                         if (routes.isEmpty()) RouteListEmpty()
@@ -644,6 +674,19 @@ private fun RouteCard(route: RouteEntity, onClick: () -> Unit) {
                     Text("${"%.1f".format(it)} KM", fontFamily = SpaceGroteskFamily, fontWeight = FontWeight.Bold, fontSize = 13.sp, color = BrutalistBlack)
                 }
             }
+        }
+    }
+}
+
+@Composable
+private fun RouteListError(message: String) {
+    Box(modifier = Modifier.fillMaxSize().padding(32.dp), contentAlignment = Alignment.Center) {
+        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            Text("ERROR DE CARGA", fontFamily = SpaceGroteskFamily, fontWeight = FontWeight.Black, fontSize = 18.sp, color = SafetyOrange)
+            Spacer(Modifier.height(8.dp))
+            Text(message, fontFamily = SpaceGroteskFamily, fontSize = 13.sp, color = Color(0xFF757575))
+            Spacer(Modifier.height(16.dp))
+            Text("Desliza hacia abajo para reintentar", fontFamily = SpaceGroteskFamily, fontSize = 12.sp, color = BrutalistBlack)
         }
     }
 }

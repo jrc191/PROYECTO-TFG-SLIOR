@@ -22,5 +22,13 @@ public class GeocodeController {
     public ResponseEntity<List<AddressSuggestionResponse>> search(@RequestParam("q") String query) {
         return ResponseEntity.ok(geocodeService.searchAddresses(query));
     }
+
+    @GetMapping("/reverse")
+    public ResponseEntity<AddressSuggestionResponse> reverse(
+            @RequestParam("lat") Double lat,
+            @RequestParam("lon") Double lon) {
+        return ResponseEntity.ok(geocodeService.reverseGeocode(lat, lon));
+    }
 }
+
 

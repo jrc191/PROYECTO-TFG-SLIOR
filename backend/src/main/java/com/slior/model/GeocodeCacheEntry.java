@@ -1,13 +1,14 @@
 package com.slior.model;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
+
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "geocode_cache")
@@ -18,12 +19,20 @@ import lombok.NoArgsConstructor;
 public class GeocodeCacheEntry {
 
     @Id
-    @Column(nullable = false, unique = true)
-    private String query;
+    @Column(name = "query_normalized", nullable = false)
+    private String queryNormalized;
 
-    @Column(nullable = false, columnDefinition = "TEXT")
-    private String payload;
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(name = "results", columnDefinition = "jsonb")
+    private String results;
 
-    @Column(nullable = false)
-    private long expiresAtMs;
+    @Column(length = 20)
+    private String source; // 'local' | 'nominatim'
+
+    @Column(name = "created_at", insertable = false, updatable = false)
+    private LocalDateTime createdAt;
+
+    @Column(name = "last_accessed_at")
+    private LocalDateTime lastAccessedAt;
 }
+

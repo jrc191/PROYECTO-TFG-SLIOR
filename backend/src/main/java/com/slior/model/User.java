@@ -58,6 +58,24 @@ public class User {
     @Builder.Default
     private Boolean isDeleted = false;
 
+    @Column(name = "deletion_requested_at")
+    private LocalDateTime deletionRequestedAt;
+
+    @Column(name = "tratamiento_limitado", nullable = false)
+    @Builder.Default
+    private Boolean tratamientoLimitado = false;
+
+    @Column(name = "consentimiento_notificaciones", nullable = false)
+    @Builder.Default
+    private Boolean consentimientoNotificaciones = false;
+
+    @Column(name = "consentimiento_geolocalizacion", nullable = false)
+    @Builder.Default
+    private Boolean consentimientoGeolocalizacion = false;
+
+    @Column(name = "anonymized_at")
+    private LocalDateTime anonymizedAt;
+
     @CreatedDate
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;

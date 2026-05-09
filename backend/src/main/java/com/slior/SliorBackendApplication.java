@@ -25,3 +25,4 @@ public class SliorBackendApplication {
         SpringApplication.run(SliorBackendApplication.class, args);
     }
 }
+
