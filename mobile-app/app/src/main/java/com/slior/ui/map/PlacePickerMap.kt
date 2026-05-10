@@ -47,7 +47,7 @@ fun PlacePickerMap(
 ) {
     val youLabel = stringResource(R.string.map_label_you)
     val selectedLabel = stringResource(R.string.map_label_selected)
-    val stopLabel = stringResource(R.string.map_label_stop)
+    val stopLabelTemplate = stringResource(R.string.map_label_stop)
     val nameLabel = stringResource(R.string.map_info_name)
     val addressLabel = stringResource(R.string.map_info_address)
     val phoneLabel = stringResource(R.string.map_info_phone)
@@ -112,7 +112,7 @@ fun PlacePickerMap(
             existingStops.forEachIndexed { index, stop ->
                 val marker = Marker(mapView).apply {
                     position = GeoPoint(stop.latitud, stop.longitud)
-                    title = stopLabel.replace("%1$d", (index + 1).toString())
+                    title = String.format(stopLabelTemplate, index + 1)
                     infoWindow = customInfoWindow
                     snippet = "<b>${nameLabel.split(":")[0]}:</b> ${stop.destinatario}<br><b>${addressLabel.split(":")[0]}:</b> ${stop.direccion}"
                     setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)

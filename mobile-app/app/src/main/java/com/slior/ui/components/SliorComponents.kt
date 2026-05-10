@@ -4,20 +4,33 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
-import androidx.compose.material3.*
+import androidx.compose.material.icons.filled.Warning
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Icon
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.res.stringResource
@@ -30,82 +43,109 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.slior.R
-import com.slior.ui.theme.*
+import com.slior.ui.theme.BrutalistBlack
+import com.slior.ui.theme.BrutalistLightGray
+import com.slior.ui.theme.BrutalistWhite
+import com.slior.ui.theme.NeonGreen
+import com.slior.ui.theme.SafetyOrange
+import com.slior.ui.theme.SpaceGroteskFamily
 
-@Composable
-fun SliorAccentBar(modifier: Modifier = Modifier) {
-    Row(modifier = modifier.height(12.dp).fillMaxWidth()) {
-        Box(modifier = Modifier.weight(0.7f).fillMaxHeight().background(BrutalistBlack))
-        Box(modifier = Modifier.weight(0.3f).fillMaxHeight().background(NeonGreen))
-    }
+//
+// Design tokens
+//
+object SliorDesignTokens {
+    val BorderWidth      = 2.dp
+    val BorderWidthHeavy = 3.dp
+    val ShadowOffset     = 4.dp
+    val ShadowOffsetLg   = 6.dp
+    val FieldHeight      = 64.dp
+    val ButtonHeight     = 72.dp
 }
 
-@Composable
+//
+// Sombras offset (estilo brutalist)
+//
 fun Modifier.hardShadow(
-    offsetX: Dp = 4.dp,
-    offsetY: Dp = 4.dp,
+    offsetX: Dp  = SliorDesignTokens.ShadowOffset,
+    offsetY: Dp  = SliorDesignTokens.ShadowOffset,
     color: Color = BrutalistBlack
-) = this.drawBehind {
-    drawRect(
-        color = color,
-        topLeft = Offset(offsetX.toPx(), offsetY.toPx()),
-        size = size
-    )
-}
+): Modifier = this
+    .padding(end = offsetX, bottom = offsetY)
+    .drawBehind {
+        drawRect(
+            color   = color,
+            topLeft = Offset(offsetX.toPx(), offsetY.toPx()),
+            size    = Size(size.width, size.height)
+        )
+    }
 
+//
+// SliorFieldLabel – etiqueta de campo
+//
 @Composable
-fun SliorFieldLabel(text: String) {
+fun SliorFieldLabel(
+    text: String,
+    modifier: Modifier = Modifier
+) {
     Text(
-        text = text,
-        fontFamily = SpaceGroteskFamily,
-        fontWeight = FontWeight.Black,
-        fontSize = 12.sp,
-        letterSpacing = 2.sp,
-        color = BrutalistBlack,
-        modifier = Modifier.padding(bottom = 8.dp)
+        text          = text,
+        fontFamily    = SpaceGroteskFamily,
+        fontWeight    = FontWeight.Black,
+        fontSize      = 13.sp,
+        letterSpacing = 1.5.sp,
+        color         = BrutalistBlack,
+        modifier      = modifier.padding(bottom = 6.dp)
     )
 }
 
+//
+// SliorTextField – campo de texto
+//
 @Composable
 fun SliorTextField(
     value: String,
     onValueChange: (String) -> Unit,
     placeholder: String,
+    modifier: Modifier = Modifier,
     keyboardType: KeyboardType = KeyboardType.Text,
     withShadow: Boolean = false
 ) {
-    val baseModifier = Modifier
-        .fillMaxWidth()
-        .height(56.dp)
-        .border(2.dp, BrutalistBlack)
-        .background(BrutalistWhite)
-    
-    val modifier = if (withShadow) baseModifier.hardShadow() else baseModifier
+    val fieldModifier = if (withShadow)
+        modifier
+            .hardShadow()
+            .border(SliorDesignTokens.BorderWidth, BrutalistBlack)
+    else
+        modifier.border(SliorDesignTokens.BorderWidth, BrutalistBlack)
 
     BasicTextField(
-        value = value,
-        onValueChange = onValueChange,
-        modifier = modifier,
-        textStyle = TextStyle(
-            fontFamily = SpaceGroteskFamily,
-            fontWeight = FontWeight.Bold,
-            fontSize = 16.sp,
-            color = BrutalistBlack
+        value           = value,
+        onValueChange   = onValueChange,
+        singleLine      = true,
+        textStyle       = TextStyle(
+            fontFamily  = SpaceGroteskFamily,
+            fontWeight  = FontWeight.Bold,
+            fontSize    = 18.sp,
+            color       = BrutalistBlack
         ),
-        cursorBrush = SolidColor(NeonGreen),
+        cursorBrush     = SolidColor(NeonGreen),
         keyboardOptions = KeyboardOptions(keyboardType = keyboardType),
-        singleLine = true,
-        decorationBox = { innerTextField ->
+        modifier        = fieldModifier
+            .background(BrutalistWhite)
+            .height(SliorDesignTokens.FieldHeight),
+        decorationBox   = { innerTextField ->
             Box(
-                modifier = Modifier.fillMaxSize().padding(horizontal = 16.dp),
+                modifier         = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp),
                 contentAlignment = Alignment.CenterStart
             ) {
                 if (value.isEmpty()) {
                     Text(
-                        text = placeholder,
+                        text       = placeholder,
                         fontFamily = SpaceGroteskFamily,
-                        fontSize = 16.sp,
-                        color = Color(0xFFB0B0B0)
+                        fontWeight = FontWeight.Bold,
+                        fontSize   = 18.sp,
+                        color      = Color(0xFF9E9E9E)
                     )
                 }
                 innerTextField()
@@ -114,6 +154,9 @@ fun SliorTextField(
     )
 }
 
+//
+// SliorPasswordField – campo contraseña con ojo de visibilidad
+//
 @Composable
 fun SliorPasswordField(
     value: String,
@@ -121,124 +164,253 @@ fun SliorPasswordField(
     placeholder: String,
     visible: Boolean,
     onToggleVisibility: () -> Unit,
+    modifier: Modifier = Modifier,
     loginStyle: Boolean = true,
     withShadow: Boolean = false
 ) {
-    val baseModifier = Modifier
-        .fillMaxWidth()
-        .height(56.dp)
-        .border(2.dp, BrutalistBlack)
-        .background(if (loginStyle) BrutalistWhite else Color.White)
-    
-    val modifier = if (withShadow) baseModifier.hardShadow() else baseModifier
+    val visual = if (visible) VisualTransformation.None else PasswordVisualTransformation()
 
-    BasicTextField(
-        value = value,
-        onValueChange = onValueChange,
-        modifier = modifier,
-        textStyle = TextStyle(
-            fontFamily = SpaceGroteskFamily,
-            fontWeight = FontWeight.Bold,
-            fontSize = 16.sp,
-            color = BrutalistBlack
-        ),
-        visualTransformation = if (visible) VisualTransformation.None else PasswordVisualTransformation(),
-        cursorBrush = SolidColor(NeonGreen),
-        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
-        singleLine = true,
-        decorationBox = { innerTextField ->
-            Row(
-                modifier = Modifier.fillMaxSize().padding(horizontal = 16.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.CenterStart) {
-                    if (value.isEmpty()) {
-                        Text(
-                            text = placeholder,
-                            fontFamily = SpaceGroteskFamily,
-                            fontSize = 16.sp,
-                            color = Color(0xFFB0B0B0)
-                        )
+    if (loginStyle) {
+        val rowModifier = if (withShadow)
+            modifier
+                .hardShadow()
+                .border(SliorDesignTokens.BorderWidth, BrutalistBlack)
+        else
+            modifier.border(SliorDesignTokens.BorderWidth, BrutalistBlack)
+
+        Row(
+            modifier          = rowModifier
+                .background(BrutalistWhite)
+                .height(SliorDesignTokens.FieldHeight),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            BasicTextField(
+                value                = value,
+                onValueChange        = onValueChange,
+                singleLine           = true,
+                visualTransformation = visual,
+                textStyle            = TextStyle(
+                    fontFamily  = SpaceGroteskFamily,
+                    fontWeight  = FontWeight.Bold,
+                    fontSize    = 18.sp,
+                    color       = BrutalistBlack
+                ),
+                cursorBrush          = SolidColor(NeonGreen),
+                keyboardOptions      = KeyboardOptions(keyboardType = KeyboardType.Password),
+                modifier             = Modifier
+                    .weight(1f)
+                    .fillMaxHeight()
+                    .padding(horizontal = 16.dp),
+                decorationBox        = { innerTextField ->
+                    Box(contentAlignment = Alignment.CenterStart) {
+                        if (value.isEmpty()) {
+                            Text(
+                                text       = placeholder,
+                                fontFamily = SpaceGroteskFamily,
+                                fontWeight = FontWeight.Bold,
+                                fontSize   = 18.sp,
+                                color      = Color(0xFF9E9E9E)
+                            )
+                        }
+                        innerTextField()
                     }
-                    innerTextField()
                 }
-                IconButton(onClick = onToggleVisibility) {
-                    Icon(
-                        imageVector = if (visible) Icons.Default.VisibilityOff else Icons.Default.Visibility,
-                        contentDescription = null,
-                        tint = BrutalistBlack
-                    )
-                }
+            )
+            Box(
+                modifier = Modifier
+                    .width(SliorDesignTokens.BorderWidth)
+                    .fillMaxHeight()
+                    .background(BrutalistBlack)
+            )
+            Box(
+                modifier         = Modifier
+                    .size(SliorDesignTokens.FieldHeight)
+                    .clickable(
+                        interactionSource = remember { MutableInteractionSource() },
+                        indication        = null,
+                        onClick           = onToggleVisibility
+                    ),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector        = if (visible) Icons.Default.VisibilityOff else Icons.Default.Visibility,
+                    contentDescription = null,
+                    tint               = BrutalistBlack
+                )
             }
         }
-    )
+    } else {
+        val boxModifier = if (withShadow)
+            modifier
+                .hardShadow()
+                .border(SliorDesignTokens.BorderWidth, BrutalistBlack)
+        else
+            modifier.border(SliorDesignTokens.BorderWidth, BrutalistBlack)
+
+        Box(
+            modifier = boxModifier
+                .background(BrutalistWhite)
+                .height(SliorDesignTokens.FieldHeight)
+        ) {
+            BasicTextField(
+                value                = value,
+                onValueChange        = onValueChange,
+                singleLine           = true,
+                visualTransformation = visual,
+                textStyle            = TextStyle(
+                    fontFamily  = SpaceGroteskFamily,
+                    fontWeight  = FontWeight.Bold,
+                    fontSize    = 18.sp,
+                    color       = BrutalistBlack
+                ),
+                cursorBrush          = SolidColor(NeonGreen),
+                keyboardOptions      = KeyboardOptions(keyboardType = KeyboardType.Password),
+                modifier             = Modifier
+                    .fillMaxWidth()
+                    .fillMaxHeight()
+                    .padding(start = 16.dp, end = 56.dp),
+                decorationBox        = { innerTextField ->
+                    Box(contentAlignment = Alignment.CenterStart) {
+                        if (value.isEmpty()) {
+                            Text(
+                                text       = placeholder,
+                                fontFamily = SpaceGroteskFamily,
+                                fontWeight = FontWeight.Bold,
+                                fontSize   = 18.sp,
+                                color      = Color(0xFF9E9E9E)
+                            )
+                        }
+                        innerTextField()
+                    }
+                }
+            )
+            Box(
+                modifier         = Modifier
+                    .align(Alignment.CenterEnd)
+                    .padding(end = 12.dp)
+                    .size(36.dp)
+                    .clickable(
+                        interactionSource = remember { MutableInteractionSource() },
+                        indication        = null,
+                        onClick           = onToggleVisibility
+                    ),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector        = if (visible) Icons.Default.VisibilityOff else Icons.Default.Visibility,
+                    contentDescription = null,
+                    tint               = BrutalistBlack
+                )
+            }
+        }
+    }
 }
 
+//
+// SliorPrimaryButton – botón de acción
+//
 @Composable
 fun SliorPrimaryButton(
     text: String,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
-    enabled: Boolean = true
+    enabled: Boolean = true,
+    trailingIcon: @Composable (() -> Unit)? = null
 ) {
     Box(
-        modifier = modifier
-            .then(if (enabled) Modifier.hardShadow(6.dp, 6.dp, NeonGreen) else Modifier)
-            .height(64.dp)
-            .border(2.dp, BrutalistBlack)
-            .background(if (enabled) BrutalistBlack else Color(0xFFD4D4D8))
+        modifier         = modifier
+            .hardShadow(
+                offsetX = SliorDesignTokens.ShadowOffsetLg,
+                offsetY = SliorDesignTokens.ShadowOffsetLg
+            )
+            .border(SliorDesignTokens.BorderWidthHeavy, BrutalistBlack)
+            .background(if (enabled) NeonGreen else Color(0xFFB0B0B0))
+            .height(SliorDesignTokens.ButtonHeight)
             .clickable(enabled = enabled, onClick = onClick),
         contentAlignment = Alignment.Center
     ) {
-        Text(
-            text = text,
-            fontFamily = SpaceGroteskFamily,
-            fontWeight = FontWeight.Black,
-            fontSize = 18.sp,
-            letterSpacing = 2.sp,
-            color = if (enabled) BrutalistWhite else Color(0xFF71717A)
-        )
+        Row(
+            verticalAlignment     = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Center
+        ) {
+            Text(
+                text          = text,
+                fontFamily    = SpaceGroteskFamily,
+                fontWeight    = FontWeight.Black,
+                fontSize      = 20.sp,
+                letterSpacing = 2.sp,
+                color         = BrutalistBlack
+            )
+            if (trailingIcon != null) {
+                Spacer(Modifier.width(8.dp))
+                trailingIcon()
+            }
+        }
     }
 }
 
+//
+// SliorLoadingButton – estado de carga del botón
+//
 @Composable
 fun SliorLoadingButton(modifier: Modifier = Modifier) {
     Box(
-        modifier = modifier
-            .height(64.dp)
-            .border(2.dp, BrutalistBlack)
-            .background(BrutalistBlack),
+        modifier         = modifier
+            .border(SliorDesignTokens.BorderWidthHeavy, BrutalistBlack)
+            .background(Color(0xFFB0B0B0))
+            .height(SliorDesignTokens.ButtonHeight),
         contentAlignment = Alignment.Center
     ) {
         CircularProgressIndicator(
-            color = NeonGreen,
-            modifier = Modifier.size(28.dp),
+            color       = BrutalistBlack,
+            modifier    = Modifier.size(28.dp),
             strokeWidth = 3.dp
         )
     }
 }
 
+//
+// SliorErrorBanner – banner de alerta
+//
 @Composable
-fun SliorErrorBanner(message: String) {
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .border(2.dp, BrutalistBlack)
-            .background(OfflineRed)
-            .padding(16.dp)
+fun SliorErrorBanner(
+    message: String,
+    modifier: Modifier = Modifier
+) {
+    Row(
+        modifier              = modifier
+            .hardShadow()
+            .border(SliorDesignTokens.BorderWidth, BrutalistBlack)
+            .background(SafetyOrange)
+            .padding(horizontal = 16.dp, vertical = 14.dp),
+        verticalAlignment     = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(10.dp)
     ) {
+        Icon(
+            imageVector        = Icons.Default.Warning,
+            contentDescription = null,
+            tint               = BrutalistWhite,
+            modifier           = Modifier.size(22.dp)
+        )
         Text(
-            text = message,
-            fontFamily = SpaceGroteskFamily,
-            fontWeight = FontWeight.Bold,
-            fontSize = 14.sp,
-            color = BrutalistWhite
+            text          = message,
+            fontFamily    = SpaceGroteskFamily,
+            fontWeight    = FontWeight.Black,
+            fontSize      = 12.sp,
+            letterSpacing = 1.5.sp,
+            color         = BrutalistWhite
         )
     }
 }
 
+//
+// ConnectivityBanner – banner de estado de conexión
+//
 @Composable
-fun ConnectivityBanner(isConnected: Boolean, modifier: Modifier = Modifier) {
+fun ConnectivityBanner(
+    isConnected: Boolean,
+    modifier: Modifier = Modifier
+) {
     if (!isConnected) {
         Box(
             modifier = modifier
@@ -256,6 +428,49 @@ fun ConnectivityBanner(isConnected: Boolean, modifier: Modifier = Modifier) {
                 letterSpacing = 2.sp
             )
         }
+    }
+}
+
+//
+// SliorAccentBar – barra decorativa
+//
+@Composable
+fun SliorAccentBar(modifier: Modifier = Modifier) {
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .height(8.dp)
+    ) {
+        Box(
+            modifier = Modifier
+                .weight(1f)
+                .fillMaxHeight()
+                .background(SafetyOrange)
+        )
+        Box(
+            modifier = Modifier
+                .width(2.dp)
+                .fillMaxHeight()
+                .background(BrutalistBlack)
+        )
+        Box(
+            modifier = Modifier
+                .weight(1f)
+                .fillMaxHeight()
+                .background(NeonGreen)
+        )
+        Box(
+            modifier = Modifier
+                .width(2.dp)
+                .fillMaxHeight()
+                .background(BrutalistBlack)
+        )
+        Box(
+            modifier = Modifier
+                .weight(1f)
+                .fillMaxHeight()
+                .background(BrutalistLightGray)
+        )
     }
 }
 

@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Logout
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
@@ -223,7 +224,7 @@ private fun ProfileDrawer(onClose: () -> Unit, onLogout: () -> Unit) {
         ProfileDrawerItem(Icons.Default.Notifications, stringResource(R.string.menu_notifications), stringResource(R.string.menu_notifications_desc), stringResource(R.string.menu_badge_soon), BrutalistBlack, { })
         Spacer(Modifier.weight(1f))
         Row(Modifier.fillMaxWidth().drawBehind { drawLine(BrutalistBlack, Offset(0f, 0f), Offset(size.width, 0f), 2.dp.toPx()) }.clickable { onLogout() }.padding(20.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-            Icon(Icons.Default.Logout, null, tint = SafetyOrange, modifier = Modifier.size(22.dp))
+            Icon(Icons.AutoMirrored.Filled.Logout, null, tint = SafetyOrange, modifier = Modifier.size(22.dp))
             Column {
                 Text(text = stringResource(R.string.menu_logout), fontFamily = SpaceGroteskFamily, fontWeight = FontWeight.Black, fontSize = 15.sp, color = SafetyOrange)
                 Text(text = stringResource(R.string.menu_logout_desc), fontFamily = SpaceGroteskFamily, fontSize = 11.sp, color = Color(0xFF9E9E9E))

@@ -42,7 +42,7 @@ fun RouteMapView(
 
     // Obtenemos los strings localizados fuera del update del AndroidView
     val youLabel = stringResource(R.string.map_label_you)
-    val stopLabel = stringResource(R.string.map_label_stop)
+    val stopLabelTemplate = stringResource(R.string.map_label_stop)
     val nameLabel = stringResource(R.string.map_info_name)
     val addressLabel = stringResource(R.string.map_info_address)
     val phoneLabel = stringResource(R.string.map_info_phone)
@@ -124,7 +124,8 @@ fun RouteMapView(
             stops.forEachIndexed { index, stop ->
                 val marker = Marker(mapView).apply {
                     position = GeoPoint(stop.latitud, stop.longitud)
-                    title = stopLabel.replace("%1$d", (index + 1).toString())
+                    // Usamos String.format para evitar problemas con plantillas de Kotlin
+                    title = String.format(stopLabelTemplate, index + 1)
                     infoWindow = customInfoWindow
                     
                     val sb = StringBuilder()

@@ -17,13 +17,12 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.slior.data.local.entity.StopEntity
-import com.slior.ui.components.SliorDesignTokens
+import com.slior.ui.theme.SpaceGroteskFamily
 import com.slior.ui.components.hardShadow
 import com.slior.ui.theme.BrutalistBlack
 import com.slior.ui.theme.BrutalistWhite
 import com.slior.ui.theme.NeonGreen
 import com.slior.ui.theme.SafetyOrange
-import com.slior.ui.theme.SpaceGroteskFamily
 
 @Composable
 fun StopCard(
@@ -40,12 +39,12 @@ fun StopCard(
             .heightIn(min = 80.dp)
             // MODIFICADOR CORREGIDO: sombra -> fondo -> borde
             .hardShadow(
-                offsetX = SliorDesignTokens.ShadowOffset,
-                offsetY = SliorDesignTokens.ShadowOffset
+                offsetX = 4.dp,
+                offsetY = 4.dp
             )
             .background(BrutalistWhite)
             .border(
-                width = SliorDesignTokens.BorderWidthHeavy, 
+                width = 2.dp, 
                 color = BrutalistBlack
             )
             .clickable {
@@ -69,7 +68,7 @@ fun StopCard(
                     .size(32.dp)
                     .background(statusColor)
                     .border(
-                        width = SliorDesignTokens.BorderWidthHeavy, 
+                        width = 2.dp, 
                         color = BrutalistBlack
                     ),
                 contentAlignment = Alignment.Center
@@ -117,7 +116,7 @@ fun StopCard(
                     modifier = Modifier
                         .background(SafetyOrange)
                         .border(
-                            width = SliorDesignTokens.BorderWidthHeavy, 
+                            width = 2.dp, 
                             color = BrutalistBlack
                         )
                         .padding(horizontal = 8.dp, vertical = 4.dp)
