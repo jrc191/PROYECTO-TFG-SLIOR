@@ -44,6 +44,10 @@
     <string name="title_new_route">NEUE ROUTE</string>
     <string name="title_edit_route">ROUTE BEARBEITEN</string>
     <string name="title_route_detail">ROUTENDETAILS</string>
+    <string name="status_in_progress">IN BEARBEITUNG</string>
+    <string name="status_planned">GEPLANT</string>
+    <string name="status_completed">ABGESCHLOSSEN</string>
+    <string name="status_cancelled">ABGEBROCHEN</string>
     <string name="label_route_data">ROUTENDATEN</string>
     <string name="label_edit_data">DATEN BEARBEITEN</string>
     <string name="btn_new_route">NEUE ROUTE</string>

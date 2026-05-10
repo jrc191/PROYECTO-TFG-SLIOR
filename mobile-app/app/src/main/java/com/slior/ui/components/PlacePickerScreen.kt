@@ -58,8 +58,12 @@ fun PlacePickerScreen(
     val isResolving by viewModel.isResolvingAddress.collectAsStateWithLifecycle()
 
     LaunchedEffect(Unit) {
-        if (selectedLocation == null && !hasCentered) {
-            viewModel.fetchCurrentLocation()
+        viewModel.startLocationTracking()
+    }
+
+    DisposableEffect(Unit) {
+        onDispose {
+            viewModel.stopLocationTracking()
         }
     }
 

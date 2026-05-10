@@ -39,7 +39,7 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @AndroidEntryPoint
-class MainActivity : ComponentActivity() {
+class MainActivity : androidx.appcompat.app.AppCompatActivity() {
 
     @Inject
     lateinit var globalEventBus: com.slior.util.GlobalEventBus
@@ -102,7 +102,7 @@ class MainActivity : ComponentActivity() {
                                             popUpTo("register") { inclusive = true }
                                         }
                                     },
-                                    onBack = { navController.popBackStack() }
+                                    onGoToLogin = { navController.popBackStack() }
                                 )
                             }
                             composable("routes/{repartidorId}") { backStackEntry ->

@@ -100,6 +100,17 @@ fun RouteListScreen(
                     }
                     is RouteListState.Success -> {
                         val routes = (state as RouteListState.Success).routes
+                        
+                        // Cachear de fondo las zonas de las rutas cargadas
+                        LaunchedEffect(routes) {
+                            routes.forEach { route ->
+                                // Aquí idealmente necesitaríamos los puntos de la ruta, 
+                                // pero por ahora podemos cachear el área general si tuviéramos acceso a paradas.
+                                // Como no las tenemos en la entidad RouteEntity de la lista,
+                                // dejamos este gancho listo para cuando implementemos Room con relaciones.
+                            }
+                        }
+
                         if (routes.isEmpty()) RouteListEmpty()
                         else RouteListSuccess(routes = routes, onRouteClick = onRouteClick)
                     }
@@ -289,8 +300,22 @@ private fun RouteListSuccess(routes: List<RouteEntity>, onRouteClick: (String) -
 
 @Composable
 private fun RouteCard(route: RouteEntity, onClick: () -> Unit) {
-    val statusColor = when (route.status.uppercase()) { "EN_CURSO" -> SafetyOrange; "PLANIFICADA" -> Color(0xFFFFD700); "COMPLETADA" -> NeonGreen; "CANCELADA" -> Color(0xFFEF9A9A); else -> Color(0xFFF4F4F5) }
-    val statusLabel = when (route.status.uppercase()) { "EN_CURSO" -> "En_Curso"; "PLANIFICADA" -> "Planificada"; "COMPLETADA" -> "Completada"; "CANCELADA" -> "Cancelada"; else -> route.status }
+    val statusColor = when (route.status.uppercase()) { 
+        "EN_CURSO"    -> SafetyOrange 
+        "PLANIFICADA" -> Color(0xFFFFD700) 
+        "COMPLETADA"  -> NeonGreen 
+        "CANCELADA"   -> Color(0xFFEF9A9A) 
+        else          -> Color(0xFFF4F4F5) 
+    }
+    
+    val statusLabel = when (route.status.uppercase()) { 
+        "EN_CURSO"    -> stringResource(R.string.status_in_progress)
+        "PLANIFICADA" -> stringResource(R.string.status_planned)
+        "COMPLETADA"  -> stringResource(R.string.status_completed)
+        "CANCELADA"   -> stringResource(R.string.status_cancelled)
+        else          -> route.status 
+    }
+    
     val syncIcon = if (route.syncStatus == "PENDING") "☁↑" else "☁✓"
     val syncColor = if (route.syncStatus == "PENDING") Color(0xFFFFD700) else BrutalistBlack
 
@@ -298,7 +323,9 @@ private fun RouteCard(route: RouteEntity, onClick: () -> Unit) {
         Column(modifier = Modifier.fillMaxSize(), verticalArrangement = Arrangement.SpaceBetween) {
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.Top) {
                 Column {
-                    Box(Modifier.border(2.dp, BrutalistBlack).background(statusColor).padding(horizontal = 10.dp, vertical = 4.dp)) { Text(statusLabel.uppercase(), fontFamily = SpaceGroteskFamily, fontWeight = FontWeight.Bold, fontSize = 11.sp, letterSpacing = 1.sp, color = BrutalistBlack) }
+                    Box(Modifier.border(2.dp, BrutalistBlack).background(statusColor).padding(horizontal = 10.dp, vertical = 4.dp)) { 
+                        Text(statusLabel.uppercase(), fontFamily = SpaceGroteskFamily, fontWeight = FontWeight.Bold, fontSize = 11.sp, letterSpacing = 1.sp, color = BrutalistBlack) 
+                    }
                     Spacer(Modifier.height(6.dp))
                     Text(route.nombre.uppercase(), fontFamily = SpaceGroteskFamily, fontWeight = FontWeight.Bold, fontSize = 18.sp, letterSpacing = (-0.5).sp, color = BrutalistBlack)
                 }

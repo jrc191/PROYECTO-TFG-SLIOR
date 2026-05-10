@@ -16,6 +16,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.DisposableEffect
 import androidx.core.graphics.drawable.DrawableCompat
 import android.text.Html
 import android.widget.TextView
@@ -27,6 +28,7 @@ import android.text.style.ClickableSpan
 import android.text.style.URLSpan
 import android.view.View
 import androidx.appcompat.app.AlertDialog
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import com.slior.R
 
@@ -38,7 +40,36 @@ fun RouteMapView(
     centerKey: Any? = null,
     onCallRequest: (String) -> Unit = {}
 ) {
+    val context = LocalContext.current
+    val mapView = remember {
+        MapView(context).apply {
+            setTileSource(TileSourceFactory.MAPNIK)
+            setMultiTouchControls(true)
+            controller.setZoom(13.0)
+            // IMPORTANTE: Evitar que el mapa se destruya al ser removido momentáneamente de la composición
+            setDestroyMode(false)
+        }
+    }
+
+    // Gestión del ciclo de vida de osmdroid
+    val lifecycle = androidx.lifecycle.compose.LocalLifecycleOwner.current.lifecycle
+    DisposableEffect(lifecycle, mapView) {
+        val observer = androidx.lifecycle.LifecycleEventObserver { _, event ->
+            when (event) {
+                androidx.lifecycle.Lifecycle.Event.ON_RESUME -> mapView.onResume()
+                androidx.lifecycle.Lifecycle.Event.ON_PAUSE -> mapView.onPause()
+                else -> {}
+            }
+        }
+        lifecycle.addObserver(observer)
+        onDispose {
+            lifecycle.removeObserver(observer)
+            mapView.onDetach()
+        }
+    }
+
     var hasCentered by remember { mutableStateOf(false) }
+    var lastCenterKey by remember { mutableStateOf<Any?>(null) }
 
     // Obtenemos los strings localizados fuera del update del AndroidView
     val youLabel = stringResource(R.string.map_label_you)
@@ -49,26 +80,22 @@ fun RouteMapView(
 
     AndroidView(
         modifier = modifier,
-        factory = { context ->
-            Configuration.getInstance().userAgentValue = context.packageName
-            MapView(context).apply {
-                setTileSource(TileSourceFactory.MAPNIK)
-                setMultiTouchControls(true)
-                controller.setZoom(13.0)
-            }
-        },
-        update = { mapView ->
-            mapView.overlays.clear()
+        factory = { mapView },
+        update = { m ->
+            // Reasegurar el User Agent en cada actualización para evitar bloqueos
+            Configuration.getInstance().userAgentValue = "SliorLogistics_TFG_App_${context.packageName}"
+            
+            m.overlays.clear()
 
-            val customInfoWindow = object : MarkerInfoWindow(org.osmdroid.library.R.layout.bonuspack_bubble, mapView) {
+            val customInfoWindow = object : MarkerInfoWindow(org.osmdroid.library.R.layout.bonuspack_bubble, m) {
                 override fun onOpen(item: Any?) {
                     super.onOpen(item)
-                    mapView.overlays.filterIsInstance<Marker>().forEach { 
+                    m.overlays.filterIsInstance<Marker>().forEach { 
                         if (it != item && it.isInfoWindowShown) it.closeInfoWindow()
                     }
-                    val m = item as? Marker
+                    val marker = item as? Marker
                     val description = view.findViewById<TextView>(org.osmdroid.library.R.id.bubble_description)
-                    val htmlContent = Html.fromHtml(m?.snippet ?: "", Html.FROM_HTML_MODE_LEGACY)
+                    val htmlContent = Html.fromHtml(marker?.snippet ?: "", Html.FROM_HTML_MODE_LEGACY)
                     val spannable = SpannableStringBuilder(htmlContent)
                     val spans = spannable.getSpans(0, spannable.length, URLSpan::class.java)
                     for (span in spans) {
@@ -93,38 +120,36 @@ fun RouteMapView(
             userLocation?.let { points.add(GeoPoint(it.first, it.second)) }
             points.addAll(stops.map { GeoPoint(it.latitud, it.longitud) })
             if (points.size >= 2) {
-                val polyline = Polyline(mapView).apply {
+                val polyline = Polyline(m).apply {
                     setPoints(points)
                     outlinePaint.color = Color.BLACK
                     outlinePaint.strokeWidth = 10f
                     outlinePaint.isAntiAlias = true
                 }
-                mapView.overlays.add(polyline)
+                m.overlays.add(polyline)
             }
 
             // 2. Usuario
             userLocation?.let {
-                val courierMarker = Marker(mapView).apply {
+                val courierMarker = Marker(m).apply {
                     position = GeoPoint(it.first, it.second)
                     title = youLabel
                     infoWindow = customInfoWindow
-                    val rawDrawable = mapView.context.resources.getDrawable(org.osmdroid.library.R.drawable.marker_default, null).mutate()
+                    val rawDrawable = context.resources.getDrawable(org.osmdroid.library.R.drawable.marker_default, null).mutate()
                     val wrappedDrawable = DrawableCompat.wrap(rawDrawable)
                     DrawableCompat.setTint(wrappedDrawable, Color.parseColor("#FF5722"))
                     DrawableCompat.setTintMode(wrappedDrawable, PorterDuff.Mode.SRC_IN)
                     icon = wrappedDrawable
                     setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
-                    setOnMarkerClickListener { m, _ -> m.showInfoWindow(); true }
-                    showInfoWindow()
+                    setOnMarkerClickListener { mark, _ -> mark.showInfoWindow(); true }
                 }
-                mapView.overlays.add(courierMarker)
+                m.overlays.add(courierMarker)
             }
 
             // 3. Paradas
             stops.forEachIndexed { index, stop ->
-                val marker = Marker(mapView).apply {
+                val marker = Marker(m).apply {
                     position = GeoPoint(stop.latitud, stop.longitud)
-                    // Usamos String.format para evitar problemas con plantillas de Kotlin
                     title = String.format(stopLabelTemplate, index + 1)
                     infoWindow = customInfoWindow
                     
@@ -137,21 +162,45 @@ fun RouteMapView(
                     snippet = sb.toString()
 
                     setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
-                    icon = mapView.context.resources.getDrawable(org.osmdroid.library.R.drawable.marker_default, null).mutate()
-                    if (stop.isCompleted) alpha = 0.5f
-                    setOnMarkerClickListener { m, _ -> m.showInfoWindow(); true }
+                    
+                    val rawDrawable = context.resources.getDrawable(org.osmdroid.library.R.drawable.marker_default, null).mutate()
+                    val wrappedDrawable = DrawableCompat.wrap(rawDrawable)
+                    
+                    if (stop.isCompleted) {
+                        DrawableCompat.setTint(wrappedDrawable, Color.parseColor("#4CAF50"))
+                        alpha = 0.7f
+                    } else {
+                        DrawableCompat.setTint(wrappedDrawable, Color.parseColor("#2196F3"))
+                    }
+                    icon = wrappedDrawable
+
+                    setOnMarkerClickListener { mark, _ -> mark.showInfoWindow(); true }
                 }
-                mapView.overlays.add(marker)
+                m.overlays.add(marker)
             }
 
             // 4. Centrado
-            val shouldCenter = !hasCentered || centerKey != null
-            if (shouldCenter) {
-                if (stops.isNotEmpty()) mapView.controller.animateTo(GeoPoint(stops.last().latitud, stops.last().longitud))
-                else if (userLocation != null) mapView.controller.animateTo(GeoPoint(userLocation.first, userLocation.second))
-                hasCentered = true
+            val isManualCenter = centerKey != null && centerKey != lastCenterKey
+            val shouldCenter = !hasCentered || isManualCenter
+            
+            if (shouldCenter && points.isNotEmpty()) {
+                val validPoints = points.filter { it.latitude != 0.0 && it.longitude != 0.0 }
+                if (validPoints.isNotEmpty()) {
+                    if (validPoints.size == 1) {
+                        m.controller.setZoom(15.0)
+                        m.controller.animateTo(validPoints[0])
+                    } else {
+                        val boundingBox = org.osmdroid.util.BoundingBox.fromGeoPoints(validPoints)
+                        m.post { 
+                            // Añadimos límites de zoom y animación suave
+                            m.zoomToBoundingBox(boundingBox, true, 120, 18.0, 500)
+                        }
+                    }
+                    hasCentered = true
+                    lastCenterKey = centerKey
+                }
             }
-            mapView.invalidate()
+            m.invalidate()
         }
     )
 }

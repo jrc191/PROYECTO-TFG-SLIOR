@@ -43,7 +43,11 @@
     <string name="title_routes">MINHAS ROTAS</string>
     <string name="title_new_route">NOVA ROTA</string>
     <string name="title_edit_route">EDITAR ROTA</string>
-    <string name="title_route_detail">DETALHE DA ROTA</string>
+    <string name="title_route_detail">DETALHES DA ROTA</string>
+    <string name="status_in_progress">EM CURSO</string>
+    <string name="status_planned">PLANEJADA</string>
+    <string name="status_completed">CONCLUÍDA</string>
+    <string name="status_cancelled">CANCELADA</string>
     <string name="label_route_data">DADOS DA ROTA</string>
     <string name="label_edit_data">EDITAR DADOS</string>
     <string name="btn_new_route">NOVA ROTA</string>

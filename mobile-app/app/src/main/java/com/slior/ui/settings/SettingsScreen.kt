@@ -11,7 +11,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Language
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
@@ -24,12 +24,78 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.os.LocaleListCompat
 import com.slior.R
+import com.slior.ui.components.hardShadow
 import com.slior.ui.theme.*
 
 @Composable
 fun SettingsScreen(
     onBack: () -> Unit
 ) {
+    // Estado para el idioma que se quiere seleccionar (pendiente de confirmar)
+    var pendingLocaleCode by remember { mutableStateOf<String?>(null) }
+    
+    // Obtener idioma actual
+    val currentLocale = AppCompatDelegate.getApplicationLocales().get(0)?.language ?: "es"
+
+    // Diálogo de confirmación brutalista
+    if (pendingLocaleCode != null) {
+        AlertDialog(
+            onDismissRequest = { pendingLocaleCode = null },
+            containerColor = BrutalistWhite,
+            shape = MaterialTheme.shapes.extraSmall,
+            tonalElevation = 0.dp,
+            modifier = Modifier.border(2.dp, BrutalistBlack),
+            title = {
+                Text(
+                    text = stringResource(R.string.dialog_lang_title),
+                    fontFamily = SpaceGroteskFamily,
+                    fontWeight = FontWeight.Black,
+                    fontSize = 18.sp,
+                    color = BrutalistBlack
+                )
+            },
+            text = {
+                Text(
+                    text = stringResource(R.string.dialog_lang_desc),
+                    fontFamily = SpaceGroteskFamily,
+                    color = BrutalistBlack
+                )
+            },
+            confirmButton = {
+                // Surface envuelto en una Box para asegurar alineación correcta en el AlertDialog
+                Box(
+                    modifier = Modifier
+                        .padding(horizontal = 4.dp)
+                        .border(2.dp, BrutalistBlack)
+                        .background(NeonGreen)
+                        .clickable { 
+                            val appLocales: LocaleListCompat = LocaleListCompat.forLanguageTags(pendingLocaleCode!!)
+                            AppCompatDelegate.setApplicationLocales(appLocales)
+                            pendingLocaleCode = null
+                        }
+                ) {
+                    Text(
+                        text = stringResource(R.string.btn_change),
+                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                        color = BrutalistBlack,
+                        fontWeight = FontWeight.Bold,
+                        fontFamily = SpaceGroteskFamily
+                    )
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { pendingLocaleCode = null }) {
+                    Text(
+                        text = stringResource(R.string.btn_cancel),
+                        color = BrutalistBlack,
+                        fontFamily = SpaceGroteskFamily,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+            }
+        )
+    }
+
     Box(modifier = Modifier.fillMaxSize().background(BrutalistWhite)) {
         Column(modifier = Modifier.fillMaxSize()) {
             // TopAppBar
@@ -62,12 +128,10 @@ fun SettingsScreen(
                     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         Icon(Icons.Default.Language, null, tint = BrutalistBlack)
                         Text(
-                            text = "IDIOMA / LANGUAGE", // Hardcoded dual for clear identification
+                            text = "IDIOMA / LANGUAGE",
                             fontFamily = SpaceGroteskFamily, fontWeight = FontWeight.Black, fontSize = 12.sp, letterSpacing = 2.sp, color = BrutalistBlack
                         )
                     }
-                    
-                    val currentLocale = AppCompatDelegate.getApplicationLocales().get(0)?.language ?: "es"
                     
                     val languages = listOf(
                         "es" to "ESPAÑOL",
@@ -82,8 +146,9 @@ fun SettingsScreen(
                             label = label,
                             isSelected = currentLocale == code,
                             onClick = {
-                                val appLocales: LocaleListCompat = LocaleListCompat.forLanguageTags(code)
-                                AppCompatDelegate.setApplicationLocales(appLocales)
+                                if (currentLocale != code) {
+                                    pendingLocaleCode = code
+                                }
                             }
                         )
                     }
@@ -114,13 +179,26 @@ private fun LanguageOption(
             .padding(16.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
+        // Caja de selección (Check)
         Box(
             modifier = Modifier
-                .size(20.dp)
+                .size(24.dp)
                 .border(2.dp, BrutalistBlack)
-                .background(if (isSelected) BrutalistBlack else BrutalistWhite)
-        )
+                .background(if (isSelected) BrutalistBlack else BrutalistWhite),
+            contentAlignment = Alignment.Center
+        ) {
+            if (isSelected) {
+                Text(
+                    text = "✓",
+                    color = NeonGreen,
+                    fontWeight = FontWeight.Black,
+                    fontSize = 16.sp
+                )
+            }
+        }
+        
         Spacer(Modifier.width(16.dp))
+        
         Text(
             text = label,
             fontFamily = SpaceGroteskFamily,
@@ -129,8 +207,5 @@ private fun LanguageOption(
             color = BrutalistBlack,
             modifier = Modifier.weight(1f)
         )
-        if (isSelected) {
-            Text("✓", fontWeight = FontWeight.Black, fontSize = 18.sp, color = BrutalistBlack)
-        }
     }
 }

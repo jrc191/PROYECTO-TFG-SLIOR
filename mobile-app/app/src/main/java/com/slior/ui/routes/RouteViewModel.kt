@@ -61,6 +61,23 @@ class RouteViewModel @Inject constructor(
     private val _isResolvingAddress = MutableStateFlow(false)
     val isResolvingAddress: StateFlow<Boolean> = _isResolvingAddress.asStateFlow()
 
+    private var locationTrackingJob: Job? = null
+
+    fun startLocationTracking() {
+        locationTrackingJob?.cancel()
+        locationTrackingJob = viewModelScope.launch {
+            while (true) {
+                fetchCurrentLocation()
+                delay(10000) // Cada 10 segundos para balancear realismo y batería
+            }
+        }
+    }
+
+    fun stopLocationTracking() {
+        locationTrackingJob?.cancel()
+        locationTrackingJob = null
+    }
+
     fun fetchCurrentLocation() {
         viewModelScope.launch {
             try {
@@ -117,7 +134,9 @@ class RouteViewModel @Inject constructor(
         viewModelScope.launch {
             _createState.value = CreateRouteState.Loading
             _createState.value = when (val result = routeRepository.updateRoute(routeId, request)) {
-                is Result.Success -> CreateRouteState.Success
+                is Result.Success -> {
+                    CreateRouteState.Success
+                }
                 is Result.Error -> CreateRouteState.Error(
                     result.exception.message ?: "Error al actualizar la ruta"
                 )
@@ -190,7 +209,9 @@ class RouteViewModel @Inject constructor(
         viewModelScope.launch {
             _createState.value = CreateRouteState.Loading
             _createState.value = when (val result = routeRepository.createRoute(request)) {
-                is Result.Success -> CreateRouteState.Success
+                is Result.Success -> {
+                    CreateRouteState.Success
+                }
                 is Result.Error -> CreateRouteState.Error(
                     result.exception.message ?: "Error al crear la ruta"
                 )

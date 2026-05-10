@@ -5,28 +5,32 @@ import androidx.hilt.work.HiltWorkerFactory
 import androidx.work.Configuration
 import dagger.hilt.android.HiltAndroidApp
 import javax.inject.Inject
+import org.osmdroid.config.Configuration as OsmConfig
 
-/**
- * Clase Application de SLIOR.
- *
- * Anotada con @HiltAndroidApp para que Hilt genere los componentes
- * de inyección de dependencias al arrancar la app.
- *
- * También implementa [Configuration.Provider] para que WorkManager
- * use HiltWorkerFactory y pueda inyectar dependencias en los Workers.
- */
 @HiltAndroidApp
 class SliorApplication : Application(), Configuration.Provider {
 
-    /**
-     * Inyectado por Hilt. Necesario para que WorkManager use Workers con @HiltWorker.
-     */
     @Inject
     lateinit var workerFactory: HiltWorkerFactory
 
-    /**
-     * Proporciona la configuración personalizada de WorkManager con Hilt.
-     */
+    override fun onCreate() {
+        super.onCreate()
+        
+        // Inicialización de osmdroid (Forma estándar y segura)
+        val osmConfig = OsmConfig.getInstance()
+        
+        // 1. Establecer el User Agent (MUY específico para evitar bloqueos del servidor OSM)
+        osmConfig.userAgentValue = "SliorLogistics_TFG_App_${packageName}"
+        
+        // 2. Forzar el uso de la caché interna de la app para evitar problemas de permisos en Android 10+
+        val mapCache = java.io.File(cacheDir, "osmdroid_tiles")
+        if (!mapCache.exists()) mapCache.mkdirs()
+        osmConfig.osmdroidTileCache = mapCache
+        
+        // 3. Cargar configuración previa
+        osmConfig.load(this, getSharedPreferences("osmdroid", MODE_PRIVATE))
+    }
+
     override val workManagerConfiguration: Configuration
         get() = Configuration.Builder()
             .setWorkerFactory(workerFactory)

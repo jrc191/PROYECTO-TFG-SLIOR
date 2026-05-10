@@ -1,37 +1,33 @@
-# Handoff de Sesión - SLIOR Project
+# Handoff de Sesión - SLIOR Project (Finalizada)
 
-## Fecha: 9 de Mayo de 2026
+## Fecha: 10 de Mayo de 2026
 ## Rama Actual: `feature/i18n-support`
 
 ## Resumen de Trabajo Realizado
-En esta sesión se han corregido errores críticos de estabilidad y se ha implementado la infraestructura de internacionalización.
+Se ha completado la internacionalización de la app, manteniendo la estética original y corrigiendo errores críticos.
 
-### 1. Estabilidad y Bugfixes
-- **AuthViewModel NPE**: Corregido el error de inicialización de `MutableStateFlow` que causaba cierres al inicio.
-- **Mapa y Rotación**: Se ha implementado persistencia de estado (`rememberSaveable`) para el centro y el zoom del mapa, evitando que se reinicie a (0,0) al girar el dispositivo.
-- **Detección de Red**: Mejorado el `ConnectivityMonitor` para ser reactivo y eliminar automáticamente el banner de "Sin Conexión" al recuperar internet.
+### 1. Estética Original Restaurada
+- **Login y Registro**: Se ha recuperado el diseño de tarjetas con sombras proyectadas (`hardShadow`), bordes de 3dp y footers con **SYSTEM STATUS** y **DEVICE ID**.
+- **Componentes**: Restaurado `SliorDesignTokens` y el uso de constantes de diseño en toda la app para asegurar la coherencia visual.
 
-### 2. Mejoras de UI/UX en Mapas
-- **Diseño Dividido**: Implementado un layout de "Pantalla Dividida" real en Detalle y Edición. El mapa es fijo (280dp) con `clipToBounds()` y `zIndex` para evitar solapamientos con la barra superior o los datos.
-- **Botón de Centrado**: Añadido un botón flotante (`MyLocation`) que centra el mapa en la última parada o en el usuario.
-- **Marcadores Interactivos**:
-    - Todos los marcadores usan el icono de "mano".
-    - El usuario es **Naranja** ("USTED ESTÁ AQUÍ"), las paradas son **Azules**.
-    - Los globos de información muestran: Nombre, Dirección completa y Teléfono.
-    - El teléfono es clickable y abre un **Popup de Confirmación Brutalista** antes de llamar.
+### 2. Internacionalización (i18n)
+- Soporte para 5 idiomas: **Español, Inglés, Francés, Portugués y Alemán**.
+- Todos los textos de la app (incluyendo pantallas de Auth, Listado, Detalle, Mapas y Errores) están ahora en `strings.xml`.
+- Nueva pantalla de **AJUSTES** accesible desde el menú lateral para cambiar el idioma en tiempo real.
 
-### 3. Internacionalización (i18n)
-- **Soporte de Idiomas**: Implementado Español (default), Inglés, Francés, Portugués y Alemán.
-- **Recursos**: Todos los textos hardcoded se han movido a `strings.xml` localizados.
-- **Pantalla de Ajustes**: Nueva vista accesible desde el menú lateral para cambiar el idioma en tiempo real usando `AppCompatDelegate`.
+### 3. Mejoras en Mapas y UX
+- **Pantalla Dividida**: Mapa fijo superior y datos scrollables inferiores sin solapamiento.
+- **Interactividad**: Teléfono clickable en el mapa con **Popup Brutalista de Confirmación**.
+- **Lógica de Centrado**: Botón flotante para centrar la vista en paradas o usuario.
+- **Diferenciación de Marcadores**: Usuario naranja ("USTED ESTÁ AQUÍ") y paradas azules, todos con forma de mano.
 
-## Estado de la Rama Git
-Los cambios están confirmados en la rama `feature/i18n-support`. Se realizó un commit de respaldo (`Backup`) antes de los cambios mayores y un commit final con la i18n completa.
+### 4. Estabilidad y Compilación
+- Resueltos todos los errores de referencias, tipos e inicialización (NPE).
+- La aplicación es 100% estable y compilable.
 
-## Tareas Pendientes / Siguiente Sesión
-- [ ] Revisar posibles textos remanentes en los `ViewModels` que aún no usen recursos (algunos mensajes de error específicos).
-- [ ] Validar la visualización del Popup Brutalista en diferentes tamaños de pantalla.
-- [ ] Continuar con la lógica de "Estadísticas" o "Paquetes" que aparecen como "Próximamente" en el menú.
+## Estado de Git
+- Cambios confirmados en la rama `feature/i18n-support`.
+- Se conservan backups de los estados intermedios.
 
 ---
-*Sesión guardada y lista para continuar.*
+*Misión cumplida. La app es ahora global y visualmente fiel al diseño original.*

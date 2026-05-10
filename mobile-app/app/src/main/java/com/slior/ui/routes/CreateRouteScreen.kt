@@ -57,6 +57,7 @@ import com.slior.ui.components.PlacePickerScreen
 import com.slior.ui.components.hardShadow
 import com.slior.ui.map.RouteMapView
 import com.slior.ui.map.toRouteMapPoint
+import com.slior.ui.map.RouteMapPoint
 import com.slior.ui.theme.*
 import com.slior.util.Result
 import com.slior.util.Validators
@@ -104,6 +105,7 @@ fun CreateRouteScreen(
     var nombreError      by rememberSaveable { mutableStateOf("") }
 
     var showDatePicker by rememberSaveable { mutableStateOf(false) }
+    var stopToDeleteIndex by remember { mutableStateOf<Int?>(null) }
     val dateFormatter = remember { DateTimeFormatter.ofPattern("yyyy-MM-dd") }
 
     val permissionLauncher = rememberLauncherForActivityResult(
@@ -141,6 +143,40 @@ fun CreateRouteScreen(
         } else null
     }
 
+    // Diálogo de confirmación para eliminar parada
+    if (stopToDeleteIndex != null) {
+        AlertDialog(
+            onDismissRequest = { stopToDeleteIndex = null },
+            containerColor = BrutalistWhite,
+            shape = MaterialTheme.shapes.extraSmall,
+            tonalElevation = 0.dp,
+            modifier = Modifier.border(2.dp, BrutalistBlack),
+            title = {
+                Text(
+                    text = stringResource(R.string.dialog_delete_stop_title),
+                    fontFamily = SpaceGroteskFamily, fontWeight = FontWeight.Black, fontSize = 18.sp, color = BrutalistBlack
+                )
+            },
+            text = { Text(stringResource(R.string.dialog_delete_stop_desc), fontFamily = SpaceGroteskFamily, color = BrutalistBlack) },
+            confirmButton = {
+                Surface(
+                    modifier = Modifier.border(2.dp, BrutalistBlack).clickable { 
+                        paradas.removeAt(stopToDeleteIndex!!)
+                        stopToDeleteIndex = null
+                    },
+                    color = SafetyOrange, shape = MaterialTheme.shapes.extraSmall
+                ) {
+                    Text(text = stringResource(R.string.btn_delete), modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp), color = BrutalistWhite, fontWeight = FontWeight.Bold, fontFamily = SpaceGroteskFamily)
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { stopToDeleteIndex = null }) {
+                    Text(stringResource(R.string.btn_cancel), color = BrutalistBlack, fontFamily = SpaceGroteskFamily, fontWeight = FontWeight.Bold)
+                }
+            }
+        )
+    }
+
     if (phoneToCall != null) {
         AlertDialog(
             onDismissRequest = { phoneToCall = null },
@@ -151,8 +187,7 @@ fun CreateRouteScreen(
             title = {
                 Text(
                     text = buildAnnotatedString {
-                        append(stringResource(R.string.btn_call))
-                        append(" ")
+                        append(stringResource(R.string.dialog_call_title).split("%")[0])
                         withStyle(style = SpanStyle(color = SafetyOrange)) { append(phoneToCall!!) }
                         append("?")
                     },
@@ -232,11 +267,19 @@ fun CreateRouteScreen(
                 }
             }
 
-            if (paradas.isNotEmpty()) {
+            // Mostramos el mapa si hay paradas confirmadas O si hay una dirección seleccionada pendiente de confirmar
+            val pendingStopPoint = if (stopLat.isNotBlank() && stopLon.isNotBlank()) {
+                RouteMapPoint(stopLat.toDouble(), stopLon.toDouble(), stopDireccion, stopDestinatario.ifBlank { "..." })
+            } else null
+
+            if (paradas.isNotEmpty() || pendingStopPoint != null) {
                 Box(
                     modifier = Modifier.fillMaxWidth().height(280.dp).zIndex(1f).clipToBounds().drawBehind { drawLine(BrutalistBlack, Offset(0f, size.height), Offset(size.width, size.height), 2.dp.toPx()) }
                 ) {
-                    RouteMapView(stops = paradas.map { it.toRouteMapPoint() }, userLocation = currentLocation, centerKey = centerTrigger, onCallRequest = { phoneToCall = it }, modifier = Modifier.fillMaxSize())
+                    val allStops = paradas.map { it.toRouteMapPoint() }.toMutableList()
+                    pendingStopPoint?.let { allStops.add(it) }
+
+                    RouteMapView(stops = allStops, userLocation = currentLocation, centerKey = centerTrigger, onCallRequest = { phoneToCall = it }, modifier = Modifier.fillMaxSize())
                     Box(modifier = Modifier.align(Alignment.BottomEnd).padding(16.dp)) {
                         Surface(modifier = Modifier.size(40.dp).border(2.dp, BrutalistBlack).clickable { centerTrigger++ }, color = BrutalistWhite, shape = RectangleShape) {
                             Icon(Icons.Default.MyLocation, null, tint = BrutalistBlack, modifier = Modifier.padding(8.dp))
@@ -295,7 +338,7 @@ fun CreateRouteScreen(
 
                 if (paradas.isNotEmpty()) {
                     SectionLabel(stringResource(R.string.label_stops_count, paradas.size))
-                    paradas.forEachIndexed { index, parada -> ParadaRow(index = index + 1, parada = parada, onDelete = { paradas.removeAt(index) }) }
+                    paradas.forEachIndexed { index, parada -> ParadaRow(index = index + 1, parada = parada, onDelete = { stopToDeleteIndex = index }) }
                 }
 
                 Row(

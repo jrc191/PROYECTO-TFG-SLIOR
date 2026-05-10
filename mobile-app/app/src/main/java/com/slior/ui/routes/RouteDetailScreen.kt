@@ -102,7 +102,13 @@ fun RouteDetailScreen(
     LaunchedEffect(routeId) {
         viewModel.loadRouteDetail(routeId)
         if (hasLocationPermission(context)) {
-            viewModel.fetchCurrentLocation()
+            viewModel.startLocationTracking()
+        }
+    }
+
+    DisposableEffect(Unit) {
+        onDispose {
+            viewModel.stopLocationTracking()
         }
     }
 
@@ -251,33 +257,74 @@ fun RouteDetailScreen(
 
 @Composable
 private fun RouteDetailContent(data: RouteDetailState.Success, context: Context, currentLocation: Pair<Double, Double>?, onOptimize: () -> Unit, onNavigate: () -> Unit) {
-    Box(modifier = Modifier.fillMaxSize()) {
-        LazyColumn(modifier = Modifier.fillMaxSize(), contentPadding = PaddingValues(bottom = 96.dp)) {
-            item {
-                Column(modifier = Modifier.fillMaxWidth().background(Color(0xFFF4F4F5)).drawBehind { drawLine(BrutalistBlack, Offset(0f, size.height), Offset(size.width, size.height), 2.dp.toPx()) }.padding(horizontal = 16.dp, vertical = 12.dp), horizontalAlignment = Alignment.CenterHorizontally) {
-                    Text(stringResource(R.string.label_estimated_time), fontFamily = SpaceGroteskFamily, fontWeight = FontWeight.Bold, fontSize = 13.sp, letterSpacing = 2.sp, color = BrutalistBlack)
-                    Spacer(Modifier.height(6.dp))
-                    Box(modifier = Modifier.hardShadow(2.dp, 2.dp).border(2.dp, BrutalistBlack).background(BrutalistWhite).padding(horizontal = 24.dp, vertical = 8.dp)) {
-                        Text(text = if (data.route.tiempoEstimado != null) formatMinutes(data.route.tiempoEstimado) else "--:--", fontFamily = SpaceGroteskFamily, fontWeight = FontWeight.Bold, fontSize = 28.sp, color = SafetyOrange)
-                    }
-                    data.route.distanciaTotal?.let {
-                        Spacer(Modifier.height(4.dp))
-                        Text(stringResource(R.string.format_km, it) + " · " + stringResource(R.string.label_stops_count, data.stops.size), fontFamily = SpaceGroteskFamily, fontSize = 12.sp, color = BrutalistBlack)
-                    }
-                }
+    Column(modifier = Modifier.fillMaxSize()) {
+        // 1. Cabecera Fija: Tiempo Estimado
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(Color(0xFFF4F4F5))
+                .drawBehind { drawLine(BrutalistBlack, Offset(0f, size.height), Offset(size.width, size.height), 2.dp.toPx()) }
+                .padding(horizontal = 16.dp, vertical = 12.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Text(stringResource(R.string.label_estimated_time), fontFamily = SpaceGroteskFamily, fontWeight = FontWeight.Bold, fontSize = 13.sp, letterSpacing = 2.sp, color = BrutalistBlack)
+            Spacer(Modifier.height(6.dp))
+            Box(modifier = Modifier.hardShadow(2.dp, 2.dp).border(2.dp, BrutalistBlack).background(BrutalistWhite).padding(horizontal = 24.dp, vertical = 8.dp)) {
+                Text(text = if (data.route.tiempoEstimado != null) formatMinutes(data.route.tiempoEstimado) else "--:--", fontFamily = SpaceGroteskFamily, fontWeight = FontWeight.Bold, fontSize = 28.sp, color = SafetyOrange)
             }
-            items(data.stops.sortedBy { it.ordenVisita }) { stop -> BrutalistStopRow(stop = stop) }
-            item {
-                Spacer(Modifier.height(8.dp))
-                Box(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp)) {
-                    Row(modifier = Modifier.fillMaxWidth().hardShadow().border(2.dp, BrutalistBlack).background(Color(0xFFF4F4F5)).clickable { onOptimize() }.padding(16.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.Center) {
-                        Text(stringResource(R.string.btn_optimize), fontFamily = SpaceGroteskFamily, fontWeight = FontWeight.Bold, fontSize = 15.sp, letterSpacing = 1.sp, color = BrutalistBlack)
-                    }
+            data.route.distanciaTotal?.let {
+                Spacer(Modifier.height(4.dp))
+                Text(stringResource(R.string.format_km, it) + " · " + stringResource(R.string.label_stops_count, data.stops.size), fontFamily = SpaceGroteskFamily, fontSize = 12.sp, color = BrutalistBlack)
+            }
+            Box(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp)) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .hardShadow()
+                        .border(2.dp, BrutalistBlack)
+                        .background(Color(0xFFF4F4F5))
+                        .clickable { onOptimize() }
+                        .padding(14.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Center
+                ) {
+                    Text(stringResource(R.string.btn_optimize), fontFamily = SpaceGroteskFamily, fontWeight = FontWeight.Bold, fontSize = 15.sp, letterSpacing = 1.sp, color = BrutalistBlack)
                 }
             }
         }
-        Box(modifier = Modifier.align(Alignment.BottomCenter).fillMaxWidth().background(BrutalistWhite).drawBehind { drawLine(BrutalistBlack, Offset(0f, 0f), Offset(size.width, 0f), 2.dp.toPx()) }.padding(8.dp)) {
-            Row(modifier = Modifier.fillMaxWidth().height(72.dp).hardShadow(2.dp, 2.dp).border(2.dp, BrutalistBlack).background(NeonGreen).clickable { onNavigate() }, verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.Center) {
+
+        // 2. Botón Optimizar Fijo
+
+
+        // 3. Lista Deslizable de Paradas
+        LazyColumn(
+            modifier = Modifier.weight(1f),
+            contentPadding = PaddingValues(bottom = 8.dp)
+        ) {
+            items(data.stops.sortedBy { it.ordenVisita }) { stop ->
+                BrutalistStopRow(stop = stop)
+            }
+        }
+
+        // 4. Botón Iniciar Navegación Fijo al final
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(BrutalistWhite)
+                .drawBehind { drawLine(BrutalistBlack, Offset(0f, 0f), Offset(size.width, 0f), 2.dp.toPx()) }
+                .padding(8.dp)
+        ) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(64.dp)
+                    .hardShadow(2.dp, 2.dp)
+                    .border(2.dp, BrutalistBlack)
+                    .background(NeonGreen)
+                    .clickable { onNavigate() },
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Center
+            ) {
                 Icon(Icons.Default.Navigation, null, tint = BrutalistBlack, modifier = Modifier.size(24.dp))
                 Spacer(Modifier.width(10.dp))
                 Text(stringResource(R.string.btn_start_navigation), fontFamily = SpaceGroteskFamily, fontWeight = FontWeight.Bold, fontSize = 18.sp, letterSpacing = 1.sp, color = BrutalistBlack)

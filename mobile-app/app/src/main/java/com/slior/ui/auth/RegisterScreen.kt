@@ -61,6 +61,7 @@ import com.slior.ui.theme.OfflineRed
 import com.slior.ui.theme.SafetyOrange
 import com.slior.ui.theme.SpaceGroteskFamily
 import com.slior.util.Validators
+import androidx.compose.ui.platform.LocalContext
 import com.slior.viewmodel.AuthViewModel
 
 @Composable
@@ -69,6 +70,7 @@ fun RegisterScreen(
     onGoToLogin: () -> Unit,
     viewModel: AuthViewModel = hiltViewModel()
 ) {
+    val context = LocalContext.current
     val loginState   by viewModel.loginState.collectAsStateWithLifecycle()
     val serverStatus by viewModel.serverStatus.collectAsStateWithLifecycle()
 
@@ -225,7 +227,7 @@ fun RegisterScreen(
                 modifier = Modifier.fillMaxWidth()
             )
 
-            Spacer(Modifier.height(32.dp))
+            Spacer(Modifier.height(40.dp))
 
             //  Crear Cuenta
             if (loginState is LoginState.Loading) {

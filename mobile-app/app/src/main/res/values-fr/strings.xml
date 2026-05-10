@@ -43,7 +43,11 @@
     <string name="title_routes">MES ITINÉRAIRES</string>
     <string name="title_new_route">NOUVEL ITINÉRAIRE</string>
     <string name="title_edit_route">MODIFIER L\'ITINÉRAIRE</string>
-    <string name="title_route_detail">DÉTAIL DE L\'ITINÉRAIRE</string>
+    <string name="title_route_detail">DÉTAILS DE L\'ITINÉRAIRE</string>
+    <string name="status_in_progress">EN COURS</string>
+    <string name="status_planned">PLANIFIÉ</string>
+    <string name="status_completed">TERMINÉ</string>
+    <string name="status_cancelled">ANNULÉ</string>
     <string name="label_route_data">DONNÉES DE L\'ITINÉRAIRE</string>
     <string name="label_edit_data">MODIFIER LES DONNÉES</string>
     <string name="btn_new_route">NOUVEL ITINÉRAIRE</string>

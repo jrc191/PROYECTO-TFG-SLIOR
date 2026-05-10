@@ -19,6 +19,7 @@ import androidx.compose.ui.unit.sp
 import com.slior.data.local.entity.StopEntity
 import com.slior.ui.theme.SpaceGroteskFamily
 import com.slior.ui.components.hardShadow
+import com.slior.ui.components.SliorDesignTokens
 import com.slior.ui.theme.BrutalistBlack
 import com.slior.ui.theme.BrutalistWhite
 import com.slior.ui.theme.NeonGreen
@@ -37,14 +38,13 @@ fun StopCard(
         modifier = Modifier
             .fillMaxWidth()
             .heightIn(min = 80.dp)
-            // MODIFICADOR CORREGIDO: sombra -> fondo -> borde
             .hardShadow(
-                offsetX = 4.dp,
-                offsetY = 4.dp
+                offsetX = SliorDesignTokens.ShadowOffset,
+                offsetY = SliorDesignTokens.ShadowOffset
             )
             .background(BrutalistWhite)
             .border(
-                width = 2.dp, 
+                width = SliorDesignTokens.BorderWidth, 
                 color = BrutalistBlack
             )
             .clickable {
@@ -62,13 +62,12 @@ fun StopCard(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            // Indicador de estado (checkbox o check)
             Box(
                 modifier = Modifier
                     .size(32.dp)
                     .background(statusColor)
                     .border(
-                        width = 2.dp, 
+                        width = SliorDesignTokens.BorderWidth, 
                         color = BrutalistBlack
                     ),
                 contentAlignment = Alignment.Center
@@ -83,7 +82,6 @@ fun StopCard(
                 }
             }
 
-            // Contenido de la parada
             Column(
                 modifier = Modifier
                     .weight(1f)
@@ -110,13 +108,12 @@ fun StopCard(
                 )
             }
 
-            // Badge "AHORA" si está activa
             if (isActive) {
                 Box(
                     modifier = Modifier
                         .background(SafetyOrange)
                         .border(
-                            width = 2.dp, 
+                            width = SliorDesignTokens.BorderWidth, 
                             color = BrutalistBlack
                         )
                         .padding(horizontal = 8.dp, vertical = 4.dp)

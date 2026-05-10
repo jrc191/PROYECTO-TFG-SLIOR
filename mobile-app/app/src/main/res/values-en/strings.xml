@@ -44,6 +44,10 @@
     <string name="title_new_route">NEW ROUTE</string>
     <string name="title_edit_route">EDIT ROUTE</string>
     <string name="title_route_detail">ROUTE DETAILS</string>
+    <string name="status_in_progress">IN PROGRESS</string>
+    <string name="status_planned">PLANNED</string>
+    <string name="status_completed">COMPLETED</string>
+    <string name="status_cancelled">CANCELLED</string>
     <string name="label_route_data">ROUTE DATA</string>
     <string name="label_edit_data">EDIT DATA</string>
     <string name="btn_new_route">NEW ROUTE</string>
@@ -103,8 +107,13 @@
     <!-- ======= Dialogs ======= -->
     <string name="dialog_delete_route_title">DELETE ROUTE?</string>
     <string name="dialog_delete_route_desc">This action cannot be undone. All associated stops will be deleted.</string>
+    <string name="dialog_delete_stop_title">DELETE STOP?</string>
+    <string name="dialog_delete_stop_desc">Are you sure you want to remove this stop from the route?</string>
     <string name="dialog_call_title">CALL %1$s?</string>
     <string name="dialog_call_desc">The system dialer will open.</string>
+    <string name="dialog_lang_title">CHANGE LANGUAGE?</string>
+    <string name="dialog_lang_desc">The application will restart to apply the new language.</string>
+    <string name="btn_change">CHANGE</string>
     <string name="btn_delete">DELETE</string>
     <string name="btn_call">CALL</string>
     <string name="btn_cancel">CANCEL</string>

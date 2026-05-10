@@ -44,6 +44,10 @@
     <string name="title_new_route">NUEVA RUTA</string>
     <string name="title_edit_route">EDITAR RUTA</string>
     <string name="title_route_detail">DETALLE DE RUTA</string>
+    <string name="status_in_progress">EN CURSO</string>
+    <string name="status_planned">PLANIFICADA</string>
+    <string name="status_completed">COMPLETADA</string>
+    <string name="status_cancelled">CANCELADA</string>
     <string name="label_route_data">DATOS DE LA RUTA</string>
     <string name="label_edit_data">EDITAR DATOS</string>
     <string name="btn_new_route">NUEVA RUTA</string>
@@ -103,8 +107,13 @@
     <!-- ======= Diálogos ======= -->
     <string name="dialog_delete_route_title">¿ELIMINAR RUTA?</string>
     <string name="dialog_delete_route_desc">Esta acción no se puede deshacer. Se borrarán todas las paradas asociadas.</string>
+    <string name="dialog_delete_stop_title">¿ELIMINAR PARADA?</string>
+    <string name="dialog_delete_stop_desc">¿Seguro que quieres quitar esta parada de la ruta?</string>
     <string name="dialog_call_title">¿LLAMAR A %1$s?</string>
     <string name="dialog_call_desc">Se abrirá la aplicación de teléfono del dispositivo.</string>
+    <string name="dialog_lang_title">¿CAMBIAR IDIOMA?</string>
+    <string name="dialog_lang_desc">La aplicación se reiniciará para aplicar el nuevo idioma.</string>
+    <string name="btn_change">CAMBIAR</string>
     <string name="btn_delete">ELIMINAR</string>
     <string name="btn_call">LLAMAR</string>
     <string name="btn_cancel">CANCELAR</string>
