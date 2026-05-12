@@ -3,6 +3,9 @@
 # Backend: Java/Maven | Mobile: Android/Gradle | IDEs
 # ============================================================
 
+Agent
+*.png
+
 # ------ Java / Maven (Backend) ------
 target/
 *.class
