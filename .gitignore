@@ -87,3 +87,10 @@ backend/logs/
 backend/generated-labels/
 *.log
 *.txt
+
+# ------ Docker & Photon ------
+contenedores/slior-db-data/
+contenedores/photon-data/
+photon/photon_data/
+photon/tmp_photon/
+photon/*.jar

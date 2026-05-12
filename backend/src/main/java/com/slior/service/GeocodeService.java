@@ -110,7 +110,8 @@ public class GeocodeService {
         String url = builder.toUriString();
 
         try {
-            applyThrottle();
+            // Eliminamos el throttle temporalmente para evitar los timeouts de 20s
+            // applyThrottle(); 
             ResponseEntity<String> response = restTemplate.exchange(
                     url,
                     HttpMethod.GET,
@@ -740,4 +741,3 @@ public class GeocodeService {
         }
     }
 }
-

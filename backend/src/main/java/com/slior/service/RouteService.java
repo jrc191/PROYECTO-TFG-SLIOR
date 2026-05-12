@@ -71,13 +71,6 @@ public class RouteService {
     public List<RouteResponse> getRoutesForRepartidor(UUID repartidorId) {
         List<Route> routes = routeRepository.findByRepartidorIdAndIsDeletedFalse(repartidorId);
         
-        // ASEGURAR PDFs en segundo plano
-        List<UUID> stopIds = routes.stream()
-                .flatMap(r -> r.getStops().stream())
-                .map(Stop::getId)
-                .toList();
-        labelService.generateLabelsAsync(stopIds);
-        
         return routes.stream()
                 .map(RouteResponse::from)
                 .toList();

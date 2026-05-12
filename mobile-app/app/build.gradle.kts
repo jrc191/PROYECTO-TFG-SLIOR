@@ -31,14 +31,14 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
-            // En release usar la URL del túnel
-            buildConfigField("String", "BASE_URL", "\"http://100.115.5.3:8080/\"")
+            // En release usar la URL del túnel (Cloudflare Tunnel)
+            buildConfigField("String", "BASE_URL", "\"https://api.sliorlogistics.app/\"")
         }
         debug {
             applicationIdSuffix = ".debug"
             isDebuggable = true
-            // Emulador local → 10.0.2.2 apunta al localhost del PC
-            buildConfigField("String", "BASE_URL", "\"http://100.115.5.3:8080/\"")
+            // Localhost (vía Cloudflare Tunnel) para pruebas remotas
+            buildConfigField("String", "BASE_URL", "\"https://api.sliorlogistics.app/\"")
         }
     }
 

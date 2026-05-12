@@ -29,6 +29,16 @@ services:
       -listen-ip 0.0.0.0
       -listen-port 2322
 
+  cloudflared:
+    image: cloudflare/cloudflared:latest
+    container_name: cloudflared
+    restart: unless-stopped
+    command: tunnel --no-autoupdate run
+    environment:
+      - TUNNEL_TOKEN=${CLOUDFLARE_TUNNEL_TOKEN}
+    networks:
+      - slior-net
+
 networks:
   slior-net:
     name: slior-net

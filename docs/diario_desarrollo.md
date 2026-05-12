@@ -30,3 +30,10 @@
 *   **Rendimiento:** Optimización de la generación de etiquetas mediante procesos asíncronos (`@Async`) para no bloquear el API.
 *   **Testing Extensivo:** Creación de una suite de tests JUnit 5 para validar seguridad, RGPD y casos límite de geocodificación.
 *   **UI Adaptativa:** Ajustes finales para soporte completo de modo horizontal (Landscape) en la aplicación móvil.
+
+## Fase 7: Infraestructura y Despliegue Seguro (Mayo 2026)
+*   **Migración de Red:** Sustitución de Tailscale por Cloudflare Tunnels para permitir acceso HTTPS público sin VPN cliente.
+*   **Automatización:** Integración de `cloudflared` en el ecosistema Docker del proyecto.
+*   **Refactorización de API URL:** Actualización de la configuración de red en la app móvil para usar el nuevo dominio seguro.
+*   **Optimización de Consultas:** Implementación de `@EntityGraph` en el backend para resolver problemas de rendimiento (N+1) detectados tras la migración.
+*   **Ajuste de Timeouts:** Ampliación de los tiempos de espera en la app móvil para mejorar la resiliencia en conexiones con latencia.
