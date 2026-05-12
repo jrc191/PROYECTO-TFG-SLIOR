@@ -31,6 +31,7 @@ public class GeocodeService {
 
     private final ObjectMapper objectMapper;
     private final GeocodeCacheRepository geocodeCacheRepository;
+    private final com.slior.repository.DireccionRepository direccionRepository;
     private static final Logger log = LoggerFactory.getLogger(GeocodeService.class);
 
     private final Map<String, CacheEntry> cache = new ConcurrentHashMap<>();
@@ -72,6 +73,16 @@ public class GeocodeService {
             if (!persistentResults.isEmpty() || !hasCity) {
                 cache.put(key, new CacheEntry(persistentResults, System.currentTimeMillis() + cacheTtlMs));
                 return persistentResults;
+            }
+        }
+
+        List<AddressSuggestionResponse> local = fetchFromLocalDatabase(normalized);
+        if (!local.isEmpty()) {
+            List<AddressSuggestionResponse> localResults = keepCityMatches(prioritizeByCity(normalized, local), city, hasCity);
+            if (!localResults.isEmpty() || !hasCity) {
+                cache.put(key, new CacheEntry(localResults, System.currentTimeMillis() + cacheTtlMs));
+                saveToPersistentCache(key, localResults);
+                return localResults;
             }
         }
 
@@ -120,6 +131,27 @@ public class GeocodeService {
         }
 
         return new AddressSuggestionResponse("Dirección desconocida", lat, lon);
+    }
+
+    private List<AddressSuggestionResponse> fetchFromLocalDatabase(String query) {
+        log.info("Searching in local database for: {}", query);
+        try {
+            return direccionRepository.searchByFuzzyName(query, org.springframework.data.domain.PageRequest.of(0, 10))
+                    .stream()
+                    .map(d -> {
+                        String displayName = d.getNombre();
+                        if (d.getNumero() != null && !d.getNumero().isBlank()) displayName += ", " + d.getNumero();
+                        if (d.getMunicipio() != null && !d.getMunicipio().isBlank()) displayName += ", " + d.getMunicipio();
+                        if (d.getProvincia() != null && !d.getProvincia().isBlank()) displayName += ", " + d.getProvincia();
+                        if (d.getCodigoPostal() != null && !d.getCodigoPostal().isBlank()) displayName += " (" + d.getCodigoPostal() + ")";
+                        
+                        return new AddressSuggestionResponse(displayName, d.getLatitud(), d.getLongitud());
+                    })
+                    .toList();
+        } catch (Exception e) {
+            log.error("Local database search failed: {}", e.getMessage());
+            return Collections.emptyList();
+        }
     }
 
     private List<AddressSuggestionResponse> fetchWithRetries(String query) {

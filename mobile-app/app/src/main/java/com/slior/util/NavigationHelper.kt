@@ -21,8 +21,8 @@ object NavigationHelper {
             return
         }
 
-        // 1. Filtrar solo paradas pendientes (opcional, aquí enviamos todas las que no estén entregadas)
-        val pendingStops = stops.filter { it.status != "DELIVERED" }
+        // 1. Filtrar solo paradas pendientes (Slior usa "ENTREGADO" para paradas completadas)
+        val pendingStops = stops.filter { it.status != "ENTREGADO" }
         
         if (pendingStops.isEmpty()) {
             Toast.makeText(context, "Todas las paradas ya han sido entregadas", Toast.LENGTH_SHORT).show()
@@ -35,11 +35,8 @@ object NavigationHelper {
             pendingStops.dropLast(1).joinToString("|") { "${it.latitud},${it.longitud}" }
         } else null
 
-        // 3. Construir la URI para Google Maps
-        // api=1: Versión de la API de Google Maps URLs
-        // destination: lat,lng de la última parada
-        // waypoints: lista de lat,lng separados por '|'
-        // travelmode: driving
+        // 3. Construir la URI para Google Maps usando COORDENADAS EXACTAS
+        // Esto evita errores por nombres de calles distintos entre proveedores.
         val uriBuilder = Uri.parse("https://www.google.com/maps/dir/?api=1")
             .buildUpon()
             .appendQueryParameter("destination", "${lastStop.latitud},${lastStop.longitud}")
@@ -49,17 +46,34 @@ object NavigationHelper {
             uriBuilder.appendQueryParameter("waypoints", waypoints)
         }
 
-        val mapUri = uriBuilder.build()
+        launchIntent(context, uriBuilder.build())
+    }
 
-        // 4. Lanzar el Intent
-        val mapIntent = Intent(Intent.ACTION_VIEW, mapUri)
-        mapIntent.setPackage("com.google.android.apps.maps") // Forzar Google Maps si está instalado
+    /**
+     * Abre Google Maps para navegar a una única parada específica.
+     */
+    fun launchSingleStopNavigation(context: Context, stop: StopEntity) {
+        val uri = Uri.parse("google.navigation:q=${stop.latitud},${stop.longitud}")
+        val mapIntent = Intent(Intent.ACTION_VIEW, uri)
+        mapIntent.setPackage("com.google.android.apps.maps")
 
         if (mapIntent.resolveActivity(context.packageManager) != null) {
             context.startActivity(mapIntent)
         } else {
-            // Si Google Maps no está, lanzar un Intent genérico para que el usuario elija (Waze, Maps, Browser)
-            val genericIntent = Intent(Intent.ACTION_VIEW, mapUri)
+            // Fallback a URL de Google Maps si la app no responde al esquema navigation:
+            val webUri = Uri.parse("https://www.google.com/maps/dir/?api=1&destination=${stop.latitud},${stop.longitud}&travelmode=driving")
+            launchIntent(context, webUri)
+        }
+    }
+
+    private fun launchIntent(context: Context, uri: Uri) {
+        val mapIntent = Intent(Intent.ACTION_VIEW, uri)
+        mapIntent.setPackage("com.google.android.apps.maps")
+
+        if (mapIntent.resolveActivity(context.packageManager) != null) {
+            context.startActivity(mapIntent)
+        } else {
+            val genericIntent = Intent(Intent.ACTION_VIEW, uri)
             context.startActivity(genericIntent)
         }
     }

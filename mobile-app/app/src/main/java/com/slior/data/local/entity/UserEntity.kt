@@ -24,12 +24,5 @@ data class UserEntity(
 
     val timestamp: Long = System.currentTimeMillis(),
 
-    val syncStatus: String = SyncStatus.SYNCED
+    val syncStatus: String = SyncStatus.SYNCED.name
 )
-
-/** Estados de sincronización para la lógica offline-first. */
-object SyncStatus {
-    const val SYNCED = "SYNCED"       // Sincronizado con el servidor
-    const val PENDING = "PENDING"     // Pendiente de subir al servidor
-    const val ERROR = "ERROR"         // Error al sincronizar
-}

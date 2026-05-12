@@ -25,6 +25,12 @@ import com.slior.ui.theme.BrutalistWhite
 import com.slior.ui.theme.NeonGreen
 import com.slior.ui.theme.SafetyOrange
 
+import com.slior.data.local.entity.SyncStatus
+import androidx.compose.material.icons.filled.Sync
+import androidx.compose.material.icons.filled.CloudOff
+import androidx.compose.animation.core.*
+import androidx.compose.ui.graphics.graphicsLayer
+
 @Composable
 fun StopCard(
     stop: StopEntity,
@@ -73,12 +79,25 @@ fun StopCard(
                 contentAlignment = Alignment.Center
             ) {
                 if (isCompleted) {
-                    Icon(
-                        imageVector = Icons.Default.Check,
-                        contentDescription = null,
-                        tint = BrutalistBlack,
-                        modifier = Modifier.size(20.dp)
-                    )
+                    if (stop.syncStatus == SyncStatus.PENDING.name) {
+                        val infiniteTransition = rememberInfiniteTransition(label = "sync")
+                        val rotation by infiniteTransition.animateFloat(
+                            initialValue = 0f,
+                            targetValue = 360f,
+                            animationSpec = infiniteRepeatable(tween(2000, easing = LinearEasing)),
+                            label = "rotation"
+                        )
+                        Icon(Icons.Default.Sync, null, tint = BrutalistBlack, modifier = Modifier.size(20.dp).graphicsLayer(rotationZ = rotation))
+                    } else if (stop.syncStatus == SyncStatus.FAILED.name) {
+                        Icon(Icons.Default.CloudOff, null, tint = SafetyOrange, modifier = Modifier.size(20.dp))
+                    } else {
+                        Icon(
+                            imageVector = Icons.Default.Check,
+                            contentDescription = null,
+                            tint = BrutalistBlack,
+                            modifier = Modifier.size(20.dp)
+                        )
+                    }
                 }
             }
 

@@ -11,6 +11,7 @@ import com.slior.data.remote.dto.UpdateRouteRequest
 import retrofit2.http.Body
 import retrofit2.http.DELETE
 import retrofit2.http.GET
+import retrofit2.http.PATCH
 import retrofit2.http.POST
 import retrofit2.http.PUT
 import retrofit2.http.Path
@@ -58,6 +59,12 @@ interface ApiService {
     suspend fun optimizeRoute(
         @Path("id") routeId: String,
         @Body request: OptimizeRouteRequest
+    ): RouteResponseDto
+
+    @PATCH("api/v1/routes/stops/{stopId}/status")
+    suspend fun updateStopStatus(
+        @Path("stopId") stopId: String,
+        @Query("status") status: String
     ): RouteResponseDto
 
     @GET("api/v1/geocode/search")

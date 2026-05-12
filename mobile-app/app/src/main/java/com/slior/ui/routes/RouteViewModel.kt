@@ -20,20 +20,31 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+import com.slior.util.ConnectivityMonitor
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.stateIn
+
 @HiltViewModel
 class RouteViewModel @Inject constructor(
     private val routeRepository: RouteRepository,
     private val authRepository: AuthRepository,
     private val routeDao: RouteDao,
     private val locationHelper: LocationHelper,
-    private val geocodeService: GeocodeService
+    private val geocodeService: GeocodeService,
+    private val connectivityMonitor: ConnectivityMonitor
 ) : ViewModel() {
+
+    val isOnline = connectivityMonitor.isConnected
+        .stateIn(viewModelScope, SharingStarted.Eagerly, true)
 
     private val _listState = MutableStateFlow<RouteListState>(RouteListState.Loading)
     val listState: StateFlow<RouteListState> = _listState.asStateFlow()
 
     private val _detailState = MutableStateFlow<RouteDetailState>(RouteDetailState.Loading)
     val detailState: StateFlow<RouteDetailState> = _detailState.asStateFlow()
+
+    private val _currentUser = MutableStateFlow<com.slior.data.local.entity.UserEntity?>(null)
+    val currentUser: StateFlow<com.slior.data.local.entity.UserEntity?> = _currentUser.asStateFlow()
 
     private val _createState = MutableStateFlow<CreateRouteState>(CreateRouteState.Idle)
     val createState: StateFlow<CreateRouteState> = _createState.asStateFlow()
@@ -60,6 +71,18 @@ class RouteViewModel @Inject constructor(
 
     private val _isResolvingAddress = MutableStateFlow(false)
     val isResolvingAddress: StateFlow<Boolean> = _isResolvingAddress.asStateFlow()
+
+    private val _stopDetail = MutableStateFlow<com.slior.data.local.entity.StopEntity?>(null)
+    val stopDetail: StateFlow<com.slior.data.local.entity.StopEntity?> = _stopDetail.asStateFlow()
+
+    private val _scannedPackageCode = MutableStateFlow<String?>(null)
+    val scannedPackageCode: StateFlow<String?> = _scannedPackageCode.asStateFlow()
+
+    private val _isPackageValid = MutableStateFlow<Boolean?>(null)
+    val isPackageValid: StateFlow<Boolean?> = _isPackageValid.asStateFlow()
+
+    private val _deliveryState = MutableStateFlow<Result<Unit>?>(null)
+    val deliveryState: StateFlow<Result<Unit>?> = _deliveryState.asStateFlow()
 
     private var locationTrackingJob: Job? = null
 
@@ -145,8 +168,20 @@ class RouteViewModel @Inject constructor(
         }
     }
 
+    private var currentUserJob: Job? = null
+
+    fun loadCurrentUser(userId: String) {
+        currentUserJob?.cancel()
+        currentUserJob = viewModelScope.launch {
+            authRepository.getCurrentUser(userId).collect { user ->
+                _currentUser.value = user
+            }
+        }
+    }
+
     fun loadRoutes(repartidorId: String) {
         viewModelScope.launch {
+            loadCurrentUser(repartidorId)
             _listState.value = RouteListState.Loading
             val syncResult = routeRepository.syncRoutes(repartidorId)
             routeRepository.getRoutesByRepartidor(repartidorId)
@@ -165,8 +200,11 @@ class RouteViewModel @Inject constructor(
         }
     }
 
+    private var detailJob: Job? = null
+
     fun loadRouteDetail(routeId: String) {
-        viewModelScope.launch {
+        detailJob?.cancel()
+        detailJob = viewModelScope.launch {
             _detailState.value = RouteDetailState.Loading
             val route = routeDao.getRouteById(routeId)
             if (route == null) {
@@ -265,4 +303,70 @@ class RouteViewModel @Inject constructor(
     fun closeDrawer() { _drawerOpen.value = null }
 
     enum class DrawerType { MENU, PROFILE }
+
+    private var stopDetailJob: Job? = null
+
+    fun loadStopDetail(stopId: String) {
+        stopDetailJob?.cancel()
+        stopDetailJob = viewModelScope.launch {
+            routeDao.observeStopById(stopId).collect { stop ->
+                _stopDetail.value = stop
+                _scannedPackageCode.value = null
+                _isPackageValid.value = null
+            }
+        }
+    }
+
+    fun onPackageScanned(code: String) {
+        _scannedPackageCode.value = code
+        val stop = _stopDetail.value
+        if (stop != null) {
+            // Verificación: Por ahora comprobamos contra el ID o el codigoPaquete si existe
+            val expectedCode = stop.codigoPaquete ?: stop.id
+            _isPackageValid.value = (code == expectedCode)
+        }
+    }
+
+    fun confirmDelivery(stopId: String) {
+        viewModelScope.launch {
+            try {
+                // Ya no ponemos _deliveryState en Loading porque Room actualizará la UI instantáneamente
+                
+                val timestamp = java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", java.util.Locale.getDefault())
+                    .format(java.util.Date())
+                
+                // El método optimistic actualiza la DB y ENCOLA el worker, pero NO espera a que termine.
+                val result = routeRepository.confirmDeliveryOptimistic(stopId, timestamp)
+                
+                if (result is Result.Success) {
+                    // Notificamos éxito de la operación LOCAL
+                    _deliveryState.value = Result.Success(Unit)
+                    // La UI se refresca sola porque RouteDetailScreen observa el Flow de Room
+                } else if (result is Result.Error) {
+                    _deliveryState.value = Result.Error(result.exception)
+                }
+            } catch (e: Exception) {
+                _deliveryState.value = Result.Error(e)
+            }
+        }
+    }
+
+    fun resetDeliveryState() {
+        _deliveryState.value = null
+    }
+
+    private val _isRetryingSync = MutableStateFlow(false)
+    val isRetryingSync: StateFlow<Boolean> = _isRetryingSync.asStateFlow()
+
+    fun retrySyncStops() {
+        viewModelScope.launch {
+            _isRetryingSync.value = true
+            val pending = routeDao.getPendingStops()
+            pending.forEach { stop ->
+                confirmDelivery(stop.id)
+            }
+            delay(1000) // Pequeño delay para que se vea el feedback
+            _isRetryingSync.value = false
+        }
+    }
 }

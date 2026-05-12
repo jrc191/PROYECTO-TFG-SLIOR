@@ -13,6 +13,9 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import javax.inject.Inject
 import javax.inject.Singleton
 
+import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.*
+
 interface ConnectivityMonitor {
     val isConnected: Flow<Boolean>
 }
@@ -25,40 +28,34 @@ class ConnectivityMonitorImpl @Inject constructor(
     private val connectivityManager =
         context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
 
-    override val isConnected: Flow<Boolean> = callbackFlow {
-        val callback = object : ConnectivityManager.NetworkCallback() {
+    // Usamos un MutableStateFlow para tener un valor inicial inmediato y suscribirnos a cambios
+    private val _isConnected = MutableStateFlow(checkCurrentConnectivity())
+    override val isConnected: Flow<Boolean> = _isConnected.asStateFlow()
+
+    init {
+        val request = NetworkRequest.Builder()
+            .addCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
+            .build()
+
+        connectivityManager.registerNetworkCallback(request, object : ConnectivityManager.NetworkCallback() {
             override fun onAvailable(network: Network) {
-                trySend(true)
+                _isConnected.value = true
             }
 
             override fun onLost(network: Network) {
-                // Verificamos si realmente no hay ninguna red disponible antes de enviar false
-                val active = connectivityManager.activeNetwork
-                val caps = connectivityManager.getNetworkCapabilities(active)
-                val connected = caps?.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET) == true
-                trySend(connected)
+                // Al perder una red, verificamos si queda alguna otra activa
+                _isConnected.value = checkCurrentConnectivity()
             }
 
             override fun onCapabilitiesChanged(network: Network, caps: NetworkCapabilities) {
-                trySend(caps.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET))
+                _isConnected.value = caps.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
             }
-        }
+        })
+    }
 
-        val request = NetworkRequest.Builder()
-            .addCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
-            .addCapability(NetworkCapabilities.NET_CAPABILITY_VALIDATED)
-            .build()
-
-        connectivityManager.registerNetworkCallback(request, callback)
-
-        // Valor inicial más fiable
-        val currentNetwork = connectivityManager.activeNetwork
-        val caps = connectivityManager.getNetworkCapabilities(currentNetwork)
-        val initialStatus = caps?.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET) == true
-        trySend(initialStatus)
-
-        awaitClose {
-            connectivityManager.unregisterNetworkCallback(callback)
-        }
-    }.distinctUntilChanged()
+    private fun checkCurrentConnectivity(): Boolean {
+        val activeNetwork = connectivityManager.activeNetwork
+        val caps = connectivityManager.getNetworkCapabilities(activeNetwork)
+        return caps?.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET) == true
+    }
 }

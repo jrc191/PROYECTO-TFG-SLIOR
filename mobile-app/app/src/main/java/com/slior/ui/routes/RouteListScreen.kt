@@ -47,7 +47,9 @@ fun RouteListScreen(
     onRouteClick: (String) -> Unit,
     onCreateRoute: () -> Unit,
     onLogout: () -> Unit,
-    onSettings: () -> Unit, // Callback para ajustes
+    onSettings: () -> Unit,
+    onEditProfile: () -> Unit,
+    onChangePassword: () -> Unit,
     viewModel: RouteViewModel = hiltViewModel(),
     authViewModel: AuthViewModel = hiltViewModel(),
     connViewModel: com.slior.viewmodel.ConnectivityViewModel = hiltViewModel()
@@ -55,6 +57,7 @@ fun RouteListScreen(
     val state      by viewModel.listState.collectAsStateWithLifecycle()
     val drawerOpen by viewModel.drawerOpen.collectAsStateWithLifecycle()
     val isConnected by connViewModel.isConnected.collectAsStateWithLifecycle()
+    val currentUser by viewModel.currentUser.collectAsStateWithLifecycle()
     
     val isRefreshing = state is RouteListState.Loading
 
@@ -101,16 +104,6 @@ fun RouteListScreen(
                     is RouteListState.Success -> {
                         val routes = (state as RouteListState.Success).routes
                         
-                        // Cachear de fondo las zonas de las rutas cargadas
-                        LaunchedEffect(routes) {
-                            routes.forEach { route ->
-                                // Aquí idealmente necesitaríamos los puntos de la ruta, 
-                                // pero por ahora podemos cachear el área general si tuviéramos acceso a paradas.
-                                // Como no las tenemos en la entidad RouteEntity de la lista,
-                                // dejamos este gancho listo para cuando implementemos Room con relaciones.
-                            }
-                        }
-
                         if (routes.isEmpty()) RouteListEmpty()
                         else RouteListSuccess(routes = routes, onRouteClick = onRouteClick)
                     }
@@ -167,7 +160,13 @@ fun RouteListScreen(
         }
 
         AnimatedVisibility(visible = drawerOpen == RouteViewModel.DrawerType.PROFILE, enter = slideInHorizontally(tween(250)) { it }, exit = slideOutHorizontally(tween(250)) { it }, modifier = Modifier.align(Alignment.TopEnd).zIndex(3f)) {
-            ProfileDrawer(onClose = { viewModel.closeDrawer() }, onLogout = { viewModel.closeDrawer(); authViewModel.logout(); onLogout() })
+            ProfileDrawer(
+                user = currentUser,
+                onClose = { viewModel.closeDrawer() }, 
+                onEditProfile = { viewModel.closeDrawer(); onEditProfile() },
+                onChangePassword = { viewModel.closeDrawer(); onChangePassword() },
+                onLogout = { viewModel.closeDrawer(); authViewModel.logout(); onLogout() }
+            )
         }
     }
 }
@@ -194,13 +193,15 @@ private fun MenuDrawer(onClose: () -> Unit, onSettings: () -> Unit) {
                 Text(text = stringResource(R.string.menu_system_status), fontFamily = SpaceGroteskFamily, fontWeight = FontWeight.Bold, fontSize = 11.sp, letterSpacing = 2.sp, color = BrutalistWhite)
             }
         }
-        Spacer(Modifier.height(8.dp))
-        MenuDrawerItem(Icons.Default.Route, stringResource(R.string.menu_my_routes), null, { onClose() })
-        MenuDrawerItem(Icons.Default.BarChart, stringResource(R.string.menu_statistics), stringResource(R.string.menu_badge_soon), { })
-        MenuDrawerItem(Icons.Default.Map, stringResource(R.string.menu_general_map), stringResource(R.string.menu_badge_soon), { })
-        MenuDrawerItem(Icons.Default.Inventory2, stringResource(R.string.menu_packages), stringResource(R.string.menu_badge_soon), { })
-        MenuDrawerItem(Icons.Default.Settings, stringResource(R.string.menu_settings), null, { onClose(); onSettings() })
-        Spacer(Modifier.weight(1f))
+        
+        LazyColumn(modifier = Modifier.weight(1f)) {
+            item { MenuDrawerItem(Icons.Default.Route, stringResource(R.string.menu_my_routes), null, { onClose() }) }
+            item { MenuDrawerItem(Icons.Default.BarChart, stringResource(R.string.menu_statistics), stringResource(R.string.menu_badge_soon), { }) }
+            item { MenuDrawerItem(Icons.Default.Map, stringResource(R.string.menu_general_map), stringResource(R.string.menu_badge_soon), { }) }
+            item { MenuDrawerItem(Icons.Default.Inventory2, stringResource(R.string.menu_packages), stringResource(R.string.menu_badge_soon), { }) }
+            item { MenuDrawerItem(Icons.Default.Settings, stringResource(R.string.menu_settings), null, { onClose(); onSettings() }) }
+        }
+
         Box(Modifier.fillMaxWidth().drawBehind { drawLine(BrutalistBlack, Offset(0f, 0f), Offset(size.width, 0f), 1.dp.toPx()) }.padding(20.dp)) {
             Text(text = stringResource(R.string.menu_version_info), fontFamily = SpaceGroteskFamily, fontSize = 11.sp, letterSpacing = 1.sp, color = Color(0xFF9E9E9E))
         }
@@ -221,19 +222,44 @@ private fun MenuDrawerItem(icon: ImageVector, label: String, badge: String?, onC
 }
 
 @Composable
-private fun ProfileDrawer(onClose: () -> Unit, onLogout: () -> Unit) {
-    Column(modifier = Modifier.fillMaxHeight().width(280.dp).background(BrutalistWhite).drawBehind { drawLine(BrutalistBlack, Offset(0f, 0f), Offset(0f, size.height), 2.dp.toPx()) }) {
-        Column(Modifier.fillMaxWidth().background(BrutalistBlack).padding(20.dp)) {
-            Box(Modifier.size(64.dp).border(2.dp, NeonGreen).background(Color(0xFF1A1A1A)), contentAlignment = Alignment.Center) { Icon(Icons.Default.Person, null, tint = NeonGreen, modifier = Modifier.size(36.dp)) }
-            Spacer(Modifier.height(12.dp))
-            Text(text = stringResource(R.string.menu_courier), fontFamily = SpaceGroteskFamily, fontWeight = FontWeight.Black, fontSize = 18.sp, color = BrutalistWhite)
-            Text(text = stringResource(R.string.menu_active_profile), fontFamily = SpaceGroteskFamily, fontSize = 12.sp, color = Color(0xFF9E9E9E))
+private fun ProfileDrawer(
+    user: com.slior.data.local.entity.UserEntity?,
+    onClose: () -> Unit, 
+    onEditProfile: () -> Unit,
+    onChangePassword: () -> Unit,
+    onLogout: () -> Unit
+) {
+    val configuration = androidx.compose.ui.platform.LocalConfiguration.current
+    val isLandscape = configuration.orientation == android.content.res.Configuration.ORIENTATION_LANDSCAPE
+
+    Column(modifier = Modifier.fillMaxHeight().width(if (isLandscape) 360.dp else 280.dp).background(BrutalistWhite).drawBehind { drawLine(BrutalistBlack, Offset(0f, 0f), Offset(0f, size.height), 2.dp.toPx()) }) {
+        Column(Modifier.fillMaxWidth().background(BrutalistBlack).padding(if (isLandscape) 16.dp else 20.dp)) {
+            if (isLandscape) {
+                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+                    Box(Modifier.size(56.dp).border(2.dp, NeonGreen).background(Color(0xFF1A1A1A)), contentAlignment = Alignment.Center) { 
+                        Icon(Icons.Default.Person, null, tint = NeonGreen, modifier = Modifier.size(32.dp)) 
+                    }
+                    Column {
+                        Text(text = user?.nombre?.uppercase() ?: stringResource(R.string.menu_courier), fontFamily = SpaceGroteskFamily, fontWeight = FontWeight.Black, fontSize = 16.sp, color = BrutalistWhite, maxLines = 1)
+                        Text(text = user?.email ?: stringResource(R.string.menu_active_profile), fontFamily = SpaceGroteskFamily, fontSize = 11.sp, color = Color(0xFF9E9E9E), maxLines = 1)
+                    }
+                }
+            } else {
+                Box(Modifier.size(64.dp).border(2.dp, NeonGreen).background(Color(0xFF1A1A1A)), contentAlignment = Alignment.Center) { 
+                    Icon(Icons.Default.Person, null, tint = NeonGreen, modifier = Modifier.size(36.dp)) 
+                }
+                Spacer(Modifier.height(12.dp))
+                Text(text = user?.nombre?.uppercase() ?: stringResource(R.string.menu_courier), fontFamily = SpaceGroteskFamily, fontWeight = FontWeight.Black, fontSize = 18.sp, color = BrutalistWhite)
+                Text(text = user?.email ?: stringResource(R.string.menu_active_profile), fontFamily = SpaceGroteskFamily, fontSize = 12.sp, color = Color(0xFF9E9E9E))
+            }
         }
-        Spacer(Modifier.height(8.dp))
-        ProfileDrawerItem(Icons.Default.Person, stringResource(R.string.menu_edit_profile), stringResource(R.string.menu_edit_profile_desc), stringResource(R.string.menu_badge_soon), BrutalistBlack, { })
-        ProfileDrawerItem(Icons.Default.Lock, stringResource(R.string.menu_change_password), stringResource(R.string.menu_change_password_desc), stringResource(R.string.menu_badge_soon), BrutalistBlack, { })
-        ProfileDrawerItem(Icons.Default.Notifications, stringResource(R.string.menu_notifications), stringResource(R.string.menu_notifications_desc), stringResource(R.string.menu_badge_soon), BrutalistBlack, { })
-        Spacer(Modifier.weight(1f))
+        
+        LazyColumn(modifier = Modifier.weight(1f)) {
+            item { ProfileDrawerItem(Icons.Default.Person, stringResource(R.string.menu_edit_profile), stringResource(R.string.menu_edit_profile_desc), null, BrutalistBlack, onEditProfile) }
+            item { ProfileDrawerItem(Icons.Default.Lock, stringResource(R.string.menu_change_password), stringResource(R.string.menu_change_password_desc), null, BrutalistBlack, onChangePassword) }
+            item { ProfileDrawerItem(Icons.Default.Notifications, stringResource(R.string.menu_notifications), stringResource(R.string.menu_notifications_desc), stringResource(R.string.menu_badge_soon), BrutalistBlack, { }) }
+        }
+
         Row(Modifier.fillMaxWidth().drawBehind { drawLine(BrutalistBlack, Offset(0f, 0f), Offset(size.width, 0f), 2.dp.toPx()) }.clickable { onLogout() }.padding(20.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
             Icon(Icons.AutoMirrored.Filled.Logout, null, tint = SafetyOrange, modifier = Modifier.size(22.dp))
             Column {

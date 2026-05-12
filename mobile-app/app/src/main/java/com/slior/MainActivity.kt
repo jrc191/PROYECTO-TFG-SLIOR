@@ -112,7 +112,9 @@ class MainActivity : androidx.appcompat.app.AppCompatActivity() {
                                     onRouteClick  = { routeId -> navController.navigate("route_detail/$routeId") },
                                     onCreateRoute = { navController.navigate("create_route/$repartidorId") },
                                     onLogout      = { navController.navigate("login") { popUpTo(0) { inclusive = true } } },
-                                    onSettings    = { navController.navigate("settings") } // Callback para ajustes
+                                    onSettings    = { navController.navigate("settings") },
+                                    onEditProfile = { scope.launch { snackbarHostState.showSnackbar("Editar Perfil: Próximamente") } },
+                                    onChangePassword = { scope.launch { snackbarHostState.showSnackbar("Cambiar Contraseña: Próximamente") } }
                                 )
                             }
                             composable("route_detail/{routeId}") { backStackEntry ->
@@ -120,7 +122,24 @@ class MainActivity : androidx.appcompat.app.AppCompatActivity() {
                                 RouteDetailScreen(
                                     routeId = routeId,
                                     onBack  = { navController.popBackStack() },
-                                    onEdit  = { id -> navController.navigate("create_route/${sessionUserId}/$id") }
+                                    onEdit  = { id -> navController.navigate("create_route/${sessionUserId}/$id") },
+                                    onStopClick = { stopId -> navController.navigate("stop_detail/$stopId") }
+                                )
+                            }
+                            composable("stop_detail/{stopId}") { backStackEntry ->
+                                val stopId = backStackEntry.arguments?.getString("stopId") ?: ""
+                                com.slior.ui.routes.StopDetailScreen(
+                                    stopId = stopId,
+                                    onBack = { navController.popBackStack() },
+                                    onScan = { id -> navController.navigate("scan/$id") }
+                                )
+                            }
+                            composable("scan/{stopId}") { backStackEntry ->
+                                val stopId = backStackEntry.arguments?.getString("stopId") ?: ""
+                                com.slior.ui.routes.ScanScreen(
+                                    stopId = stopId,
+                                    onBack = { navController.popBackStack() },
+                                    onDeliveryConfirmed = { navController.popBackStack() }
                                 )
                             }
                             composable("create_route/{repartidorId}") { backStackEntry ->

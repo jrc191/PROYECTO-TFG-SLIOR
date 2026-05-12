@@ -12,7 +12,8 @@ data class StopResponseDto(
     val ordenVisita: Int,
     val status: String,
     val notas: String?,
-    val entregadoEn: String?
+    val entregadoEn: String?,
+    val codigoPaquete: String?
 )
 
 data class RouteResponseDto(

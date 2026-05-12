@@ -26,8 +26,9 @@ class GeocodeService @Inject constructor(
         return withContext(Dispatchers.IO) {
             try {
                 val backendResults = apiService.searchAddresses(normalizedQuery)
-                cache[normalizedQuery] = backendResults
-                Result.Success(backendResults)
+                val simplifiedResults = backendResults.map { it.copy(displayName = simplifyAddress(it.displayName)) }
+                cache[normalizedQuery] = simplifiedResults
+                Result.Success(simplifiedResults)
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
@@ -55,12 +56,26 @@ class GeocodeService @Inject constructor(
         return withContext(Dispatchers.IO) {
             try {
                 val result = apiService.reverseGeocode(lat, lon)
-                Result.Success(result)
+                Result.Success(result.copy(displayName = simplifyAddress(result.displayName)))
             } catch (e: Exception) {
                 // Fallback: Devolver una dirección genérica si falla el servidor
                 Result.Success(AddressSuggestion("Ubicación seleccionada ($lat, $lon)", lat, lon))
             }
         }
+    }
+
+    /**
+     * Simplifica una dirección de OSM (que suele ser muy larga) a algo más legible.
+     * Ejemplo: "Calle Caganche, Zalamea la Real, Cuenca Minera, Huelva, Andalucía, 21640, España"
+     * Resultado: "Calle Caganche, Zalamea la Real"
+     */
+    private fun simplifyAddress(fullAddress: String): String {
+        val parts = fullAddress.split(",")
+        if (parts.size <= 2) return fullAddress
+        
+        // Intentamos quedarnos solo con los dos primeros componentes (Calle y Ciudad)
+        // y limpiar espacios extra
+        return "${parts[0].trim()}, ${parts[1].trim()}"
     }
 
     fun clearCache() {

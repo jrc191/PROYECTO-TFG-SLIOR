@@ -42,42 +42,61 @@ public class RouteOptimizationService {
         Route route = routeRepository.findByIdAndIsDeletedFalse(routeId)
                 .orElseThrow(() -> new RouteNotFoundException(routeId.toString()));
 
-        List<Stop> paradas = route.getStops().stream()
+        List<Stop> todasLasParadas = route.getStops().stream()
                 .filter(s -> !s.isDeleted())
-                .collect(Collectors.toCollection(ArrayList::new));
+                .collect(Collectors.toList());
 
-        if (paradas.isEmpty()) {
+        if (todasLasParadas.isEmpty()) {
             return RouteResponse.from(route);
         }
 
-        // 1. Aplicar algoritmo Nearest Neighbor (Mantenemos por ahora para el orden)
-        List<Stop> paradasOrdenadas = nearestNeighbor(
-                paradas,
-                request.puntoInicioLat(),
-                request.puntoInicioLon()
-        );
+        // 1. Separar paradas: Las ya entregadas no se optimizan, se quedan al principio en su orden actual
+        List<Stop> entregadas = todasLasParadas.stream()
+                .filter(s -> s.getStatus() == com.slior.model.enums.StopStatus.ENTREGADO)
+                .sorted(java.util.Comparator.comparing(Stop::getOrdenVisita))
+                .collect(Collectors.toList());
 
-        // 2. Actualizar el orden de visita
-        for (int i = 0; i < paradasOrdenadas.size(); i++) {
-            paradasOrdenadas.get(i).setOrdenVisita(i + 1);
+        List<Stop> pendientes = todasLasParadas.stream()
+                .filter(s -> s.getStatus() != com.slior.model.enums.StopStatus.ENTREGADO)
+                .collect(Collectors.toCollection(ArrayList::new));
+
+        // 2. Optimizar solo las pendientes desde la ubicación actual o última entregada
+        double startLat = request.puntoInicioLat();
+        double startLon = request.puntoInicioLon();
+
+        if (!entregadas.isEmpty()) {
+            Stop ultimaEntregada = entregadas.get(entregadas.size() - 1);
+            startLat = ultimaEntregada.getLatitud();
+            startLon = ultimaEntregada.getLongitud();
         }
 
-        // 3. Calcular métricas reales con OSRM
+        List<Stop> pendientesOrdenadas = nearestNeighbor(pendientes, startLat, startLon);
+
+        // 3. Recomponer la ruta completa: Entregadas + Pendientes Optimizadas
+        List<Stop> rutaFinal = new ArrayList<>(entregadas);
+        rutaFinal.addAll(pendientesOrdenadas);
+
+        // 4. Actualizar el orden de visita global
+        for (int i = 0; i < rutaFinal.size(); i++) {
+            rutaFinal.get(i).setOrdenVisita(i + 1);
+        }
+
+        // 5. Calcular métricas reales con OSRM (desde el punto de inicio real de la petición)
         OSRMResult metrics = calcularMetricasReales(
                 request.puntoInicioLat(),
                 request.puntoInicioLon(),
-                paradasOrdenadas
+                rutaFinal
         );
 
         if (metrics != null) {
             route.setDistanciaTotal(metrics.distanceKm());
             route.setTiempoEstimado(ajustarTiempoPorVehiculo(metrics.durationMinutes(), request.vehicleType()));
         } else {
-            // Fallback a Haversine si OSRM falla
+            // Fallback a Haversine
             double distanciaKm = calcularDistanciaTotalHaversine(
                     request.puntoInicioLat(),
                     request.puntoInicioLon(),
-                    paradasOrdenadas
+                    rutaFinal
             );
             route.setDistanciaTotal(Math.round(distanciaKm * 100.0) / 100.0);
             route.setTiempoEstimado(calcularTiempoEstimadoFallback(distanciaKm, request.vehicleType()));

@@ -15,6 +15,8 @@ data class StopEntity(
     val longitud: Double,
     val ordenVisita: Int,
     val status: String,
+    val syncStatus: String = SyncStatus.SYNCED.name,
     val notas: String?,
-    val entregadoEn: String?
+    val entregadoEn: String?,
+    val codigoPaquete: String? = null
 )
