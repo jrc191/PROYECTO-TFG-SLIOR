@@ -91,6 +91,8 @@ backend/generated-labels/
 # ------ Docker & Photon ------
 contenedores/slior-db-data/
 contenedores/photon-data/
+contenedores/backend-logs/
+contenedores/backend-labels/
 photon/photon_data/
 photon/tmp_photon/
 photon/*.jar

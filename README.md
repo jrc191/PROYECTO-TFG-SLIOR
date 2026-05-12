@@ -25,13 +25,14 @@ SLIOR es una solución integral para la gestión y optimización de rutas de rep
 
 ## 🛠️ Instalación y Uso
 
-1. Levantar la infraestructura:
+1. **Configuración de Red:** Asegúrate de tener un archivo `.env` en la carpeta `contenedores/` con tu `CLOUDFLARE_TUNNEL_TOKEN`.
+2. **Levantar todo el sistema:**
    ```bash
    cd contenedores
-   docker-compose up -d
+   docker-compose up -d --build
    ```
-2. Ejecutar el backend desde tu IDE favorito (Puerto 8080).
-3. Compilar e instalar la app móvil en un dispositivo o emulador.
+   *Esto compilará el backend, levantará la base de datos PostgreSQL, el servicio de mapas Photon y el túnel de Cloudflare.*
+3. **App Móvil:** Compila e instala la app móvil en un dispositivo o emulador. La app ya está configurada para conectar con `https://api.sliorlogistics.app/`.
 
 ---
 **Autor:** José Ramos Contioso

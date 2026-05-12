@@ -37,3 +37,9 @@
 *   **Refactorización de API URL:** Actualización de la configuración de red en la app móvil para usar el nuevo dominio seguro.
 *   **Optimización de Consultas:** Implementación de `@EntityGraph` en el backend para resolver problemas de rendimiento (N+1) detectados tras la migración.
 *   **Ajuste de Timeouts:** Ampliación de los tiempos de espera en la app móvil para mejorar la resiliencia en conexiones con latencia.
+
+## Fase 8: Dockerización Completa del Backend (Mayo 2026)
+*   **Contenerización:** Creación de un `Dockerfile` multi-stage para el backend, permitiendo compilar y ejecutar el servidor sin necesidad de herramientas locales.
+*   **Orquestación:** Integración del servicio `slior-backend` en `docker-compose.yml`, vinculándolo a la red interna y a la base de datos PostgreSQL.
+*   **Configuración por Perfiles:** Implementación de `application-docker.properties` para gestionar variables de entorno y conexiones dentro de la red de Docker.
+*   **Persistencia de Logs:** Mapeo de volúmenes para que los logs y las etiquetas generadas sean accesibles desde el host.
