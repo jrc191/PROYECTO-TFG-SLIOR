@@ -2,6 +2,7 @@ package com.slior.exception;
 
 import com.slior.dto.ErrorResponse;
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.extern.slf4j.Slf4j;
 import org.slf4j.MDC;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -15,6 +16,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
  * Centraliza todos los errores en una respuesta JSON consistente.
  */
 @RestControllerAdvice
+@Slf4j
 public class GlobalExceptionHandler {
 
     private static final String MDC_KEY = "requestId";
@@ -81,9 +83,9 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleGeneral(
             Exception ex, HttpServletRequest request) {
+        log.error("Unhandled exception occurred while processing request: {}", request.getRequestURI(), ex);
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body(buildError(HttpStatus.INTERNAL_SERVER_ERROR,
                         "Error interno del servidor", request.getRequestURI()));
     }
 }
-

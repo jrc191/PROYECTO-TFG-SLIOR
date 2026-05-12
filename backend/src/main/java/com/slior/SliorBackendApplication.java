@@ -19,6 +19,8 @@ import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
  */
 @SpringBootApplication
 @EnableJpaAuditing
+@org.springframework.scheduling.annotation.EnableScheduling
+@org.springframework.scheduling.annotation.EnableAsync
 public class SliorBackendApplication {
 
     public static void main(String[] args) {

@@ -48,7 +48,7 @@ public class SecurityConfig {
                         .authenticationEntryPoint((request, response, authException) -> {
                             response.setStatus(jakarta.servlet.http.HttpServletResponse.SC_UNAUTHORIZED);
                             response.setContentType("application/json");
-                            response.getWriter().write("{\"error\": \"No autorizado\", \"message\": \"Token inválido o ausente\"}");
+                            response.getWriter().write("{\"status\": 401, \"error\": \"Unauthorized\", \"message\": \"Token inválido o ausente\"}");
                         })
                 )
                 .headers(headers -> headers
@@ -68,6 +68,7 @@ public class SecurityConfig {
                         .requestMatchers("/auth/v1/**").permitAll()
                         .requestMatchers("/health").permitAll()
                         .requestMatchers("/api/v1/geocode/**").permitAll()
+                        .requestMatchers("/api/v1/routes/stops/*/label").permitAll()
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session
