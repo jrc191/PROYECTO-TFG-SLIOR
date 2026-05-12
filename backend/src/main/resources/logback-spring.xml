@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <include resource="org/springframework/boot/logging/logback/defaults.xml" />
+    <include resource="org/springframework/boot/logging/logback/console-appender.xml" />
+
+    <!-- Carpeta base de logs -->
+    <property name="LOG_BASE" value="./logs" />
+
+    <!-- Formato para archivos -->
+    <property name="FILE_LOG_PATTERN" value="%d{yyyy-MM-dd HH:mm:ss.SSS} %5p ${PID:- } --- [%t] %-40.40logger{39} : %m%n${LOG_EXCEPTION_CONVERSION_WORD:-%wEx}" />
+
+    <!-- 1. APPENDER PARA PDFS -->
+    <appender name="PDF_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <encoder><pattern>${FILE_LOG_PATTERN}</pattern></encoder>
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <fileNamePattern>${LOG_BASE}/pdfs/log-pdf-%d{yyyy-MM-dd}.%i.txt</fileNamePattern>
+            <maxFileSize>10MB</maxFileSize>
+            <maxHistory>30</maxHistory>
+        </rollingPolicy>
+    </appender>
+
+    <!-- 2. APPENDER PARA QUERYS -->
+    <appender name="QUERIES_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <encoder><pattern>${FILE_LOG_PATTERN}</pattern></encoder>
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <fileNamePattern>${LOG_BASE}/queries/log-queries-%d{yyyy-MM-dd}.%i.txt</fileNamePattern>
+            <maxFileSize>10MB</maxFileSize>
+            <maxHistory>30</maxHistory>
+        </rollingPolicy>
+    </appender>
+
+    <!-- 3. APPENDER PARA SEGURIDAD (Auth, JWT, etc) -->
+    <appender name="SECURITY_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <encoder><pattern>${FILE_LOG_PATTERN}</pattern></encoder>
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <fileNamePattern>${LOG_BASE}/security/log-security-%d{yyyy-MM-dd}.%i.txt</fileNamePattern>
+            <maxFileSize>10MB</maxFileSize>
+            <maxHistory>30</maxHistory>
+        </rollingPolicy>
+    </appender>
+
+    <!-- 4. APPENDER GENÉRICO -->
+    <appender name="GENERIC_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <encoder><pattern>${FILE_LOG_PATTERN}</pattern></encoder>
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <fileNamePattern>${LOG_BASE}/generic/log-generic-%d{yyyy-MM-dd}.%i.txt</fileNamePattern>
+            <maxFileSize>10MB</maxFileSize>
+            <maxHistory>30</maxHistory>
+        </rollingPolicy>
+    </appender>
+
+    <!-- ASIGNACIÓN DE LOGGERS -->
+
+    <!-- PDFs -->
+    <logger name="com.slior.service.LabelService" level="INFO" additivity="true">
+        <appender-ref ref="PDF_FILE" />
+    </logger>
+
+    <!-- Base de Datos / SQL -->
+    <logger name="org.hibernate.SQL" level="DEBUG" additivity="true">
+        <appender-ref ref="QUERIES_FILE" />
+    </logger>
+    <logger name="org.hibernate.type.descriptor.sql.BasicBinder" level="TRACE" additivity="true">
+        <appender-ref ref="QUERIES_FILE" />
+    </logger>
+
+    <!-- Seguridad (Logins, denegaciones de acceso, etc) -->
+    <logger name="org.springframework.security" level="INFO" additivity="true">
+        <appender-ref ref="SECURITY_FILE" />
+    </logger>
+    <logger name="com.slior.security" level="DEBUG" additivity="true">
+        <appender-ref ref="SECURITY_FILE" />
+    </logger>
+
+    <!-- Root logger (Va a generic/) -->
+    <root level="INFO">
+        <appender-ref ref="CONSOLE" />
+        <appender-ref ref="GENERIC_FILE" />
+    </root>
+
+</configuration>

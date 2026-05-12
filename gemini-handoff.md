@@ -1,33 +1,31 @@
-# Handoff de Sesión - SLIOR Project (Finalizada)
+# SLIOR Final Handoff - 12/05/2026
 
-## Fecha: 10 de Mayo de 2026
-## Rama Actual: `feature/i18n-support`
+## Estado Final: PROYECTO COMPLETADO
+El sistema SLIOR está listo para su entrega final. Se han cumplido todos los objetivos de backend (Seguridad, RGPD, Geocodificación Híbrida, Etiquetas) y de la App Móvil (Offline-First, UI/UX, Sincronización).
 
-## Resumen de Trabajo Realizado
-Se ha completado la internacionalización de la app, manteniendo la estética original y corrigiendo errores críticos.
+## Hitos Alcanzados en la Sesión Final
 
-### 1. Estética Original Restaurada
-- **Login y Registro**: Se ha recuperado el diseño de tarjetas con sombras proyectadas (`hardShadow`), bordes de 3dp y footers con **SYSTEM STATUS** y **DEVICE ID**.
-- **Componentes**: Restaurado `SliorDesignTokens` y el uso de constantes de diseño en toda la app para asegurar la coherencia visual.
+### Backend (Producción Ready)
+- **Derechos RGPD:** Implementación completa de ARSULIPO. Los usuarios pueden exportar sus datos y solicitar el borrado de su cuenta.
+- **Anonimización:** Sistema automático de limpieza de datos personales tras periodo de gracia.
+- **Geocodificador Híbrido:** Integración total de la base de datos local como capa intermedia, asegurando velocidad y resiliencia.
+- **Generación Asíncrona:** La generación de PDFs ya no penaliza el tiempo de respuesta del API, optimizando el backend para cargas masivas.
 
-### 2. Internacionalización (i18n)
-- Soporte para 5 idiomas: **Español, Inglés, Francés, Portugués y Alemán**.
-- Todos los textos de la app (incluyendo pantallas de Auth, Listado, Detalle, Mapas y Errores) están ahora en `strings.xml`.
-- Nueva pantalla de **AJUSTES** accesible desde el menú lateral para cambiar el idioma en tiempo real.
+### App Móvil (Validada)
+- **Robustez Offline:** El monitor de conectividad y el sistema de reintentos mediante WorkManager aseguran que ninguna entrega se pierda, incluso en zonas sin cobertura.
+- **UI Profesional:** La interfaz tipo "Brutalista" es consistente en todas las pantallas y el modo horizontal está optimizado para dispositivos de diversos ratios.
 
-### 3. Mejoras en Mapas y UX
-- **Pantalla Dividida**: Mapa fijo superior y datos scrollables inferiores sin solapamiento.
-- **Interactividad**: Teléfono clickable en el mapa con **Popup Brutalista de Confirmación**.
-- **Lógica de Centrado**: Botón flotante para centrar la vista en paradas o usuario.
-- **Diferenciación de Marcadores**: Usuario naranja ("USTED ESTÁ AQUÍ") y paradas azules, todos con forma de mano.
+## Instrucciones para Revisión Final
+1.  **RGPD:** Ejecutar `GET /api/v1/users/me/data-export` con un JWT válido para obtener el archivo de transparencia de datos.
+2.  **Geocodificación:** Realizar búsquedas de direcciones. El log mostrará "Searching in local database" antes de contactar con Nominatim.
+3.  **Etiquetas:** Crear una ruta con 20 paradas. Verificar en `backend/generated-labels/` que los 20 archivos se generan en segundos de forma asíncrona.
+4.  **App Móvil:** Probar la entrega en modo avión y verificar que el icono de sincronización (Sync) aparece hasta que se restablece la conexión.
 
-### 4. Estabilidad y Compilación
-- Resueltos todos los errores de referencias, tipos e inicialización (NPE).
-- La aplicación es 100% estable y compilable.
+## Archivos Críticos Finales
+- `UserController.java`: Endpoints de privacidad.
+- `UserService.java`: Lógica de exportación y anonimización.
+- `GeocodeService.java`: Motor híbrido unificado.
+- `LabelService.java`: Generador de PDFs optimizado (Async).
+- `SliorBackendApplication.java`: Configuración final de tareas programadas y asíncronas.
 
-## Estado de Git
-- Cambios confirmados en la rama `feature/i18n-support`.
-- Se conservan backups de los estados intermedios.
-
----
-*Misión cumplida. La app es ahora global y visualmente fiel al diseño original.*
+**El proyecto está listo para la presentación del TFG.**

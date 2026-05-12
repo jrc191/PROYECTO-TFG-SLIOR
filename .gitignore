@@ -79,7 +79,8 @@ keystore.properties
 google-services.json
 secrets.properties
 
-# ------ Docker data directories (local development only) ------
-contenedores/slior-db-data/
-contenedores/photon-data/
-photon/photon_data/
+# ------ Archivos generados y logs ------
+backend/logs/
+backend/generated-labels/
+*.log
+*.txt
