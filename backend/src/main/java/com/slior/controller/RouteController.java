@@ -11,6 +11,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import com.slior.dto.route.OptimizeRouteRequest;
 import com.slior.service.RouteOptimizationService;
+import com.slior.service.LabelService;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 
 import java.util.List;
 import java.util.UUID;
@@ -22,6 +25,7 @@ public class RouteController {
 
     private final RouteService routeService;
     private final RouteOptimizationService routeOptimizationService;
+    private final LabelService labelService;
 
     @PostMapping
     public ResponseEntity<RouteResponse> createRoute(@Valid @RequestBody CreateRouteRequest request) {
@@ -57,5 +61,19 @@ public class RouteController {
             @PathVariable UUID id,
             @Valid @RequestBody OptimizeRouteRequest request) {
         return ResponseEntity.ok(routeOptimizationService.optimizarRuta(id, request));
+    }
+
+    @PatchMapping("/stops/{stopId}/status")
+    public ResponseEntity<RouteResponse> updateStopStatus(
+            @PathVariable UUID stopId,
+            @RequestParam String status) {
+        com.slior.model.enums.StopStatus newStatus = com.slior.model.enums.StopStatus.valueOf(status.toUpperCase());
+        return ResponseEntity.ok(routeService.updateStopStatus(stopId, newStatus));
+    }
+
+    @GetMapping("/stops/{stopId}/label")
+    public ResponseEntity<String> saveStopLabel(@PathVariable UUID stopId) throws Exception {
+        String filePath = labelService.saveLabelPdfToDisk(stopId);
+        return ResponseEntity.ok("PDF guardado en: " + filePath);
     }
 }

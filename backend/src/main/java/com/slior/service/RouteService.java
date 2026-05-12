@@ -9,6 +9,7 @@ import com.slior.exception.UserNotFoundException;
 import com.slior.model.enums.RouteStatus;
 import com.slior.model.enums.StopStatus;
 import com.slior.repository.RouteRepository;
+import com.slior.repository.StopRepository;
 import com.slior.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -26,7 +27,10 @@ public class RouteService {
 
     private final RouteRepository routeRepository;
     private final UserRepository userRepository;
+    private final StopRepository stopRepository;
+    private final LabelService labelService;
 
+    @Transactional
     public RouteResponse createRoute(CreateRouteRequest request) {
         User repartidor = userRepository.findById(request.repartidorId())
                 .orElseThrow(() -> new UserNotFoundException(request.repartidorId().toString()));
@@ -56,12 +60,25 @@ public class RouteService {
         route.setStops(stops);
 
         Route saved = routeRepository.save(route);
+
+        // Generar PDFs automáticamente en segundo plano para no bloquear la respuesta
+        List<UUID> stopIds = saved.getStops().stream().map(Stop::getId).toList();
+        labelService.generateLabelsAsync(stopIds);
+
         return RouteResponse.from(saved);
     }
 
     public List<RouteResponse> getRoutesForRepartidor(UUID repartidorId) {
-        return routeRepository.findByRepartidorIdAndIsDeletedFalse(repartidorId)
-                .stream()
+        List<Route> routes = routeRepository.findByRepartidorIdAndIsDeletedFalse(repartidorId);
+        
+        // ASEGURAR PDFs en segundo plano
+        List<UUID> stopIds = routes.stream()
+                .flatMap(r -> r.getStops().stream())
+                .map(Stop::getId)
+                .toList();
+        labelService.generateLabelsAsync(stopIds);
+        
+        return routes.stream()
                 .map(RouteResponse::from)
                 .toList();
     }
@@ -111,6 +128,24 @@ public class RouteService {
 
         Route updated = routeRepository.save(route);
         return RouteResponse.from(updated);
+    }
+
+    @Transactional
+    public RouteResponse updateStopStatus(UUID stopId, StopStatus newStatus) {
+        Stop stop = stopRepository.findById(stopId)
+                .orElseThrow(() -> new RuntimeException("Parada no encontrada"));
+        
+        stop.setStatus(newStatus);
+        if (newStatus == StopStatus.ENTREGADO) {
+            stop.setEntregadoEn(java.time.LocalDateTime.now());
+        } else {
+            stop.setEntregadoEn(null);
+        }
+        
+        stopRepository.save(stop);
+        
+        // Return the updated route
+        return RouteResponse.from(stop.getRoute());
     }
 }
 
