@@ -11,7 +11,7 @@
 *   **Solución:** Migración a **OpenPDF**, que es un fork libre y actualizado. Se ajustaron las clases de color de `BaseColor` a `java.awt.Color`.
 
 ## 3. Desbordamiento de UI en Modo Horizontal
-*   **Error:** Al rotar el móvil, el botón de "Confirmar Entrega" y la cabecera de perfil desaparecían o se cortaban.
+*   **Error:** Al rotar el móvil, el botón de "Confirmar Entrega" y la cabecera de perfil desaparecían y se cortaban.
 *   **Causa:** Uso de alturas fijas y contenedores `Column` sin scroll.
 *   **Solución:** Implementación de `LazyColumn` para permitir scroll vertical en pantallas con poca altura y rediseño de cabeceras usando `Row` para aprovechar el ancho en modo landscape.
 
