@@ -29,7 +29,7 @@
     <string name="menu_system_status">ESTADO DO SISTEMA</string>
     <string name="menu_device_id">ID DO DISPOSITIVO</string>
     <string name="menu_courier">ESTAFETA</string>
-    <string name="menu_active_profile">Perfil ativo</string>
+    <string name="menu_active_profile">Perfil activo</string>
     <string name="menu_edit_profile">EDITAR PERFIL</string>
     <string name="menu_edit_profile_desc">Nome e dados</string>
     <string name="menu_change_password">ALTERAR SENHA</string>
@@ -107,13 +107,33 @@
     <!-- ======= Diálogos ======= -->
     <string name="dialog_delete_route_title">EXCLUIR ROTA?</string>
     <string name="dialog_delete_route_desc">Esta ação não pode ser desfeita. Todas as paragens associadas serão excluídas.</string>
+    <string name="dialog_delete_stop_title">EXCLUIR PARAGEM?</string>
+    <string name="dialog_delete_stop_desc">Tem certeza de que deseja remover esta paragem da rota?</string>
     <string name="dialog_call_title">LIGAR PARA %1$s?</string>
     <string name="dialog_call_desc">O marcador de chamadas será aberto.</string>
+    <string name="dialog_lang_title">ALTERAR IDIOMA?</string>
+    <string name="dialog_lang_desc">O aplicativo será reiniciado para aplicar o novo idioma.</string>
+    <string name="btn_change">ALTERAR</string>
     <string name="btn_delete">EXCLUIR</string>
     <string name="btn_call">LIGAR</string>
     <string name="btn_cancel">CANCELAR</string>
     <string name="btn_ok">OK</string>
     <string name="btn_back">Voltar</string>
+
+    <!-- ======= Digitalização ======= -->
+    <string name="btn_scan_package">ESCANEAR PACOTE</string>
+    <string name="scan_mode_qr">MODO QR</string>
+    <string name="scan_mode_barcode">MODO BARRAS</string>
+    <string name="btn_confirm_delivery">CONFIRMAR ENTREGA</string>
+    <string name="label_scan_instructions">Aponte para o código do pacote</string>
+    <string name="label_delivery_confirmed">ENTREGA CONCLUÍDA</string>
+    <string name="label_recipient_uppercase">DESTINATÁRIO</string>
+    <string name="btn_navigate_stop">NAVEGAR PARA ESTA PARAGEM</string>
+    <string name="label_now">AGORA</string>
+    <string name="btn_retry">REINTENTAR</string>
+    <string name="banner_offline_mode">SEM CONEXÃO - MODO OFFLINE ATIVO</string>
+    <string name="label_sync_pending">Pendente de sincronização</string>
+    <string name="label_sync_error">Erro de sincronização</string>
 
     <!-- ======= Veículos ======= -->
     <string name="vehicle_car">CARRO</string>
@@ -131,13 +151,45 @@
     <string name="error_short_password">A senha deve ter pelo menos 8 caracteres</string>
     <string name="error_empty_name">O nome não puede estar vazio</string>
     <string name="error_long_name">O nome é muito longo (máx. 100 caracteres)</string>
-    <string name="error_empty_date">A data não puede estar vazia</string>
+    <string name="error_empty_date">A data não pode estar vazia</string>
     <string name="error_invalid_date">Formato de data inválido (use AAAA-MM-DD)</string>
-    <string name="error_empty_phone">O telefone não puede estar vazio</string>
+    <string name="error_past_date">A data não pode ser anterior a hoje</string>
+    <string name="error_empty_phone">O telefone não pode estar vazio</string>
     <string name="error_invalid_phone">Número de telefone inválido</string>
-    <string name="error_empty_lat">A latitude não puede estar vazia</string>
+    <string name="error_empty_lat">A latitude não pode estar vazia</string>
     <string name="error_invalid_lat">Latitude inválida (deve estar entre -90 e 90)</string>
     <string name="error_empty_lon">A longitude não puede estar vazia</string>
     <string name="error_invalid_lon">Longitude inválida (deve estar entre -180 e 180)</string>
     <string name="error_session_expired">Sessão expirada. Por favor, identifique-se novamente.</string>
+    <string name="error_invalid_user_id">ID de usuário inválido. Por favor, identifique-se novamente.</string>
+
+    <!-- ======= Permissões ======= -->
+    <string name="perm_required_title">PERMISSÕES NECESSÁRIAS</string>
+    <string name="perm_required_desc">O SLIOR requer acesso à sua LOCALIZAÇÃO e INTERNET para funcionar corretamente. Estas permissões são obrigatórias para gerir rotas e mapas.</string>
+    <string name="perm_btn_grant">CONCEDER PERMISSÕES</string>
+    <string name="perm_denied_title">PERMISSÕES NEGADAS</string>
+    <string name="perm_denied_desc">Não podemos continuar sem as permissões. O aplicativo será fechado.</string>
+    <string name="perm_btn_exit">FECHAR APP</string>
+
+    <!-- ======= Password Reset ======= -->
+    <string name="title_forgot_password">ESQUECEU SUA SENHA?</string>
+    <string name="desc_forgot_password">Insira seu e-mail e enviaremos um código de segurança para restaurar seu acesso.</string>
+    <string name="desc_reset_password">Enviamos um código para o seu e-mail. Insira-o abaixo junto com sua nova senha.</string>
+    <string name="label_reset_code">CÓDIGO DE SEGURANÇA</string>
+    <string name="label_new_password">NOVA SENHA</string>
+    <string name="btn_send_code">ENVIAR CÓDIGO</string>
+    <string name="btn_reset_password">REDEFINIR SENHA</string>
+    <string name="msg_code_sent">CÓDIGO ENVIADO</string>
+    <string name="msg_reset_success">SENHA ATUALIZADA</string>
+    <string name="btn_back_to_login">VOLTAR AO LOGIN</string>
+
+    <!-- ======= Requisitos de Senha ======= -->
+    <string name="val_pass_min_length">Mínimo 8 caracteres</string>
+    <string name="val_pass_uppercase">Pelo menos uma letra maiúscula</string>
+    <string name="val_pass_number">Pelo menos um número</string>
+    <string name="error_invalid_code">Código inválido (6 dígitos)</string>
+    <string name="error_pass_too_short">A senha é muito curta</string>
+    <string name="error_pass_no_upper">Falta uma letra maiúscula</string>
+    <string name="error_pass_no_number">Falta um número</string>
+
 </resources>

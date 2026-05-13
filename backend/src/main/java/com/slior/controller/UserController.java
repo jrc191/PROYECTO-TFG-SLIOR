@@ -40,6 +40,13 @@ public class UserController {
         return ResponseEntity.ok().build();
     }
 
+    @PostMapping("/me/notifications")
+    public ResponseEntity<Void> updateNotifications(@AuthenticationPrincipal UserDetails userDetails, @RequestParam boolean enabled) {
+        User user = findCurrentUser(userDetails);
+        userService.updateNotificationConsent(user.getId(), enabled);
+        return ResponseEntity.ok().build();
+    }
+
     private User findCurrentUser(UserDetails userDetails) {
         return userRepository.findByEmail(userDetails.getUsername())
                 .orElseThrow(() -> new RuntimeException("Current user not found"));

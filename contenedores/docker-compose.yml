@@ -26,36 +26,10 @@ services:
       - slior-db
     environment:
       - SPRING_PROFILES_ACTIVE=docker
-      - JWT_SECRET=${JWT_SECRET:-5368566D597133743677397A244226452948404D635166546A576E5A72347537}
+      - JWT_SECRET=${JWT_SECRET}
     volumes:
       - ./backend-logs:/app/logs
       - ./backend-labels:/app/generated-labels
-    networks:
-      - slior-net
-
-  photon-serve:
-    image: eclipse-temurin:21-jre
-    container_name: photon-serve
-    volumes:
-      - ../photon/photon-1.0.1.jar:/opt/photon/photon.jar:ro
-      - ../photon/photon_data:/data
-    networks:
-      - slior-net
-    ports:
-      - "2322:2322"
-    command: >
-      java -Xmx2G -jar /opt/photon/photon.jar serve
-      -data-dir /data
-      -listen-ip 0.0.0.0
-      -listen-port 2322
-
-  cloudflared:
-    image: cloudflare/cloudflared:latest
-    container_name: cloudflared
-    restart: unless-stopped
-    command: tunnel --no-autoupdate run
-    environment:
-      - TUNNEL_TOKEN=${CLOUDFLARE_TUNNEL_TOKEN}
     networks:
       - slior-net
 

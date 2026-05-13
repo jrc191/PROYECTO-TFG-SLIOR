@@ -31,15 +31,17 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
-            // En release usar la URL del túnel (Cloudflare Tunnel)
-            buildConfigField("String", "BASE_URL", "\"https://api.sliorlogistics.app/\"")
+            // En release usar la IP de Tailscale con HTTP
+            buildConfigField("String", "BASE_URL", "\"http://100.115.5.3:8080/\"")
         }
         debug {
             applicationIdSuffix = ".debug"
             isDebuggable = true
-            // Localhost (vía Cloudflare Tunnel) para pruebas remotas
-            buildConfigField("String", "BASE_URL", "\"https://api.sliorlogistics.app/\"")
+            // IP de Tailscale con HTTP para desarrollo
+            buildConfigField("String", "BASE_URL", "\"http://100.115.5.3:8080/\"")
         }
+
+
     }
 
     compileOptions {
@@ -70,7 +72,8 @@ dependencies {
     implementation("androidx.compose.ui:ui-tooling-preview")
     implementation("androidx.compose.material3:material3")
     implementation("androidx.compose.material:material-icons-extended")
-    implementation("androidx.compose.ui:ui-text-google-fonts") // Space Grotesk font
+    implementation("androidx.compose.ui:ui-text-google-fonts")
+    implementation("com.google.firebase:firebase-crashlytics-buildtools:3.0.7") // Space Grotesk font
     debugImplementation("androidx.compose.ui:ui-tooling")
 
     // ======= Navigation Compose =======
@@ -111,6 +114,7 @@ dependencies {
 
     // ======= Mapas: OSMDroid (OpenStreetMap) =======
     implementation("org.osmdroid:osmdroid-android:6.1.17")
+    implementation("com.github.MKergall:osmbonuspack:6.9.0")
 
     // ======= Geolocalización =======
     implementation("com.google.android.gms:play-services-location:21.1.0")

@@ -31,7 +31,8 @@ class RouteViewModel @Inject constructor(
     private val routeDao: RouteDao,
     private val locationHelper: LocationHelper,
     private val geocodeService: GeocodeService,
-    private val connectivityMonitor: ConnectivityMonitor
+    private val connectivityMonitor: ConnectivityMonitor,
+    private val notificationHelper: com.slior.util.NotificationHelper
 ) : ViewModel() {
 
     val isOnline = connectivityMonitor.isConnected
@@ -63,8 +64,50 @@ class RouteViewModel @Inject constructor(
 
     private var addressSearchJob: Job? = null
 
-    private val _currentLocation = MutableStateFlow<Pair<Double, Double>?>(null)
+    private val _currentLocation = MutableStateFlow<Pair<Double, Double>?>(locationHelper.lastKnownLocation.value)
     val currentLocation: StateFlow<Pair<Double, Double>?> = _currentLocation.asStateFlow()
+
+    // Control de notificaciones de proximidad para no repetir
+    private var lastNotifiedStopId: String? = null
+
+    init {
+        viewModelScope.launch {
+            locationHelper.lastKnownLocation.collect { loc ->
+                _currentLocation.value = loc
+                checkProximityToNextStop(loc)
+            }
+        }
+    }
+
+    private fun checkProximityToNextStop(loc: Pair<Double, Double>?) {
+        if (loc == null) return
+        
+        viewModelScope.launch {
+            val user = _currentUser.value ?: return@launch
+            if (!user.consentimientoNotificaciones) return@launch
+
+            // Buscar si hay alguna ruta en curso
+            val activeRoutes = routeDao.getRoutesByStatus("EN_CURSO")
+            if (activeRoutes.isEmpty()) return@launch
+
+            for (route in activeRoutes) {
+                val stops = routeDao.getStopsByRouteSync(route.id)
+                val nextStop = stops.firstOrNull { it.status == "PENDIENTE" }
+                
+                if (nextStop != null && nextStop.id != lastNotifiedStopId) {
+                    val distanceKm = com.slior.util.HaversineUtil.calculateDistance(
+                        loc.first, loc.second, nextStop.latitud, nextStop.longitud
+                    )
+                    
+                    // Notificar si está a menos de 500 metros
+                    if (distanceKm < 0.5) {
+                        notificationHelper.showProximityAlert(nextStop.direccion, distanceKm * 1000)
+                        lastNotifiedStopId = nextStop.id
+                    }
+                }
+            }
+        }
+    }
 
     private val _pickedLocation = MutableStateFlow<AddressSuggestion?>(null)
     val pickedLocation: StateFlow<AddressSuggestion?> = _pickedLocation.asStateFlow()
@@ -84,21 +127,14 @@ class RouteViewModel @Inject constructor(
     private val _deliveryState = MutableStateFlow<Result<Unit>?>(null)
     val deliveryState: StateFlow<Result<Unit>?> = _deliveryState.asStateFlow()
 
-    private var locationTrackingJob: Job? = null
-
     fun startLocationTracking() {
-        locationTrackingJob?.cancel()
-        locationTrackingJob = viewModelScope.launch {
-            while (true) {
-                fetchCurrentLocation()
-                delay(10000) // Cada 10 segundos para balancear realismo y batería
-            }
-        }
+        locationHelper.startTracking(viewModelScope)
     }
 
     fun stopLocationTracking() {
-        locationTrackingJob?.cancel()
-        locationTrackingJob = null
+        // No detenemos el tracking global aquí, a menos que sea necesario
+        // Pero para mantener la compatibilidad con el código existente:
+        // locationHelper.stopTracking()
     }
 
     fun fetchCurrentLocation() {
@@ -181,10 +217,24 @@ class RouteViewModel @Inject constructor(
 
     fun loadRoutes(repartidorId: String) {
         viewModelScope.launch {
-            loadCurrentUser(repartidorId)
+            var userId = repartidorId
+            if (userId.isBlank()) {
+                // Intentar recuperar el ID guardado si el pasado es blanco (posible carrera en NavHost)
+                userId = authRepository.getSavedUserId() ?: ""
+            }
+
+            if (userId.isBlank()) {
+                _listState.value = RouteListState.Error(
+                    message = "Sesión no válida o expirada. Por favor, inicia sesión de nuevo.",
+                    cachedRoutes = emptyList()
+                )
+                return@launch
+            }
+
+            loadCurrentUser(userId)
             _listState.value = RouteListState.Loading
-            val syncResult = routeRepository.syncRoutes(repartidorId)
-            routeRepository.getRoutesByRepartidor(repartidorId)
+            val syncResult = routeRepository.syncRoutes(userId)
+            routeRepository.getRoutesByRepartidor(userId)
                 .collect { routes ->
                     _listState.value = when {
                         syncResult is Result.Success || routes.isNotEmpty() ->

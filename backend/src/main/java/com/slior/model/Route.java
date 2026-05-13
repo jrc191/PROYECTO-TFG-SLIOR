@@ -62,6 +62,7 @@ public class Route {
     private String notas;
 
     @Column(nullable = false)
+    @Builder.Default
     private boolean isDeleted = false;
 
     @CreatedDate

@@ -93,27 +93,27 @@ fun StopDetailScreen(
                                 verticalAlignment = Alignment.CenterVertically,
                                 horizontalArrangement = Arrangement.Center
                             ) {
-                                Text("ENTREGA COMPLETADA", fontFamily = SpaceGroteskFamily, fontWeight = FontWeight.Black, fontSize = 16.sp, color = BrutalistBlack)
+                                Text(stringResource(R.string.label_delivery_confirmed), fontFamily = SpaceGroteskFamily, fontWeight = FontWeight.Black, fontSize = 16.sp, color = BrutalistBlack)
                             }
                         }
                     }
 
                     // Información del Destinatario
                     Column {
-                        Text("DESTINATARIO", fontFamily = SpaceGroteskFamily, fontWeight = FontWeight.Black, fontSize = 12.sp, color = Color.Gray, letterSpacing = 1.sp)
+                        Text(stringResource(R.string.label_recipient_uppercase), fontFamily = SpaceGroteskFamily, fontWeight = FontWeight.Black, fontSize = 12.sp, color = Color.Gray, letterSpacing = 1.sp)
                         Text(s.destinatario.uppercase(), fontFamily = SpaceGroteskFamily, fontWeight = FontWeight.Black, fontSize = 24.sp, color = BrutalistBlack)
                     }
 
                     // Dirección
                     Column {
-                        Text("DIRECCIÓN DE ENTREGA", fontFamily = SpaceGroteskFamily, fontWeight = FontWeight.Black, fontSize = 12.sp, color = Color.Gray, letterSpacing = 1.sp)
+                        Text(stringResource(R.string.label_address).uppercase(), fontFamily = SpaceGroteskFamily, fontWeight = FontWeight.Black, fontSize = 12.sp, color = Color.Gray, letterSpacing = 1.sp)
                         Text(s.direccion, fontFamily = SpaceGroteskFamily, fontWeight = FontWeight.Bold, fontSize = 18.sp, color = BrutalistBlack)
                     }
 
                     // Teléfono
                     if (s.telefonoDestinatario.isNotBlank()) {
                         Column {
-                            Text("TELÉFONO CONTACTO", fontFamily = SpaceGroteskFamily, fontWeight = FontWeight.Black, fontSize = 12.sp, color = Color.Gray, letterSpacing = 1.sp)
+                            Text(stringResource(R.string.label_phone).uppercase(), fontFamily = SpaceGroteskFamily, fontWeight = FontWeight.Black, fontSize = 12.sp, color = Color.Gray, letterSpacing = 1.sp)
                             Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.clickable {
                                 val intent = Intent(Intent.ACTION_DIAL, Uri.parse("tel:${s.telefonoDestinatario}"))
                                 context.startActivity(intent)
@@ -134,7 +134,7 @@ fun StopDetailScreen(
                     ) {
                         Icon(Icons.Default.Navigation, null, tint = BrutalistBlack)
                         Spacer(Modifier.width(12.dp))
-                        Text("NAVEGAR A ESTA PARADA", color = BrutalistBlack, fontFamily = SpaceGroteskFamily, fontWeight = FontWeight.Black, fontSize = 16.sp)
+                        Text(stringResource(R.string.btn_navigate_stop), color = BrutalistBlack, fontFamily = SpaceGroteskFamily, fontWeight = FontWeight.Black, fontSize = 16.sp)
                     }
 
                     // Botón Escanear (solo si no está entregado)
@@ -159,7 +159,7 @@ fun StopDetailScreen(
                         ) {
                             Icon(Icons.Default.QrCodeScanner, null, tint = BrutalistBlack, modifier = Modifier.size(28.dp))
                             Spacer(Modifier.width(12.dp))
-                            Text("ESCANEAR PAQUETE", color = BrutalistBlack, fontFamily = SpaceGroteskFamily, fontWeight = FontWeight.Black, fontSize = 18.sp)
+                            Text(stringResource(R.string.btn_scan_package), color = BrutalistBlack, fontFamily = SpaceGroteskFamily, fontWeight = FontWeight.Black, fontSize = 18.sp)
                         }
                     }
                 }

@@ -31,15 +31,16 @@
 *   **Testing Extensivo:** Creación de una suite de tests JUnit 5 para validar seguridad, RGPD y casos límite de geocodificación.
 *   **UI Adaptativa:** Ajustes finales para soporte completo de modo horizontal (Landscape) en la aplicación móvil.
 
-## Fase 7: Infraestructura y Despliegue Seguro (Mayo 2026)
-*   **Migración de Red:** Sustitución de Tailscale por Cloudflare Tunnels para permitir acceso HTTPS público sin VPN cliente.
-*   **Automatización:** Integración de `cloudflared` en el ecosistema Docker del proyecto.
-*   **Refactorización de API URL:** Actualización de la configuración de red en la app móvil para usar el nuevo dominio seguro.
-*   **Optimización de Consultas:** Implementación de `@EntityGraph` en el backend para resolver problemas de rendimiento (N+1) detectados tras la migración.
-*   **Ajuste de Timeouts:** Ampliación de los tiempos de espera en la app móvil para mejorar la resiliencia en conexiones con latencia.
-
-## Fase 8: Dockerización Completa del Backend (Mayo 2026)
+## Fase 7: Dockerización y Despliegue en Red Local (Mayo 2026)
 *   **Contenerización:** Creación de un `Dockerfile` multi-stage para el backend, permitiendo compilar y ejecutar el servidor sin necesidad de herramientas locales.
 *   **Orquestación:** Integración del servicio `slior-backend` en `docker-compose.yml`, vinculándolo a la red interna y a la base de datos PostgreSQL.
+*   **Acceso en Red Privada:** Configuración del acceso al backend mediante la IP de la red local o herramientas de red privada, manteniendo los servicios aislados de la red pública.
 *   **Configuración por Perfiles:** Implementación de `application-docker.properties` para gestionar variables de entorno y conexiones dentro de la red de Docker.
 *   **Persistencia de Logs:** Mapeo de volúmenes para que los logs y las etiquetas generadas sean accesibles desde el host.
+
+## Fase 8: UI/UX Pro e Internacionalización (Mayo 2026)
+*   **Modo Oscuro/Claro:** Implementación de un sistema de temas dinámico en Jetpack Compose que respeta la configuración del sistema y permite el cambio manual.
+*   **Internacionalización (i18n):** Soporte multi-idioma completo para Español, Inglés, Francés, Portugués y Alemán, gestionado mediante `AppCompatDelegate`.
+*   **Privacidad y Perfil:** Implementación de flujos para el cambio de contraseña segura y gestión de preferencias de privacidad (RGPD) directamente desde la app móvil.
+*   **Rendimiento de Datos:** Optimización de consultas JPA con `@EntityGraph` para eliminar el problema de las consultas N+1 en el listado de rutas.
+*   **Preparación de Futuras Funcionalidades:** Diseño de placeholders y estructura de navegación para el Mapa General y Estadísticas de Reparto.

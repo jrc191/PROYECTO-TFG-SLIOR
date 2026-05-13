@@ -76,8 +76,8 @@
     <string name="label_address">ADRESSE</string>
     <string name="label_recipient">EMPFÄNGER</string>
     <string name="label_phone">TELEFON</string>
-    <string name="label_latitude">BREITENGRAD</string>
-    <string name="label_longitude">LÄNGENGRAD</string>
+    <string name="label_latitude">LATITUDE</string>
+    <string name="label_longitude">LONGITUDE</string>
     <string name="label_stop_notes_optional">STOPP-NOTIZEN (OPTIONAL)</string>
     <string name="placeholder_stop_address">Tippen, um zu suchen oder auf Karte zu wählen...</string>
     <string name="placeholder_recipient">Name des Empfängers</string>
@@ -107,13 +107,33 @@
     <!-- ======= Dialoge ======= -->
     <string name="dialog_delete_route_title">ROUTE LÖSCHEN?</string>
     <string name="dialog_delete_route_desc">Diese Aktion kann nicht rückgängig gemacht werden. Alle zugehörigen Stopps werden gelöscht.</string>
+    <string name="dialog_delete_stop_title">STOPP LÖSCHEN?</string>
+    <string name="dialog_delete_stop_desc">Sind Sie sicher, dass Sie diesen Stopp von der Route entfernen möchten?</string>
     <string name="dialog_call_title">%1$s ANRUFEN?</string>
     <string name="dialog_call_desc">Die Telefon-App wird geöffnet.</string>
+    <string name="dialog_lang_title">SPRACHE ÄNDERN?</string>
+    <string name="dialog_lang_desc">Die App wird neu gestartet, um die neue Sprache anzuwenden.</string>
+    <string name="btn_change">ÄNDERN</string>
     <string name="btn_delete">LÖSCHEN</string>
     <string name="btn_call">ANRUFEN</string>
     <string name="btn_cancel">ABBRECHEN</string>
     <string name="btn_ok">OK</string>
     <string name="btn_back">Zurück</string>
+
+    <!-- ======= Scannen ======= -->
+    <string name="btn_scan_package">PAKET SCANNEN</string>
+    <string name="scan_mode_qr">QR-MODUS</string>
+    <string name="scan_mode_barcode">BARCODE-MODUS</string>
+    <string name="btn_confirm_delivery">LIEFERUNG BESTÄTIGEN</string>
+    <string name="label_scan_instructions">Zielen Sie auf den Paketcode</string>
+    <string name="label_delivery_confirmed">LIEFERUNG ABGESCHLOSSEN</string>
+    <string name="label_recipient_uppercase">EMPFÄNGER</string>
+    <string name="btn_navigate_stop">ZU DIESEM STOPP NAVIGIEREN</string>
+    <string name="label_now">JETZT</string>
+    <string name="btn_retry">WIEDERHOLEN</string>
+    <string name="banner_offline_mode">OFFLINE - OFFLINE-MODUS AKTIV</string>
+    <string name="label_sync_pending">Synchronisierung ausstehend</string>
+    <string name="label_sync_error">Synchronisierungsfehler</string>
 
     <!-- ======= Fahrzeuge ======= -->
     <string name="vehicle_car">AUTO</string>
@@ -133,6 +153,7 @@
     <string name="error_long_name">Name ist zu lang (max. 100 Zeichen)</string>
     <string name="error_empty_date">Datum darf nicht leer sein</string>
     <string name="error_invalid_date">Ungültiges Datumsformat (JJJJ-MM-TT verwenden)</string>
+    <string name="error_past_date">Das Datum darf nicht in der Vergangenheit liegen</string>
     <string name="error_empty_phone">Telefon darf nicht leer sein</string>
     <string name="error_invalid_phone">Ungültige Telefonnummer</string>
     <string name="error_empty_lat">Breitengrad darf nicht leer sein</string>
@@ -140,4 +161,35 @@
     <string name="error_empty_lon">Längengrad darf nicht leer sein</string>
     <string name="error_invalid_lon">Ungültiger Längengrad (muss zwischen -180 und 180 liegen)</string>
     <string name="error_session_expired">Sitzung abgelaufen. Bitte melden Sie sich erneut an.</string>
+    <string name="error_invalid_user_id">Ungültige Benutzer-ID. Bitte melden Sie sich erneut an.</string>
+
+    <!-- ======= Berechtigungen ======= -->
+    <string name="perm_required_title">ERFORDERLICHE BERECHTIGUNGEN</string>
+    <string name="perm_required_desc">SLIOR benötigt Zugriff auf Ihren STANDORT und das INTERNET, um ordnungsgemäß zu funktionieren. Diese Berechtigungen sind zwingend erforderlich, um Routen und Karten zu verwalten.</string>
+    <string name="perm_btn_grant">BERECHTIGUNGEN ERTEILEN</string>
+    <string name="perm_denied_title">BERECHTIGUNGEN ABGELEHNT</string>
+    <string name="perm_denied_desc">Ohne die Berechtigungen können wir nicht fortfahren. Die App wird geschlossen.</string>
+    <string name="perm_btn_exit">APP SCHLIESSEN</string>
+
+    <!-- ======= Password Reset ======= -->
+    <string name="title_forgot_password">PASSWORT VERGESSEN?</string>
+    <string name="desc_forgot_password">Geben Sie Ihre E-Mail-Adresse ein und wir senden Ihnen einen Sicherheitscode zur Wiederherstellung Ihres Zugangs.</string>
+    <string name="desc_reset_password">Wir haben einen Code an Ihre E-Mail gesendet. Geben Sie ihn unten zusammen mit Ihrem neuen Passwort ein.</string>
+    <string name="label_reset_code">SICHERHEITSCODE</string>
+    <string name="label_new_password">NEUES PASSWORT</string>
+    <string name="btn_send_code">CODE SENDEN</string>
+    <string name="btn_reset_password">PASSWORT ZURÜCKSETZEN</string>
+    <string name="msg_code_sent">CODE GESENDET</string>
+    <string name="msg_reset_success">PASSWORT AKTUALISIERT</string>
+    <string name="btn_back_to_login">ZURÜCK ZUM LOGIN</string>
+
+    <!-- ======= Passwort-Anforderungen ======= -->
+    <string name="val_pass_min_length">Mindestens 8 Zeichen</string>
+    <string name="val_pass_uppercase">Mindestens ein Großbuchstabe</string>
+    <string name="val_pass_number">Mindestens eine Zahl</string>
+    <string name="error_invalid_code">Ungültiger Code (6 Stellen)</string>
+    <string name="error_pass_too_short">Passwort ist zu kurz</string>
+    <string name="error_pass_no_upper">Großbuchstabe fehlt</string>
+    <string name="error_pass_no_number">Zahl fehlt</string>
+
 </resources>

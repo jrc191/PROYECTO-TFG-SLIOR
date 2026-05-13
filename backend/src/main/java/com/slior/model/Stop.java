@@ -62,6 +62,7 @@ public class Stop {
     private LocalDateTime entregadoEn;
 
     @Column(nullable = false)
+    @Builder.Default
     private boolean isDeleted = false;
 
     @CreatedDate

@@ -24,5 +24,7 @@ public record AuthResponse(
 
         UserRole rol,
 
-        VehicleType vehicleType
+        VehicleType vehicleType,
+
+        Boolean consentimientoNotificaciones
 ) {}

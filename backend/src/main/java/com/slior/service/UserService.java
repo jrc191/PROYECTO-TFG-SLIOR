@@ -30,7 +30,7 @@ public class UserService {
     private final StopRepository stopRepository;
     private final AuditService auditService;
 
-    @Transactional(readOnly = true)
+    @Transactional
     public UserDataExportDto exportUserData(UUID userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException(userId.toString()));
@@ -88,6 +88,17 @@ public class UserService {
         userRepository.save(user);
         
         auditService.log(userId, limited ? "LIMIT_PROCESSING_ON" : "LIMIT_PROCESSING_OFF", "User");
+    }
+
+    @Transactional
+    public void updateNotificationConsent(UUID userId, boolean enabled) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new UserNotFoundException(userId.toString()));
+
+        user.setConsentimientoNotificaciones(enabled);
+        userRepository.save(user);
+
+        auditService.log(userId, enabled ? "NOTIFICATIONS_ON" : "NOTIFICATIONS_OFF", "User");
     }
 
     @Scheduled(cron = "0 0 2 * * *") // A las 2 AM cada día

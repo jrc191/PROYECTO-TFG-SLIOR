@@ -51,6 +51,11 @@ import com.slior.util.Result
 import com.slior.viewmodel.AuthViewModel
 import kotlinx.coroutines.launch
 
+/**
+ * Pantalla de Detalle de Ruta.
+ * Muestra el mapa, estadísticas de tiempo y la lista de paradas.
+ * Soporta Modo Claro/Oscuro y Landscape.
+ */
 @Composable
 fun RouteDetailScreen(
     routeId: String,
@@ -69,6 +74,11 @@ fun RouteDetailScreen(
     val deleteState by viewModel.deleteState.collectAsStateWithLifecycle()
     val isOnline by viewModel.isOnline.collectAsStateWithLifecycle()
     val isRetryingSync by viewModel.isRetryingSync.collectAsStateWithLifecycle()
+    
+    // Colores dinámicos
+    val backgroundColor = MaterialTheme.colorScheme.background
+    val surfaceColor = MaterialTheme.colorScheme.surface
+    val onSurfaceColor = MaterialTheme.colorScheme.onSurface
     
     val isRefreshing = state is RouteDetailState.Loading
     var centerTrigger by remember { mutableStateOf(0) }
@@ -89,7 +99,7 @@ fun RouteDetailScreen(
             viewModel.fetchCurrentLocation()
         } else {
             scope.launch {
-                snackbarHostState.showSnackbar(context.getString(R.string.map_info_address))
+                snackbarHostState.showSnackbar("Permisos de ubicación necesarios")
             }
         }
     }
@@ -99,7 +109,7 @@ fun RouteDetailScreen(
             viewModel.resetDeleteState()
             onBack()
         } else if (deleteState is Result.Error) {
-            snackbarHostState.showSnackbar(context.getString(R.string.state_error_loading))
+            snackbarHostState.showSnackbar("Error al eliminar ruta")
             viewModel.resetDeleteState()
         }
     }
@@ -120,7 +130,7 @@ fun RouteDetailScreen(
     if (phoneToCall != null) {
         AlertDialog(
             onDismissRequest = { phoneToCall = null },
-            containerColor = BrutalistWhite,
+            containerColor = surfaceColor,
             shape = MaterialTheme.shapes.extraSmall,
             tonalElevation = 0.dp,
             modifier = Modifier.border(2.dp, BrutalistBlack),
@@ -131,10 +141,10 @@ fun RouteDetailScreen(
                         withStyle(style = SpanStyle(color = SafetyOrange)) { append(phoneToCall!!) }
                         append("?")
                     },
-                    fontFamily = SpaceGroteskFamily, fontWeight = FontWeight.Black, fontSize = 18.sp, color = BrutalistBlack
+                    fontFamily = SpaceGroteskFamily, fontWeight = FontWeight.Black, fontSize = 18.sp, color = onSurfaceColor
                 )
             },
-            text = { Text(stringResource(R.string.dialog_call_desc), fontFamily = SpaceGroteskFamily, color = BrutalistBlack) },
+            text = { Text(stringResource(R.string.dialog_call_desc), fontFamily = SpaceGroteskFamily, color = onSurfaceColor) },
             confirmButton = {
                 Surface(
                     modifier = Modifier.border(2.dp, BrutalistBlack).clickable { 
@@ -144,12 +154,12 @@ fun RouteDetailScreen(
                     },
                     color = NeonGreen, shape = MaterialTheme.shapes.extraSmall
                 ) {
-                    Text(text = stringResource(R.string.btn_call), modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp), color = BrutalistBlack, fontWeight = FontWeight.Bold, fontFamily = SpaceGroteskFamily)
+                    Text(text = stringResource(R.string.btn_call), modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp), color = Color.Black, fontWeight = FontWeight.Bold, fontFamily = SpaceGroteskFamily)
                 }
             },
             dismissButton = {
                 TextButton(onClick = { phoneToCall = null }) {
-                    Text(stringResource(R.string.btn_cancel), color = BrutalistBlack, fontFamily = SpaceGroteskFamily, fontWeight = FontWeight.Bold)
+                    Text(stringResource(R.string.btn_cancel), color = onSurfaceColor, fontFamily = SpaceGroteskFamily, fontWeight = FontWeight.Bold)
                 }
             }
         )
@@ -158,7 +168,7 @@ fun RouteDetailScreen(
     if (showDeleteConfirm) {
         AlertDialog(
             onDismissRequest = { showDeleteConfirm = false },
-            containerColor = BrutalistWhite,
+            containerColor = surfaceColor,
             shape = MaterialTheme.shapes.extraSmall,
             tonalElevation = 0.dp,
             modifier = Modifier.border(2.dp, BrutalistBlack),
@@ -169,10 +179,10 @@ fun RouteDetailScreen(
                         withStyle(style = SpanStyle(color = SafetyOrange)) { append(stringResource(R.string.btn_delete)) }
                         append(" " + stringResource(R.string.title_routes).split(" ")[1] + "?")
                     },
-                    fontFamily = SpaceGroteskFamily, fontWeight = FontWeight.Black, fontSize = 18.sp, color = BrutalistBlack
+                    fontFamily = SpaceGroteskFamily, fontWeight = FontWeight.Black, fontSize = 18.sp, color = onSurfaceColor
                 )
             },
-            text = { Text(stringResource(R.string.dialog_delete_route_desc), fontFamily = SpaceGroteskFamily, fontSize = 14.sp, color = BrutalistBlack) },
+            text = { Text(stringResource(R.string.dialog_delete_route_desc), fontFamily = SpaceGroteskFamily, fontSize = 14.sp, color = onSurfaceColor) },
             confirmButton = {
                 Surface(
                     modifier = Modifier.border(2.dp, BrutalistBlack).clickable { 
@@ -181,29 +191,29 @@ fun RouteDetailScreen(
                     },
                     color = SafetyOrange, shape = MaterialTheme.shapes.extraSmall
                 ) {
-                    Text(text = stringResource(R.string.btn_delete), modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp), color = BrutalistWhite, fontWeight = FontWeight.Bold, fontFamily = SpaceGroteskFamily)
+                    Text(text = stringResource(R.string.btn_delete), modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp), color = Color.White, fontWeight = FontWeight.Bold, fontFamily = SpaceGroteskFamily)
                 }
             },
             dismissButton = {
                 TextButton(onClick = { showDeleteConfirm = false }) {
-                    Text(stringResource(R.string.btn_cancel), color = BrutalistBlack, fontFamily = SpaceGroteskFamily, fontWeight = FontWeight.Bold)
+                    Text(stringResource(R.string.btn_cancel), color = onSurfaceColor, fontFamily = SpaceGroteskFamily, fontWeight = FontWeight.Bold)
                 }
             }
         )
     }
 
-    Box(modifier = Modifier.fillMaxSize().background(BrutalistWhite)) {
+    Box(modifier = Modifier.fillMaxSize().background(backgroundColor)) {
         Column(modifier = Modifier.fillMaxSize()) {
             Surface(
                 modifier = Modifier.fillMaxWidth().height(if (isLandscape) 56.dp else 64.dp).zIndex(2f),
-                color = BrutalistWhite, shape = RectangleShape
+                color = surfaceColor, shape = RectangleShape
             ) {
                 Row(
-                    modifier = Modifier.fillMaxSize().drawBehind { drawLine(BrutalistBlack, Offset(0f, size.height), Offset(size.width, size.height), 2.dp.toPx()) }.padding(horizontal = 8.dp),
+                    modifier = Modifier.fillMaxSize().drawBehind { drawLine(onSurfaceColor, Offset(0f, size.height), Offset(size.width, size.height), 2.dp.toPx()) }.padding(horizontal = 8.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Box(modifier = Modifier.size(48.dp).clickable { onBack() }, contentAlignment = Alignment.Center) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, stringResource(R.string.btn_back), tint = BrutalistBlack, modifier = Modifier.size(if (isLandscape) 24.dp else 28.dp))
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, stringResource(R.string.btn_back), tint = onSurfaceColor, modifier = Modifier.size(if (isLandscape) 24.dp else 28.dp))
                     }
                     
                     Column(modifier = Modifier.weight(1f)) {
@@ -212,7 +222,7 @@ fun RouteDetailScreen(
                                 is RouteDetailState.Success -> (state as RouteDetailState.Success).route.nombre.uppercase()
                                 else -> stringResource(R.string.title_route_detail)
                             },
-                            fontFamily = SpaceGroteskFamily, fontWeight = FontWeight.Bold, fontSize = if (isLandscape) 14.sp else 18.sp, maxLines = 1, color = BrutalistBlack
+                            fontFamily = SpaceGroteskFamily, fontWeight = FontWeight.Bold, fontSize = if (isLandscape) 14.sp else 18.sp, maxLines = 1, color = onSurfaceColor
                         )
                         if (isLandscape && state is RouteDetailState.Success) {
                             val data = state as RouteDetailState.Success
@@ -233,29 +243,28 @@ fun RouteDetailScreen(
                                 authViewModel.checkServerConnectivity()
                                 if (hasLocationPermission(context)) viewModel.fetchCurrentLocation()
                             }) {
-                                if (isRefreshing) CircularProgressIndicator(modifier = Modifier.size(20.dp), color = BrutalistBlack, strokeWidth = 2.dp)
-                                else Icon(Icons.Default.Refresh, null, tint = BrutalistBlack)
+                                if (isRefreshing) CircularProgressIndicator(modifier = Modifier.size(20.dp), color = onSurfaceColor, strokeWidth = 2.dp)
+                                else Icon(Icons.Default.Refresh, null, tint = onSurfaceColor)
                             }
                             IconButton(onClick = { if (hasLocationPermission(context)) viewModel.optimizeRoute(routeId) else permissionLauncher.launch(arrayOf(Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION)) }) {
-                                Icon(Icons.Default.AutoFixHigh, null, tint = BrutalistBlack)
+                                Icon(Icons.Default.AutoFixHigh, null, tint = onSurfaceColor)
                             }
                         }
-                        IconButton(onClick = { onEdit(routeId) }) { Icon(Icons.Default.Edit, null, tint = BrutalistBlack, modifier = Modifier.size(if (isLandscape) 20.dp else 24.dp)) }
+                        IconButton(onClick = { onEdit(routeId) }) { Icon(Icons.Default.Edit, null, tint = onSurfaceColor, modifier = Modifier.size(if (isLandscape) 20.dp else 24.dp)) }
                         IconButton(onClick = { showDeleteConfirm = true }) { Icon(Icons.Default.Delete, null, tint = SafetyOrange, modifier = Modifier.size(if (isLandscape) 20.dp else 24.dp)) }
                     }
                 }
             }
 
             if (isLandscape) {
-                // MODO HORIZONTAL: Mapa a la izquierda, detalles a la derecha
                 Row(modifier = Modifier.fillMaxSize()) {
                     if (state is RouteDetailState.Success) {
                         val data = state as RouteDetailState.Success
                         Box(modifier = Modifier.weight(1.2f).fillMaxHeight().border(2.dp, BrutalistBlack).clipToBounds()) {
                             RouteMapView(stops = data.stops.map { it.toRouteMapPoint() }, userLocation = currentLocation, centerKey = centerTrigger, onCallRequest = { phoneToCall = it }, modifier = Modifier.fillMaxSize())
                             Box(modifier = Modifier.align(Alignment.BottomEnd).padding(16.dp)) {
-                                Surface(modifier = Modifier.size(40.dp).border(2.dp, BrutalistBlack).clickable { centerTrigger++ }, color = BrutalistWhite, shape = RectangleShape) {
-                                    Icon(Icons.Default.MyLocation, null, tint = BrutalistBlack, modifier = Modifier.padding(8.dp))
+                                Surface(modifier = Modifier.size(40.dp).border(2.dp, BrutalistBlack).clickable { centerTrigger++ }, color = surfaceColor, shape = RectangleShape) {
+                                    Icon(Icons.Default.MyLocation, null, tint = onSurfaceColor, modifier = Modifier.padding(8.dp))
                                 }
                             }
                         }
@@ -271,6 +280,14 @@ fun RouteDetailScreen(
                                     data = data, context = context, currentLocation = currentLocation,
                                     onOptimize = { viewModel.optimizeRoute(routeId) },
                                     onNavigate = { NavigationHelper.launchExternalNavigation(context, data.stops.sortedBy { it.ordenVisita }) },
+                                    onNavigateToStop = { stop ->
+                                        // Usamos geo: para mostrar el punto en el mapa sin iniciar ruta automáticamente
+                                        val label = Uri.encode(stop.destinatario)
+                                        val gmmIntentUri = Uri.parse("geo:0,0?q=${stop.latitud},${stop.longitud}($label)")
+                                        val mapIntent = Intent(Intent.ACTION_VIEW, gmmIntentUri)
+                                        mapIntent.setPackage("com.google.android.apps.maps")
+                                        context.startActivity(mapIntent)
+                                    },
                                     onStopClick = onStopClick,
                                     isLandscape = true
                                 )
@@ -279,14 +296,13 @@ fun RouteDetailScreen(
                     }
                 }
             } else {
-                // MODO VERTICAL
                 if (state is RouteDetailState.Success) {
                     val data = state as RouteDetailState.Success
-                    Box(modifier = Modifier.fillMaxWidth().height(260.dp).zIndex(1f).clipToBounds().drawBehind { drawLine(BrutalistBlack, Offset(0f, size.height), Offset(size.width, size.height), 2.dp.toPx()) }) {
+                    Box(modifier = Modifier.fillMaxWidth().height(260.dp).zIndex(1f).clipToBounds().drawBehind { drawLine(BrutalistBlack, Offset(0f, size.height), Offset(size.width, size.height), 2.dp.toPx()) } ) {
                         RouteMapView(stops = data.stops.map { it.toRouteMapPoint() }, userLocation = currentLocation, centerKey = centerTrigger, onCallRequest = { phoneToCall = it }, modifier = Modifier.fillMaxSize())
                         Box(modifier = Modifier.align(Alignment.BottomEnd).padding(16.dp)) {
-                            Surface(modifier = Modifier.size(40.dp).border(2.dp, BrutalistBlack).clickable { centerTrigger++ }, color = BrutalistWhite, shape = RectangleShape) {
-                                Icon(Icons.Default.MyLocation, null, tint = BrutalistBlack, modifier = Modifier.padding(8.dp))
+                            Surface(modifier = Modifier.size(40.dp).border(2.dp, BrutalistBlack).clickable { centerTrigger++ }, color = surfaceColor, shape = RectangleShape) {
+                                Icon(Icons.Default.MyLocation, null, tint = onSurfaceColor, modifier = Modifier.padding(8.dp))
                             }
                         }
                     }
@@ -302,6 +318,14 @@ fun RouteDetailScreen(
                                 data = data, context = context, currentLocation = currentLocation,
                                 onOptimize = { if (hasLocationPermission(context)) viewModel.optimizeRoute(routeId) else permissionLauncher.launch(arrayOf(Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION)) },
                                     onNavigate = { NavigationHelper.launchExternalNavigation(context, data.stops.sortedBy { it.ordenVisita }) },
+                                    onNavigateToStop = { stop ->
+                                        // Usamos geo: para mostrar el punto en el mapa sin iniciar ruta automáticamente
+                                        val label = Uri.encode(stop.destinatario)
+                                        val gmmIntentUri = Uri.parse("geo:0,0?q=${stop.latitud},${stop.longitud}($label)")
+                                        val mapIntent = Intent(Intent.ACTION_VIEW, gmmIntentUri)
+                                        mapIntent.setPackage("com.google.android.apps.maps")
+                                        context.startActivity(mapIntent)
+                                    },
                                     onStopClick = onStopClick,
                                     isLandscape = false
                             )
@@ -311,7 +335,7 @@ fun RouteDetailScreen(
             }
         }
 
-        // Banner de Sin Conexión - Ahora en la parte SUPERIOR para máxima visibilidad
+        // Banner de Sin Conexión - Superior
         if (!isOnline) {
             ConnectionBanner(
                 onRetry = { viewModel.retrySyncStops() },
@@ -324,23 +348,22 @@ fun RouteDetailScreen(
 
         if (!isLandscape) {
             Box(modifier = Modifier.align(Alignment.TopEnd).padding(top = 80.dp, end = 16.dp).zIndex(3f)) {
-                Surface(modifier = Modifier.size(48.dp).hardShadow(2.dp, 2.dp).border(2.dp, BrutalistBlack).clickable { viewModel.loadRouteDetail(routeId); authViewModel.checkServerConnectivity(); if (hasLocationPermission(context)) viewModel.fetchCurrentLocation() }, color = BrutalistWhite, shape = MaterialTheme.shapes.extraSmall) {
+                Surface(modifier = Modifier.size(48.dp).hardShadow(2.dp, 2.dp).border(2.dp, BrutalistBlack).clickable { viewModel.loadRouteDetail(routeId); authViewModel.checkServerConnectivity(); if (hasLocationPermission(context)) viewModel.fetchCurrentLocation() }, color = surfaceColor, shape = MaterialTheme.shapes.extraSmall) {
                     Box(contentAlignment = Alignment.Center) {
-                        if (isRefreshing) CircularProgressIndicator(modifier = Modifier.size(24.dp), color = BrutalistBlack, strokeWidth = 2.dp)
-                        else Icon(Icons.Default.Refresh, stringResource(R.string.status_verifying), tint = BrutalistBlack)
+                        if (isRefreshing) CircularProgressIndicator(modifier = Modifier.size(24.dp), color = onSurfaceColor, strokeWidth = 2.dp)
+                        else Icon(Icons.Default.Refresh, stringResource(R.string.status_verifying), tint = onSurfaceColor)
                     }
                 }
             }
         }
         SnackbarHost(hostState = snackbarHostState, modifier = Modifier.align(Alignment.BottomCenter))
 
-        // Banner de Sin Conexión - Elevado para que sea visible sobre otros elementos
         if (!isOnline) {
             Box(
                 modifier = Modifier
                     .align(Alignment.BottomCenter)
                     .padding(bottom = if (isLandscape) 12.dp else 90.dp)
-                    .zIndex(10f) // Forzar que esté por encima de todo
+                    .zIndex(10f)
             ) {
                 ConnectionBanner(
                     onRetry = { viewModel.retrySyncStops() },
@@ -368,30 +391,30 @@ private fun ConnectionBanner(onRetry: () -> Unit, isRetryingSync: Boolean, modif
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            Icon(Icons.Default.CloudOff, null, tint = BrutalistWhite)
+            Icon(Icons.Default.CloudOff, null, tint = Color.White)
             Text(
-                text = "SIN CONEXIÓN - MODO OFFLINE ACTIVO",
+                text = stringResource(R.string.banner_offline_mode),
                 fontFamily = SpaceGroteskFamily,
                 fontWeight = FontWeight.Black,
                 fontSize = 12.sp,
-                color = BrutalistWhite,
+                color = Color.White,
                 modifier = Modifier.weight(1f)
             )
             if (isRetryingSync) {
-                CircularProgressIndicator(modifier = Modifier.size(16.dp), color = BrutalistBlack, strokeWidth = 2.dp)
+                CircularProgressIndicator(modifier = Modifier.size(16.dp), color = Color.Black, strokeWidth = 2.dp)
             } else {
                 Surface(
-                    color = BrutalistWhite,
+                    color = Color.White,
                     shape = RectangleShape,
                     modifier = Modifier.border(1.dp, BrutalistBlack)
                 ) {
                     Text(
-                        text = "REINTENTAR",
+                        text = stringResource(R.string.btn_retry),
                         modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
                         fontFamily = SpaceGroteskFamily,
                         fontWeight = FontWeight.Bold,
                         fontSize = 10.sp,
-                        color = BrutalistBlack
+                        color = Color.Black
                     )
                 }
             }
@@ -406,64 +429,68 @@ private fun RouteDetailContent(
     currentLocation: Pair<Double, Double>?, 
     onOptimize: () -> Unit, 
     onNavigate: () -> Unit,
+    onNavigateToStop: (StopEntity) -> Unit,
     onStopClick: (String) -> Unit,
     isLandscape: Boolean
 ) {
+    val onSurface = MaterialTheme.colorScheme.onSurface
+    val surface = MaterialTheme.colorScheme.surface
+
     Column(modifier = Modifier.fillMaxSize()) {
         if (!isLandscape) {
-            // 1. Cabecera Fija: Tiempo Estimado (Solo en Vertical)
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .background(Color(0xFFF4F4F5))
+                    .background(onSurface.copy(alpha = 0.05f))
                     .drawBehind { drawLine(BrutalistBlack, Offset(0f, size.height), Offset(size.width, size.height), 2.dp.toPx()) }
                     .padding(horizontal = 16.dp, vertical = 12.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Text(stringResource(R.string.label_estimated_time), fontFamily = SpaceGroteskFamily, fontWeight = FontWeight.Bold, fontSize = 13.sp, letterSpacing = 2.sp, color = BrutalistBlack)
+                Text(stringResource(R.string.label_estimated_time), fontFamily = SpaceGroteskFamily, fontWeight = FontWeight.Bold, fontSize = 13.sp, letterSpacing = 2.sp, color = onSurface)
                 Spacer(Modifier.height(6.dp))
-                Box(modifier = Modifier.hardShadow(2.dp, 2.dp).border(2.dp, BrutalistBlack).background(BrutalistWhite).padding(horizontal = 24.dp, vertical = 8.dp)) {
+                Box(modifier = Modifier.hardShadow(2.dp, 2.dp).border(2.dp, BrutalistBlack).background(surface).padding(horizontal = 24.dp, vertical = 8.dp)) {
                     Text(text = if (data.route.tiempoEstimado != null) formatMinutes(data.route.tiempoEstimado) else "--:--", fontFamily = SpaceGroteskFamily, fontWeight = FontWeight.Bold, fontSize = 28.sp, color = SafetyOrange)
                 }
                 data.route.distanciaTotal?.let {
                     Spacer(Modifier.height(4.dp))
-                    Text(stringResource(R.string.format_km, it) + " · " + stringResource(R.string.label_stops_count, data.stops.size), fontFamily = SpaceGroteskFamily, fontSize = 12.sp, color = BrutalistBlack)
+                    Text(stringResource(R.string.format_km, it) + " · " + stringResource(R.string.label_stops_count, data.stops.size), fontFamily = SpaceGroteskFamily, fontSize = 12.sp, color = onSurface)
                 }
             }
 
-            // 2. Botón Optimizar Fijo (Solo en Vertical, en Horizontal está en la barra superior)
             Box(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp)) {
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
                         .hardShadow()
                         .border(2.dp, BrutalistBlack)
-                        .background(Color(0xFFF4F4F5))
+                        .background(onSurface.copy(alpha = 0.05f))
                         .clickable { onOptimize() }
                         .padding(14.dp),
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.Center
                 ) {
-                    Text(stringResource(R.string.btn_optimize), fontFamily = SpaceGroteskFamily, fontWeight = FontWeight.Bold, fontSize = 15.sp, letterSpacing = 1.sp, color = BrutalistBlack)
+                    Text(stringResource(R.string.btn_optimize), fontFamily = SpaceGroteskFamily, fontWeight = FontWeight.Bold, fontSize = 15.sp, letterSpacing = 1.sp, color = onSurface)
                 }
             }
         }
 
-        // 3. Lista Deslizable de Paradas
         LazyColumn(
             modifier = Modifier.weight(1f),
             contentPadding = PaddingValues(bottom = 8.dp)
         ) {
             items(data.stops.sortedBy { it.ordenVisita }) { stop ->
-                BrutalistStopRow(stop = stop, onClick = { onStopClick(stop.id) })
+                BrutalistStopRow(
+                    stop = stop, 
+                    onClick = { onStopClick(stop.id) },
+                    onNavigateClick = { onNavigateToStop(stop) }
+                )
             }
         }
 
-        // 4. Botón Iniciar Navegación Fijo al final
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .background(BrutalistWhite)
+                .background(surface)
                 .drawBehind { drawLine(BrutalistBlack, Offset(0f, 0f), Offset(size.width, 0f), 2.dp.toPx()) }
                 .padding(8.dp)
         ) {
@@ -478,32 +505,58 @@ private fun RouteDetailContent(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.Center
             ) {
-                Icon(Icons.Default.Navigation, null, tint = BrutalistBlack, modifier = Modifier.size(if (isLandscape) 20.dp else 24.dp))
+                Icon(Icons.Default.Navigation, null, tint = Color.Black, modifier = Modifier.size(if (isLandscape) 20.dp else 24.dp))
                 Spacer(Modifier.width(10.dp))
-                Text(stringResource(R.string.btn_start_navigation), fontFamily = SpaceGroteskFamily, fontWeight = FontWeight.Bold, fontSize = if (isLandscape) 14.sp else 18.sp, letterSpacing = 1.sp, color = BrutalistBlack)
+                Text(stringResource(R.string.btn_start_navigation), fontFamily = SpaceGroteskFamily, fontWeight = FontWeight.Bold, fontSize = if (isLandscape) 14.sp else 18.sp, letterSpacing = 1.sp, color = Color.Black)
             }
         }
     }
 }
 
 @Composable
-private fun BrutalistStopRow(stop: StopEntity, onClick: () -> Unit) {
+private fun BrutalistStopRow(
+    stop: StopEntity, 
+    onClick: () -> Unit,
+    onNavigateClick: () -> Unit
+) {
+    val onSurface = MaterialTheme.colorScheme.onSurface
+    val surface = MaterialTheme.colorScheme.surface
+
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .clickable { onClick() }
-            .drawBehind { drawLine(Color(0xFFE4E4E7), Offset(0f, size.height), Offset(size.width, size.height), 1.dp.toPx()) }
+            .drawBehind { drawLine(onSurface.copy(alpha = 0.1f), Offset(0f, size.height), Offset(size.width, size.height), 1.dp.toPx()) }
             .padding(16.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        Box(modifier = Modifier.size(32.dp).border(2.dp, BrutalistBlack).background(if (stop.status == "ENTREGADO") NeonGreen else Color(0xFFF4F4F5)), contentAlignment = Alignment.Center) { Text("${stop.ordenVisita}", fontFamily = SpaceGroteskFamily, fontWeight = FontWeight.Black, fontSize = 14.sp, color = BrutalistBlack) }
+        Box(modifier = Modifier.size(32.dp).border(2.dp, BrutalistBlack).background(if (stop.status == "ENTREGADO") NeonGreen else onSurface.copy(alpha = 0.05f)), contentAlignment = Alignment.Center) { 
+            Text("${stop.ordenVisita}", fontFamily = SpaceGroteskFamily, fontWeight = FontWeight.Black, fontSize = 14.sp, color = if (stop.status == "ENTREGADO") Color.Black else onSurface) 
+        }
         Column(modifier = Modifier.weight(1f)) {
-            Text(stop.destinatario.uppercase(), fontFamily = SpaceGroteskFamily, fontWeight = FontWeight.Bold, fontSize = 14.sp, color = if (stop.status == "ENTREGADO") Color.Gray else BrutalistBlack)
-            Text(stop.direccion, fontFamily = SpaceGroteskFamily, fontSize = 12.sp, color = if (stop.status == "ENTREGADO") Color.Gray else BrutalistBlack, maxLines = 1)
+            Text(stop.destinatario.uppercase(), fontFamily = SpaceGroteskFamily, fontWeight = FontWeight.Bold, fontSize = 14.sp, color = if (stop.status == "ENTREGADO") onSurface.copy(alpha = 0.5f) else onSurface)
+            Text(stop.direccion, fontFamily = SpaceGroteskFamily, fontSize = 12.sp, color = if (stop.status == "ENTREGADO") onSurface.copy(alpha = 0.5f) else onSurface, maxLines = 1)
         }
         
-        // Indicadores de sincronización
+        if (stop.status != "ENTREGADO") {
+            Box(
+                modifier = Modifier
+                    .size(40.dp)
+                    .border(2.dp, BrutalistBlack)
+                    .background(MaterialTheme.colorScheme.primaryContainer)
+                    .clickable { onNavigateClick() },
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = Icons.Default.NearMe, 
+                    contentDescription = null,
+                    tint = BrutalistBlack,
+                    modifier = Modifier.size(20.dp)
+                )
+            }
+        }
+        
         if (stop.status == "ENTREGADO") {
             when (stop.syncStatus) {
                 SyncStatus.PENDING.name -> {
@@ -514,10 +567,10 @@ private fun BrutalistStopRow(stop: StopEntity, onClick: () -> Unit) {
                         animationSpec = infiniteRepeatable(tween(2000, easing = LinearEasing)),
                         label = "rotation"
                     )
-                    Icon(Icons.Default.Sync, "Pendiente de sincronizar", tint = Color.Gray, modifier = Modifier.size(18.dp).graphicsLayer(rotationZ = rotation))
+                    Icon(Icons.Default.Sync, stringResource(R.string.label_sync_pending), tint = onSurface.copy(alpha = 0.5f), modifier = Modifier.size(18.dp).graphicsLayer(rotationZ = rotation))
                 }
                 SyncStatus.FAILED.name -> {
-                    Icon(Icons.Default.CloudOff, "Error de sincronización", tint = SafetyOrange, modifier = Modifier.size(18.dp))
+                    Icon(Icons.Default.CloudOff, stringResource(R.string.label_sync_error), tint = SafetyOrange, modifier = Modifier.size(18.dp))
                 }
                 else -> {
                     Text("✓", fontWeight = FontWeight.Black, color = NeonGreen, fontSize = 20.sp)
@@ -528,7 +581,10 @@ private fun BrutalistStopRow(stop: StopEntity, onClick: () -> Unit) {
 }
 
 @Composable
-private fun RouteDetailLoading() { Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) { CircularProgressIndicator(color = BrutalistBlack) } }
+private fun RouteDetailLoading() { 
+    val onSurface = MaterialTheme.colorScheme.onSurface
+    Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) { CircularProgressIndicator(color = onSurface) } 
+}
 
 @Composable
 private fun RouteDetailError(message: String) { Box(Modifier.fillMaxSize().padding(32.dp), contentAlignment = Alignment.Center) { Text(message, color = SafetyOrange, fontFamily = SpaceGroteskFamily, fontWeight = FontWeight.Bold) } }

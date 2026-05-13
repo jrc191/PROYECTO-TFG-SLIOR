@@ -25,6 +25,14 @@ interface UserDao {
     @Query("SELECT * FROM users WHERE id = :id")
     fun getUserById(id: String): Flow<UserEntity?>
 
+    /** Obtiene un usuario por ID de forma síncrona (suspend). */
+    @Query("SELECT * FROM users WHERE id = :id")
+    suspend fun getUserByIdSync(id: String): UserEntity?
+
+    /** Actualiza el estado de las notificaciones para un usuario. */
+    @Query("UPDATE users SET consentimientoNotificaciones = :enabled WHERE id = :userId")
+    suspend fun updateNotificationConsent(userId: String, enabled: Boolean)
+
     /** Elimina todos los usuarios (usado al cerrar sesión). */
     @Query("DELETE FROM users")
     suspend fun deleteAll()

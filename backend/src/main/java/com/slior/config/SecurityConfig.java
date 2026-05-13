@@ -59,8 +59,7 @@ public class SecurityConfig {
                         .xssProtection(xss ->
                             xss.and())
                         .httpStrictTransportSecurity(hsts ->
-                            hsts.includeSubDomains(true)
-                                .maxAgeInSeconds(31_536_000))
+                            hsts.disable())
                         .referrerPolicy(referrer ->
                             referrer.policy(ReferrerPolicyHeaderWriter.ReferrerPolicy.NO_REFERRER))
                 )

@@ -33,6 +33,11 @@ public class RouteController {
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
+    @GetMapping("/repartidor")
+    public ResponseEntity<List<RouteResponse>> getRoutesByRepartidorQuery(@RequestParam UUID repartidorId) {
+        return ResponseEntity.ok(routeService.getRoutesForRepartidor(repartidorId));
+    }
+
     @GetMapping("/repartidor/{repartidorId}")
     public ResponseEntity<List<RouteResponse>> getRoutesByRepartidor(@PathVariable UUID repartidorId) {
         return ResponseEntity.ok(routeService.getRoutesForRepartidor(repartidorId));

@@ -11,7 +11,7 @@
     <string name="btn_register">REGÍSTRATE AQUÍ</string>
     <string name="btn_create_account">CREAR CUENTA</string>
     <string name="link_forgot_password">¿OLVIDASTE TU CONTRASEÑA?</string>
-    <string name="link_no_account">¿No tienes cuenta? </string>
+    <string name="link_no_account">¿No tienes cuenta?  </string>
     <string name="link_has_account">¿YA TIENES CUENTA? </string>
     <string name="label_new_courier">NUEVO REPARTIDOR</string>
     <string name="label_join_fleet">ÚNETE A LA\nFLOTA</string>
@@ -120,6 +120,21 @@
     <string name="btn_ok">OK</string>
     <string name="btn_back">Volver</string>
 
+    <!-- ======= Escaneo ======= -->
+    <string name="btn_scan_package">ESCANEAR PAQUETE</string>
+    <string name="scan_mode_qr">MODO QR</string>
+    <string name="scan_mode_barcode">MODO BARRAS</string>
+    <string name="btn_confirm_delivery">CONFIRMAR ENTREGA</string>
+    <string name="label_scan_instructions">Apunta al código del paquete</string>
+    <string name="label_delivery_confirmed">ENTREGA COMPLETADA</string>
+    <string name="label_recipient_uppercase">DESTINATARIO</string>
+    <string name="btn_navigate_stop">NAVEGAR A ESTA PARADA</string>
+    <string name="label_now">AHORA</string>
+    <string name="btn_retry">REINTENTAR</string>
+    <string name="banner_offline_mode">SIN CONEXIÓN - MODO OFFLINE ACTIVO</string>
+    <string name="label_sync_pending">Pendiente de sincronizar</string>
+    <string name="label_sync_error">Error de sincronización</string>
+
     <!-- ======= Vehículos ======= -->
     <string name="vehicle_car">AUTO</string>
     <string name="vehicle_van">FURGONETA</string>
@@ -138,6 +153,7 @@
     <string name="error_long_name">El nombre es demasiado largo (máx. 100 caracteres)</string>
     <string name="error_empty_date">La fecha no puede estar vacía</string>
     <string name="error_invalid_date">Formato de fecha inválido (usa YYYY-MM-DD)</string>
+    <string name="error_past_date">La fecha no puede ser anterior a hoy</string>
     <string name="error_empty_phone">El teléfono no puede estar vacío</string>
     <string name="error_invalid_phone">Teléfono inválido</string>
     <string name="error_empty_lat">La latitud no puede estar vacía</string>
@@ -145,4 +161,40 @@
     <string name="error_empty_lon">La longitud no puede estar vacía</string>
     <string name="error_invalid_lon">Longitud inválida (debe estar entre -180 y 180)</string>
     <string name="error_session_expired">Sesión expirada. Por favor, identifícate de nuevo.</string>
+
+    <!-- ======= Permisos ======= -->
+    <string name="perm_required_title">PERMISOS REQUERIDOS</string>
+    <string name="perm_required_desc">SLIOR requiere acceso a tu UBICACIÓN e INTERNET para funcionar correctamente. Estos permisos son obligatorios para gestionar rutas y mapas.</string>
+    <string name="perm_btn_grant">CONCEDER PERMISOS</string>
+    <string name="perm_denied_title">PERMISOS DENEGADOS</string>
+    <string name="perm_denied_desc">No podemos continuar sin los permisos. La aplicación se cerrará.</string>
+    <string name="perm_btn_exit">CERRAR APP</string>
+    <string name="error_invalid_user_id">ID de usuario no válido. Por favor, inicia sesión de nuevo.</string>
+    <!-- ======= Restablecimiento de Contraseña ======= -->
+    <string name="title_forgot_password">¿OLVIDASTE TU CONTRASEÑA?</string>
+    <string name="desc_forgot_password">Introduce tu email y te enviaremos un código de seguridad para restablecer tu acceso.</string>
+    <string name="desc_reset_password">Hemos enviado un código a tu email. Introdúcelo abajo junto con tu nueva contraseña.</string>
+    <string name="label_reset_code">CÓDIGO DE SEGURIDAD</string>
+    <string name="label_new_password">NUEVA CONTRASEÑA</string>
+    <string name="btn_send_code">ENVIAR CÓDIGO</string>
+    <string name="btn_reset_password">CAMBIAR CONTRASEÑA</string>
+    <string name="msg_code_sent">CÓDIGO ENVIADO</string>
+    <string name="msg_reset_success">CONTRASEÑA ACTUALIZADA</string>
+    <string name="btn_back_to_login">VOLVER AL LOGIN</string>
+
+    <!-- ======= Requisitos de Contraseña ======= -->
+    <string name="val_pass_min_length">Mínimo 8 caracteres</string>
+    <string name="val_pass_uppercase">Al menos una mayúscula</string>
+    <string name="val_pass_number">Al menos un número</string>
+    <string name="error_invalid_code">Código inválido (6 dígitos)</string>
+    <string name="error_pass_too_short">La contraseña es demasiado corta</string>
+    <string name="error_pass_no_upper">Falta una mayúscula</string>
+    <string name="error_pass_no_number">Falta un número</string>
+
+    <!-- ======= Ajustes de Tema ======= -->
+    <string name="title_theme">TEMA DE LA APP</string>
+    <string name="theme_light">MODO CLARO</string>
+    <string name="theme_dark">MODO OSCURO</string>
+    <string name="theme_system">PREDETERMINADO DEL SISTEMA</string>
+
 </resources>

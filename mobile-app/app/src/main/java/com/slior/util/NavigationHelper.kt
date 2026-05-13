@@ -7,13 +7,17 @@ import android.widget.Toast
 import com.slior.data.local.entity.StopEntity
 
 /**
- * Utilidad para gestionar la navegación externa hacia aplicaciones de mapas (Google Maps, Waze).
+ * Utilidad para gestionar la navegación externa hacia aplicaciones de mapas.
+ * Orden de prioridad: Google Maps → Waze → navegador/chooser genérico.
+ *
+ * Nota: Waze no soporta waypoints intermedios vía deep link, por lo que
+ * en rutas multi-parada navega únicamente al destino final.
  */
 object NavigationHelper {
 
     /**
-     * Abre Google Maps con una ruta completa que incluye todas las paradas pendientes.
-     * Utiliza el formato de URLs de Google Maps para incluir waypoints (puntos intermedios).
+     * Abre Google Maps (o Waze como fallback) con una ruta completa
+     * que incluye todas las paradas pendientes como waypoints.
      */
     fun launchExternalNavigation(context: Context, stops: List<StopEntity>) {
         if (stops.isEmpty()) {
@@ -21,22 +25,18 @@ object NavigationHelper {
             return
         }
 
-        // 1. Filtrar solo paradas pendientes (Slior usa "ENTREGADO" para paradas completadas)
         val pendingStops = stops.filter { it.status != "ENTREGADO" }
-        
+
         if (pendingStops.isEmpty()) {
             Toast.makeText(context, "Todas las paradas ya han sido entregadas", Toast.LENGTH_SHORT).show()
             return
         }
 
-        // 2. Definir destino (la última parada) y waypoints (las intermedias)
         val lastStop = pendingStops.last()
         val waypoints = if (pendingStops.size > 1) {
             pendingStops.dropLast(1).joinToString("|") { "${it.latitud},${it.longitud}" }
         } else null
 
-        // 3. Construir la URI para Google Maps usando COORDENADAS EXACTAS
-        // Esto evita errores por nombres de calles distintos entre proveedores.
         val uriBuilder = Uri.parse("https://www.google.com/maps/dir/?api=1")
             .buildUpon()
             .appendQueryParameter("destination", "${lastStop.latitud},${lastStop.longitud}")
@@ -46,35 +46,74 @@ object NavigationHelper {
             uriBuilder.appendQueryParameter("waypoints", waypoints)
         }
 
-        launchIntent(context, uriBuilder.build())
+        launchIntent(
+            context    = context,
+            mapsUri    = uriBuilder.build(),
+            destLat    = lastStop.latitud,
+            destLon    = lastStop.longitud
+        )
     }
 
     /**
-     * Abre Google Maps para navegar a una única parada específica.
+     * Abre Google Maps (o Waze como fallback) para navegar a una única parada.
      */
     fun launchSingleStopNavigation(context: Context, stop: StopEntity) {
-        val uri = Uri.parse("google.navigation:q=${stop.latitud},${stop.longitud}")
-        val mapIntent = Intent(Intent.ACTION_VIEW, uri)
-        mapIntent.setPackage("com.google.android.apps.maps")
+        // Intentar primero con el esquema nativo de Google Maps (más directo)
+        val nativeUri = Uri.parse("google.navigation:q=${stop.latitud},${stop.longitud}")
+        val nativeIntent = Intent(Intent.ACTION_VIEW, nativeUri)
+            .apply { setPackage("com.google.android.apps.maps") }
 
-        if (mapIntent.resolveActivity(context.packageManager) != null) {
-            context.startActivity(mapIntent)
-        } else {
-            // Fallback a URL de Google Maps si la app no responde al esquema navigation:
-            val webUri = Uri.parse("https://www.google.com/maps/dir/?api=1&destination=${stop.latitud},${stop.longitud}&travelmode=driving")
-            launchIntent(context, webUri)
+        if (nativeIntent.resolveActivity(context.packageManager) != null) {
+            context.startActivity(nativeIntent)
+            return
         }
+
+        // Si el esquema nativo falla, usar launchIntent con URL web + fallback a Waze
+        val webUri = Uri.parse("https://www.google.com/maps/dir/?api=1")
+            .buildUpon()
+            .appendQueryParameter("destination", "${stop.latitud},${stop.longitud}")
+            .appendQueryParameter("travelmode", "driving")
+            .build()
+
+        launchIntent(
+            context = context,
+            mapsUri = webUri,
+            destLat = stop.latitud,
+            destLon = stop.longitud
+        )
     }
 
-    private fun launchIntent(context: Context, uri: Uri) {
-        val mapIntent = Intent(Intent.ACTION_VIEW, uri)
-        mapIntent.setPackage("com.google.android.apps.maps")
-
-        if (mapIntent.resolveActivity(context.packageManager) != null) {
-            context.startActivity(mapIntent)
-        } else {
-            val genericIntent = Intent(Intent.ACTION_VIEW, uri)
-            context.startActivity(genericIntent)
+    /**
+     * Lanza la intent de navegación en orden: Google Maps → Waze → genérico.
+     *
+     * @param mapsUri  URI con formato Google Maps (web o deep link)
+     * @param destLat  Latitud del destino final (usado por Waze)
+     * @param destLon  Longitud del destino final (usado por Waze)
+     */
+    private fun launchIntent(
+        context: Context,
+        mapsUri: Uri,
+        destLat: Double,
+        destLon: Double
+    ) {
+        // 1. Google Maps
+        val mapsIntent = Intent(Intent.ACTION_VIEW, mapsUri)
+            .apply { setPackage("com.google.android.apps.maps") }
+        if (mapsIntent.resolveActivity(context.packageManager) != null) {
+            context.startActivity(mapsIntent)
+            return
         }
+
+        // 2. Waze — solo soporta destino único vía deep link, sin waypoints
+        val wazeUri = Uri.parse("waze://?ll=$destLat,$destLon&navigate=yes")
+        val wazeIntent = Intent(Intent.ACTION_VIEW, wazeUri)
+            .apply { setPackage("com.waze") }
+        if (wazeIntent.resolveActivity(context.packageManager) != null) {
+            context.startActivity(wazeIntent)
+            return
+        }
+
+        // 3. Fallback genérico: Android presenta el chooser con cualquier app compatible
+        context.startActivity(Intent(Intent.ACTION_VIEW, mapsUri))
     }
 }

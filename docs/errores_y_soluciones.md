@@ -29,13 +29,3 @@
 *   **Error:** La cámara del móvil no enfocaba bien los códigos Code 128 pequeños.
 *   **Causa:** El "Quiet Zone" (margen blanco) del código de barras era demasiado estrecho.
 *   **Solución:** Ajustar la generación en `LabelService` para añadir un margen blanco forzoso alrededor del código, facilitando el enfoque del escáner.
-
-## 7. Error DNS y Timeouts tras Migrar a Cloudflare
-*   **Error:** DNS_PROBE_POSSIBLE y SocketTimeoutException en la app móvil.
-*   **Causa:** El túnel no tenía configurado el "Public Hostname" en el panel de Cloudflare y el Firewall de Windows bloqueaba el tráfico entrante desde Docker. Además, el límite de 10s de la app era insuficiente para el túnel.
-*   **Solución:** Configurar el CNAME `api` en Cloudflare apuntando al túnel, abrir el puerto 8080 en el Firewall de Windows y ampliar los timeouts de Retrofit/OkHttp a 30 segundos.
-
-## 8. Error 502 Bad Gateway en Endpoints con muchos datos
-*   **Error:** Cloudflare cortaba la conexión (502) al pedir la lista de rutas del repartidor.
-*   **Causa:** La consulta era lenta debido a un problema de N+1 (se pedían las paradas de cada ruta por separado) y se regeneraban etiquetas PDF innecesariamente, superando el tiempo de espera del proxy de Cloudflare.
-*   **Solución:** Optimizar el repositorio con `@EntityGraph` para traer todo de una vez y eliminar la generación redundante de etiquetas en el listado de rutas.

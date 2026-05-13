@@ -51,6 +51,11 @@ enum class ScanMode {
     QR, BARCODE
 }
 
+/**
+ * Pantalla de Escaneo de Paquetes.
+ * Permite validar códigos QR y de barras.
+ * Soporta temas dinámicos (Claro/Oscuro) y modo Landscape.
+ */
 @Composable
 fun ScanScreen(
     stopId: String,
@@ -68,6 +73,11 @@ fun ScanScreen(
     val configuration = androidx.compose.ui.platform.LocalConfiguration.current
     val isLandscape = configuration.orientation == android.content.res.Configuration.ORIENTATION_LANDSCAPE
 
+    // Colores dinámicos
+    val backgroundColor = MaterialTheme.colorScheme.background
+    val surfaceColor = MaterialTheme.colorScheme.surface
+    val onSurfaceColor = MaterialTheme.colorScheme.onSurface
+
     var scanMode by remember { mutableStateOf(ScanMode.QR) }
 
     var hasCameraPermission by remember {
@@ -81,41 +91,27 @@ fun ScanScreen(
         onResult = { granted -> hasCameraPermission = granted }
     )
 
-    // Configuración optimizada del escáner
+    // Configuración del escáner
     val barcodeView = remember {
         CompoundBarcodeView(context).apply {
             val callback = com.journeyapps.barcodescanner.BarcodeCallback { result ->
                 result.text?.let { viewModel.onPackageScanned(it) }
             }
-            // Configuramos opciones de hardware para mejor detección
             this.barcodeView.cameraSettings.isExposureEnabled = true
             this.barcodeView.cameraSettings.isAutoFocusEnabled = true
-            
             decodeContinuous(callback)
         }
     }
 
-    // Actualizar formatos y optimizar motor de búsqueda según el modo
     LaunchedEffect(scanMode) {
         val formats = if (scanMode == ScanMode.QR) {
             listOf(BarcodeFormat.QR_CODE)
         } else {
-            // Estándar para logística: CODE_128 es el más eficiente para UUIDs y cadenas largas,
-            // pero añadimos otros formatos comunes por robustez.
-            listOf(
-                BarcodeFormat.CODE_128,
-                BarcodeFormat.CODE_39,
-                BarcodeFormat.CODE_93,
-                BarcodeFormat.ITF,
-                BarcodeFormat.EAN_8,
-                BarcodeFormat.EAN_13
-            )
+            listOf(BarcodeFormat.CODE_128, BarcodeFormat.CODE_39, BarcodeFormat.CODE_93, BarcodeFormat.ITF, BarcodeFormat.EAN_8, BarcodeFormat.EAN_13)
         }
-        
         val hints = mutableMapOf<DecodeHintType, Any>()
-        hints[DecodeHintType.TRY_HARDER] = true // Crucial para códigos densos/largos
+        hints[DecodeHintType.TRY_HARDER] = true
         hints[DecodeHintType.POSSIBLE_FORMATS] = formats
-        
         barcodeView.barcodeView.decoderFactory = DefaultDecoderFactory(formats, hints, null, 0)
     }
 
@@ -148,12 +144,12 @@ fun ScanScreen(
         }
     }
 
-    Box(modifier = Modifier.fillMaxSize().background(BrutalistWhite)) {
+    Box(modifier = Modifier.fillMaxSize().background(backgroundColor)) {
         Column(modifier = Modifier.fillMaxSize()) {
-            // Header
+            // Header Dinámico
             Surface(
                 modifier = Modifier.fillMaxWidth().height(if (isLandscape) 56.dp else 64.dp),
-                color = BrutalistWhite, shape = RectangleShape
+                color = surfaceColor, shape = RectangleShape
             ) {
                 Row(
                     modifier = Modifier.fillMaxSize().drawBehind {
@@ -163,48 +159,42 @@ fun ScanScreen(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, stringResource(R.string.btn_back), tint = BrutalistBlack)
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, stringResource(R.string.btn_back), tint = onSurfaceColor)
                     }
                     Text(
-                        text = "ESCANEAR PAQUETE",
+                        text = stringResource(R.string.btn_scan_package),
                         modifier = Modifier.weight(1f),
-                        fontFamily = SpaceGroteskFamily, fontWeight = FontWeight.Black, fontSize = if (isLandscape) 16.sp else 18.sp, color = BrutalistBlack
+                        fontFamily = SpaceGroteskFamily, fontWeight = FontWeight.Black, fontSize = if (isLandscape) 16.sp else 18.sp, color = onSurfaceColor
                     )
                 }
             }
 
             if (!hasCameraPermission) {
                 Box(modifier = Modifier.weight(1f).fillMaxWidth(), contentAlignment = Alignment.Center) {
-                    Text("SE REQUIERE PERMISO DE CÁMARA", fontFamily = SpaceGroteskFamily, fontWeight = FontWeight.Bold, color = SafetyOrange)
+                    Text(stringResource(R.string.perm_required_title), fontFamily = SpaceGroteskFamily, fontWeight = FontWeight.Bold, color = SafetyOrange)
                 }
             } else {
                 if (isLandscape) {
                     Row(modifier = Modifier.weight(1f).fillMaxWidth()) {
-                        // Área de Escaneo con BoxWithConstraints para evitar desbordamiento
                         Box(
                             modifier = Modifier
                                 .weight(1.2f)
                                 .fillMaxHeight()
                                 .background(Color.Black)
                                 .border(2.dp, BrutalistBlack)
-                                .clip(RectangleShape) // Asegura que el contenido del scanner no se salga
+                                .clip(RectangleShape)
                         ) {
-                            AndroidView(
-                                factory = { barcodeView },
-                                modifier = Modifier.fillMaxSize()
-                            )
-                            
+                            AndroidView(factory = { barcodeView }, modifier = Modifier.fillMaxSize())
                             ScannerOverlay(scanMode = scanMode, onToggleMode = {
                                 scanMode = if (scanMode == ScanMode.QR) ScanMode.BARCODE else ScanMode.QR
-                            }, isLandscape = true)
+                            }, isLandscape = true, surfaceColor = surfaceColor, onSurfaceColor = onSurfaceColor)
                         }
                         
-                        // Área de Info
                         Column(
                             modifier = Modifier.weight(1f).fillMaxHeight().padding(16.dp),
                             verticalArrangement = Arrangement.spacedBy(12.dp)
                         ) {
-                            ScanInfoContent(stop, scannedCode, isValid)
+                            ScanInfoContent(stop, scannedCode, isValid, onSurfaceColor, surfaceColor)
                             Spacer(Modifier.weight(1f))
                             ConfirmButton(isValid, deliveryState, viewModel, stopId)
                         }
@@ -213,13 +203,12 @@ fun ScanScreen(
                     Column(modifier = Modifier.weight(1f).fillMaxWidth()) {
                         Box(modifier = Modifier.weight(1.2f).fillMaxWidth().background(Color.Black).border(bottom = 4.dp, color = BrutalistBlack)) {
                             AndroidView(factory = { barcodeView }, modifier = Modifier.fillMaxSize())
-                            
                             ScannerOverlay(scanMode = scanMode, onToggleMode = {
                                 scanMode = if (scanMode == ScanMode.QR) ScanMode.BARCODE else ScanMode.QR
-                            }, isLandscape = false)
+                            }, isLandscape = false, surfaceColor = surfaceColor, onSurfaceColor = onSurfaceColor)
                         }
                         Column(modifier = Modifier.weight(1f).fillMaxWidth().padding(24.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
-                            ScanInfoContent(stop, scannedCode, isValid)
+                            ScanInfoContent(stop, scannedCode, isValid, onSurfaceColor, surfaceColor)
                             Spacer(Modifier.weight(1f))
                             ConfirmButton(isValid, deliveryState, viewModel, stopId)
                         }
@@ -231,28 +220,22 @@ fun ScanScreen(
 }
 
 @Composable
-private fun ScannerOverlay(scanMode: ScanMode, onToggleMode: () -> Unit, isLandscape: Boolean) {
+private fun ScannerOverlay(scanMode: ScanMode, onToggleMode: () -> Unit, isLandscape: Boolean, surfaceColor: Color, onSurfaceColor: Color) {
     BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
         val containerWidth = maxWidth
         val containerHeight = maxHeight
         
-        // Calculamos el tamaño del marco de forma manual para evitar que el aspectRatio desborde
         val frameWidth: androidx.compose.ui.unit.Dp
         val frameHeight: androidx.compose.ui.unit.Dp
         
         if (scanMode == ScanMode.QR) {
-            // El QR es un cuadrado, usamos el 70% de la dimensión más pequeña
             val side = if (containerWidth < containerHeight) containerWidth * 0.7f else containerHeight * 0.7f
             frameWidth = side
             frameHeight = side
         } else {
-            // El código de barras es un rectángulo 3:1
-            // Intentamos que ocupe el 80% del ancho, pero vigilando el alto
             val targetWidth = containerWidth * 0.8f
             val targetHeight = targetWidth / 3f
-            
             if (targetHeight > containerHeight * 0.4f) {
-                // Si es demasiado alto para el contenedor (como en landscape), limitamos por alto
                 frameHeight = containerHeight * 0.4f
                 frameWidth = frameHeight * 3f
             } else {
@@ -267,25 +250,19 @@ private fun ScannerOverlay(scanMode: ScanMode, onToggleMode: () -> Unit, isLands
                 .size(width = frameWidth, height = frameHeight)
                 .border(3.dp, NeonGreen)
         ) {
-            // Línea de escaneo láser animada
             val infiniteTransition = rememberInfiniteTransition(label = "laser")
             val laserPosition by infiniteTransition.animateFloat(
                 initialValue = 0.1f,
                 targetValue = 0.9f,
-                animationSpec = infiniteRepeatable(
-                    animation = tween(2000, easing = LinearEasing),
-                    repeatMode = RepeatMode.Reverse
-                ),
+                animationSpec = infiniteRepeatable(animation = tween(2000, easing = LinearEasing), repeatMode = RepeatMode.Reverse),
                 label = "laserPos"
             )
-            
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
                     .fillMaxHeight(0.01f)
                     .align(Alignment.TopCenter)
-                    .offset(y = 0.dp) // Placeholder, real y defined by translation
-                    .graphicsLayer(translationY = 0f) // Not easily done with offset for percentage
+                    .graphicsLayer(translationY = 0f)
                     .drawBehind {
                         val y = size.height * laserPosition * (1f / 0.01f)
                         drawLine(NeonGreen, Offset(0f, y), Offset(size.width, y), 2.dp.toPx())
@@ -293,7 +270,6 @@ private fun ScannerOverlay(scanMode: ScanMode, onToggleMode: () -> Unit, isLands
             )
         }
 
-        // Botón flotante para cambiar de modo
         Surface(
             modifier = Modifier
                 .align(Alignment.BottomCenter)
@@ -302,20 +278,19 @@ private fun ScannerOverlay(scanMode: ScanMode, onToggleMode: () -> Unit, isLands
                 .hardShadow(2.dp, 2.dp)
                 .border(2.dp, BrutalistBlack, CircleShape)
                 .clickable { onToggleMode() },
-            color = BrutalistWhite,
+            color = surfaceColor,
             shape = CircleShape
         ) {
             Box(contentAlignment = Alignment.Center) {
                 Icon(
                     imageVector = if (scanMode == ScanMode.QR) Icons.Default.ViewColumn else Icons.Default.QrCode,
                     contentDescription = "Cambiar modo",
-                    tint = BrutalistBlack,
+                    tint = onSurfaceColor,
                     modifier = Modifier.size(if (isLandscape) 24.dp else 32.dp)
                 )
             }
         }
         
-        // Etiqueta de modo actual
         Surface(
             modifier = Modifier
                 .align(Alignment.TopCenter)
@@ -325,7 +300,7 @@ private fun ScannerOverlay(scanMode: ScanMode, onToggleMode: () -> Unit, isLands
             color = Color.Black.copy(alpha = 0.7f)
         ) {
             Text(
-                text = if (scanMode == ScanMode.QR) "MODO QR" else "MODO BARRAS",
+                text = if (scanMode == ScanMode.QR) stringResource(R.string.scan_mode_qr) else stringResource(R.string.scan_mode_barcode),
                 color = NeonGreen,
                 fontFamily = SpaceGroteskFamily,
                 fontWeight = FontWeight.Bold,
@@ -335,19 +310,17 @@ private fun ScannerOverlay(scanMode: ScanMode, onToggleMode: () -> Unit, isLands
     }
 }
 
-
-
 @Composable
-private fun ScanInfoContent(stop: com.slior.data.local.entity.StopEntity?, scannedCode: String?, isValid: Boolean?) {
+private fun ScanInfoContent(stop: com.slior.data.local.entity.StopEntity?, scannedCode: String?, isValid: Boolean?, onSurfaceColor: Color, surfaceColor: Color) {
     stop?.let { s ->
-        Text("ENTREGA PARA:", fontFamily = SpaceGroteskFamily, fontWeight = FontWeight.Black, fontSize = 10.sp, color = Color.Gray)
-        Text(s.destinatario.uppercase(), fontFamily = SpaceGroteskFamily, fontWeight = FontWeight.Black, fontSize = 18.sp, color = BrutalistBlack, maxLines = 1)
+        Text(stringResource(R.string.label_scan_instructions).uppercase(), fontFamily = SpaceGroteskFamily, fontWeight = FontWeight.Black, fontSize = 10.sp, color = onSurfaceColor.copy(alpha = 0.5f))
+        Text(s.destinatario.uppercase(), fontFamily = SpaceGroteskFamily, fontWeight = FontWeight.Black, fontSize = 18.sp, color = onSurfaceColor, maxLines = 1)
     }
 
     if (scannedCode != null) {
         Surface(
             modifier = Modifier.fillMaxWidth().border(2.dp, BrutalistBlack),
-            color = if (isValid == true) NeonGreen.copy(alpha = 0.1f) else SafetyOrange.copy(alpha = 0.1f)
+            color = if (isValid == true) NeonGreen.copy(alpha = 0.15f) else SafetyOrange.copy(alpha = 0.15f)
         ) {
             Row(modifier = Modifier.padding(8.dp), verticalAlignment = Alignment.CenterVertically) {
                 Icon(
@@ -358,14 +331,14 @@ private fun ScanInfoContent(stop: com.slior.data.local.entity.StopEntity?, scann
                 )
                 Spacer(Modifier.width(8.dp))
                 Column {
-                    Text("CÓDIGO:", fontFamily = SpaceGroteskFamily, fontWeight = FontWeight.Bold, fontSize = 9.sp)
-                    Text(scannedCode, fontFamily = SpaceGroteskFamily, fontWeight = FontWeight.Black, fontSize = 14.sp, maxLines = 1)
+                    Text("ID:", fontFamily = SpaceGroteskFamily, fontWeight = FontWeight.Bold, fontSize = 9.sp, color = onSurfaceColor)
+                    Text(scannedCode, fontFamily = SpaceGroteskFamily, fontWeight = FontWeight.Black, fontSize = 14.sp, maxLines = 1, color = onSurfaceColor)
                 }
             }
         }
     } else {
-        Box(modifier = Modifier.fillMaxWidth().height(50.dp).border(2.dp, BrutalistBlack, RectangleShape), contentAlignment = Alignment.Center) {
-            Text("ESPERANDO ESCANEO...", fontFamily = SpaceGroteskFamily, fontWeight = FontWeight.Bold, color = Color.Gray, fontSize = 12.sp)
+        Box(modifier = Modifier.fillMaxWidth().height(50.dp).border(2.dp, BrutalistBlack, RectangleShape).background(onSurfaceColor.copy(alpha = 0.05f)), contentAlignment = Alignment.Center) {
+            Text(stringResource(R.string.status_verifying), fontFamily = SpaceGroteskFamily, fontWeight = FontWeight.Bold, color = onSurfaceColor.copy(alpha = 0.4f), fontSize = 12.sp)
         }
     }
 }
@@ -376,13 +349,13 @@ private fun ConfirmButton(isValid: Boolean?, deliveryState: Result<Unit>?, viewM
         onClick = { viewModel.confirmDelivery(stopId) },
         enabled = isValid == true && deliveryState !is Result.Loading,
         modifier = Modifier.fillMaxWidth().height(64.dp).hardShadow().border(2.dp, BrutalistBlack),
-        colors = ButtonDefaults.buttonColors(containerColor = NeonGreen, disabledContainerColor = Color(0xFFD4D4D8)),
+        colors = ButtonDefaults.buttonColors(containerColor = NeonGreen, disabledContainerColor = Color.Gray.copy(alpha = 0.3f)),
         shape = MaterialTheme.shapes.extraSmall
     ) {
         if (deliveryState is Result.Loading) {
-            CircularProgressIndicator(color = BrutalistBlack, modifier = Modifier.size(24.dp))
+            CircularProgressIndicator(color = Color.Black, modifier = Modifier.size(24.dp))
         } else {
-            Text("CONFIRMAR ENTREGA", fontFamily = SpaceGroteskFamily, fontWeight = FontWeight.Black, fontSize = 16.sp, color = BrutalistBlack)
+            Text(stringResource(R.string.btn_confirm_delivery), fontFamily = SpaceGroteskFamily, fontWeight = FontWeight.Black, fontSize = 16.sp, color = Color.Black)
         }
     }
 }

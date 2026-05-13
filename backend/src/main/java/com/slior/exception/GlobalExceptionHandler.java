@@ -79,6 +79,14 @@ public class GlobalExceptionHandler {
                 .body(buildError(HttpStatus.FORBIDDEN, ex.getMessage(), request.getRequestURI()));
     }
 
+    /** Error en lectura de JSON (malformado o falta body) → 400 Bad Request */
+    @ExceptionHandler(org.springframework.http.converter.HttpMessageNotReadableException.class)
+    public ResponseEntity<ErrorResponse> handleNotReadable(
+            org.springframework.http.converter.HttpMessageNotReadableException ex, HttpServletRequest request) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(buildError(HttpStatus.BAD_REQUEST, "Cuerpo de solicitud inválido o ausente", request.getRequestURI()));
+    }
+
     /** Cualquier otro error no controlado → 500 */
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleGeneral(

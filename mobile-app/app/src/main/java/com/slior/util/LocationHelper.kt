@@ -15,11 +15,41 @@ import javax.inject.Singleton
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 
+import kotlinx.coroutines.*
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+
 @Singleton
 class LocationHelper @Inject constructor(
     @ApplicationContext private val context: Context
 ) {
     private val fusedClient = LocationServices.getFusedLocationProviderClient(context)
+    
+    private val _lastKnownLocation = MutableStateFlow<Pair<Double, Double>?>(null)
+    val lastKnownLocation: StateFlow<Pair<Double, Double>?> = _lastKnownLocation.asStateFlow()
+
+    private var trackingJob: Job? = null
+
+    fun startTracking(scope: CoroutineScope) {
+        if (trackingJob?.isActive == true) return
+        
+        trackingJob = scope.launch {
+            while (true) {
+                try {
+                    getCurrentLocation()
+                } catch (e: Exception) {
+                    // Ignore errors in background tracking
+                }
+                delay(10000)
+            }
+        }
+    }
+
+    fun stopTracking() {
+        trackingJob?.cancel()
+        trackingJob = null
+    }
 
     @SuppressLint("MissingPermission")
     suspend fun getCurrentLocation(): Pair<Double, Double> {
@@ -42,7 +72,9 @@ class LocationHelper @Inject constructor(
                 cancellationSource.token
             ).addOnSuccessListener { location ->
                 if (location != null) {
-                    continuation.resume(Pair(location.latitude, location.longitude))
+                    val result = Pair(location.latitude, location.longitude)
+                    _lastKnownLocation.value = result
+                    continuation.resume(result)
                 } else {
                     continuation.resumeWithException(Exception("No se pudo obtener la ubicación"))
                 }

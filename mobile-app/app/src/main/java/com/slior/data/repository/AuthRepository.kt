@@ -6,17 +6,22 @@ import com.slior.data.local.dao.UserDao
 import com.slior.data.local.entity.UserEntity
 import com.slior.data.remote.ApiService
 import com.slior.data.remote.AuthInterceptor.Companion.TOKEN_KEY
-import com.slior.data.remote.dto.LoginRequest
-import com.slior.data.remote.dto.RegisterRequest
+import com.slior.data.remote.dto.*
 import com.slior.data.remote.dataStore
 import com.slior.util.Result
 import com.slior.ui.auth.ServerStatus
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 import retrofit2.HttpException
 import java.io.IOException
 import javax.inject.Inject
 import javax.inject.Singleton
+
+import androidx.datastore.preferences.core.stringPreferencesKey
+import com.slior.data.remote.dto.*
+
+// ... rest of imports
 
 @Singleton
 class AuthRepository @Inject constructor(
@@ -24,6 +29,27 @@ class AuthRepository @Inject constructor(
     private val userDao: UserDao,
     @ApplicationContext private val context: Context
 ) {
+    companion object {
+        val THEME_KEY = stringPreferencesKey("app_theme")
+    }
+
+    /**
+     * Guarda la preferencia de tema (light, dark, system).
+     */
+    suspend fun saveTheme(theme: String) {
+        context.dataStore.edit { prefs ->
+            prefs[THEME_KEY] = theme
+        }
+    }
+
+    /**
+     * Observa la preferencia de tema actual.
+     */
+    fun getTheme(): Flow<String?> {
+        return context.dataStore.data.map { prefs ->
+            prefs[THEME_KEY]
+        }
+    }
 
     // Hace login en el backend, guarda el token y el usuario en local
     suspend fun login(email: String, password: String): Result<String> {
@@ -44,7 +70,8 @@ class AuthRepository @Inject constructor(
                     nombre = response.nombre,
                     email = response.email,
                     rol = response.rol,
-                    vehicleType = vehicleType
+                    vehicleType = vehicleType,
+                    consentimientoNotificaciones = response.consentimientoNotificaciones
                 )
             )
 
@@ -79,11 +106,65 @@ class AuthRepository @Inject constructor(
                     nombre = response.nombre,
                     email = response.email,
                     rol = response.rol,
-                    vehicleType = finalVehicleType
+                    vehicleType = finalVehicleType,
+                    consentimientoNotificaciones = response.consentimientoNotificaciones
                 )
             )
 
             Result.Success(response.userId)
+        } catch (e: Exception) {
+            Result.Error(e)
+        }
+    }
+
+    /**
+     * Actualiza el consentimiento de notificaciones en el servidor y localmente.
+     */
+    suspend fun updateNotifications(userId: String, enabled: Boolean): Result<Unit> {
+        return try {
+            // 1. Actualizar en el servidor
+            apiService.updateNotifications(enabled)
+            
+            // 2. Actualizar localmente
+            userDao.updateNotificationConsent(userId, enabled)
+            
+            Result.Success(Unit)
+        } catch (e: Exception) {
+            Result.Error(e)
+        }
+    }
+
+    /**
+     * Solicita código de restablecimiento.
+     */
+    suspend fun forgotPassword(email: String): Result<Unit> {
+        return try {
+            apiService.forgotPassword(ForgotPasswordRequest(email))
+            Result.Success(Unit)
+        } catch (e: Exception) {
+            Result.Error(e)
+        }
+    }
+
+    /**
+     * Resetea la contraseña usando el código.
+     */
+    suspend fun resetPassword(request: ResetPasswordRequest): Result<Unit> {
+        return try {
+            apiService.resetPassword(request)
+            Result.Success(Unit)
+        } catch (e: Exception) {
+            Result.Error(e)
+        }
+    }
+
+    /**
+     * Cambia la contraseña del usuario logueado.
+     */
+    suspend fun updatePassword(oldPass: String, newPass: String): Result<Unit> {
+        return try {
+            apiService.updatePassword(UpdatePasswordRequest(oldPass, newPass))
+            Result.Success(Unit)
         } catch (e: Exception) {
             Result.Error(e)
         }

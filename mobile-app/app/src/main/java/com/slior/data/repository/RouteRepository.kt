@@ -61,6 +61,10 @@ class RouteRepository @Inject constructor(
 
     suspend fun syncRoutes(repartidorId: String): Result<Unit> {
         return try {
+            if (repartidorId.isBlank()) {
+                return Result.Error(IllegalArgumentException("El ID del repartidor no puede estar vacío"))
+            }
+
             val remoteRoutes = apiService.getRoutesByRepartidor(repartidorId)
             
             // 1. Obtener paradas pendientes de sincronizar antes de borrar

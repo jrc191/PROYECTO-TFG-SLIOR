@@ -22,6 +22,8 @@ data class UserEntity(
 
     val vehicleType: String = VehicleType.VAN.name,  // Tipo de vehículo (CAR, VAN, TRUCK) - VAN por defecto
 
+    val consentimientoNotificaciones: Boolean = false,
+
     val timestamp: Long = System.currentTimeMillis(),
 
     val syncStatus: String = SyncStatus.SYNCED.name

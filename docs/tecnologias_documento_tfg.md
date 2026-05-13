@@ -20,4 +20,5 @@ El sistema SLIOR se basa en una arquitectura de microservicios simplificada, uti
 *   **Mapas y Ubicación:** OSMDroid (OpenStreetMap) para la visualización geoespacial.
 *   **Geocodificación:** Sistema híbrido que integra caché persistente (Redis/Local DB) y fallback a servicios REST externos (Photon/Nominatim).
 *   **Generación de Documentos:** OpenPDF para la maquetación de etiquetas logísticas y ZXing para la generación de simbologías de códigos de barras (Code 128) y códigos bidimensionales (QR).
-*   **Despliegue:** Docker y Docker Compose para la containerización de servicios de infraestructura (Base de datos y servicios de mapas).
+*   **Despliegue:** Docker y Docker Compose para la containerización de servicios de infraestructura.
+*   **Internacionalización y Tematización:** Sistema de soporte multi-idioma (i18n) y gestión de temas dinámicos (Dark/Light mode) integrados en el núcleo de la UI.

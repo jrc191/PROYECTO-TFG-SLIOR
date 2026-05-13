@@ -10,5 +10,8 @@ Aquí he apostado por **Kotlin** y **Jetpack Compose**. Compose es una maravilla
 
 Una de las partes de las que más orgulloso estoy es el sistema **Offline-First**. Uso **Room** para guardar todo en el móvil y **WorkManager** para que, si el repartidor entrega un paquete en un sótano sin cobertura, la app no se bloquee. La entrega se queda "en espera" y se envía sola al servidor en cuanto el móvil detecta internet, incluso si el repartidor ha cerrado la app.
 
-## Herramientas Útiles
-Para el tema de los mapas uso **OSMDroid**. Es una alternativa libre a Google Maps que funciona muy bien. Y para las etiquetas de los paquetes, uso una librería llamada **OpenPDF** combinada con **ZXing**. Me permite generar PDFs que parecen sacados de una empresa de transporte real, con sus códigos de barras y QRs perfectamente legibles.
+## Infraestructura y Red
+Para conectar la app con el servidor, he apostado por un despliegue basado en **Docker**. Esto me permite levantar todo el entorno (backend y base de datos) de forma idéntica en cualquier máquina. El acceso se realiza a través de la red local o mediante herramientas de red privada, asegurando que los datos sensibles no estén expuestos directamente a internet.
+
+## Pulido Final
+No quería que la app solo funcionara, quería que fuera cómoda. Por eso añadí el **Modo Oscuro**, que queda espectacular con el diseño brutalista, y soporte para **5 idiomas**. También tuve que optimizar el backend porque al principio, cuando había muchas rutas, iba un poco lento; ahora, gracias a optimizar las consultas a la base de datos, vuela.

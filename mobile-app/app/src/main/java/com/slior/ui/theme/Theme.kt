@@ -58,50 +58,52 @@ private val SliorTypography = Typography(
 
 //  Esquemas de color 
 private val LightColors = lightColorScheme(
-    primary = SliorBlue,
-    onPrimary = SurfaceLight,
-    primaryContainer = SliorBlueLight,
-    secondary = SliorOrange,
-    onSecondary = SurfaceLight,
-    secondaryContainer = SliorOrangeDark,
+    primary = BrutalistBlack,
+    onPrimary = BrutalistWhite,
+    primaryContainer = NeonGreen,
+    secondary = SafetyOrange,
+    onSecondary = BrutalistWhite,
     background = BackgroundLight,
     surface = SurfaceLight,
-    onSurface = OnSurfaceLight,
-    error = StatusCancelled
+    onSurface = BrutalistBlack,
+    error = OfflineRed
 )
 
 private val DarkColors = darkColorScheme(
-    primary = SliorBlueLight,
-    onPrimary = BackgroundDark,
-    primaryContainer = SliorBlue,
-    secondary = SliorOrange,
-    onSecondary = BackgroundDark,
+    primary = BrutalistWhite,
+    onPrimary = BrutalistBlack,
+    primaryContainer = NeonGreen,
+    secondary = SafetyOrange,
+    onSecondary = BrutalistBlack,
     background = BackgroundDark,
     surface = SurfaceDark,
-    onSurface = OnSurfaceDark,
-    error = StatusCancelled
+    onSurface = BrutalistWhite,
+    error = OfflineRed
 )
 
 @Composable
 fun SliorTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
+    // Dynamic color is available on Android 12+
+    dynamicColor: Boolean = false,
     content: @Composable () -> Unit
 ) {
-    val colorScheme = if (darkTheme) DarkColors else LightColors
-
+    val colorScheme = when {
+        darkTheme -> DarkColors
+        else -> LightColors
+    }
     val view = LocalView.current
     if (!view.isInEditMode) {
         SideEffect {
             val window = (view.context as Activity).window
-            window.statusBarColor = colorScheme.primary.toArgb()
-            WindowCompat.getInsetsController(window, view)
-                .isAppearanceLightStatusBars = !darkTheme
+            window.statusBarColor = colorScheme.surface.toArgb()
+            WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = !darkTheme
         }
     }
 
     MaterialTheme(
         colorScheme = colorScheme,
-        typography  = SliorTypography,
-        content     = content
+        typography = SliorTypography,
+        content = content
     )
 }

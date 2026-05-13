@@ -14,6 +14,9 @@ interface RouteDao {
     @Query("SELECT * FROM routes WHERE id = :id")
     suspend fun getRouteById(id: String): RouteEntity?
 
+    @Query("SELECT * FROM routes WHERE status = :status")
+    suspend fun getRoutesByStatus(status: String): List<RouteEntity>
+
     @Query("SELECT * FROM stops WHERE routeId = :routeId ORDER BY ordenVisita ASC")
     fun getStopsByRoute(routeId: String): Flow<List<StopEntity>>
 

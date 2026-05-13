@@ -120,6 +120,21 @@
     <string name="btn_ok">OK</string>
     <string name="btn_back">Back</string>
 
+    <!-- ======= Scanning ======= -->
+    <string name="btn_scan_package">SCAN PACKAGE</string>
+    <string name="scan_mode_qr">QR MODE</string>
+    <string name="scan_mode_barcode">BARCODE MODE</string>
+    <string name="btn_confirm_delivery">CONFIRM DELIVERY</string>
+    <string name="label_scan_instructions">Point at the package code</string>
+    <string name="label_delivery_confirmed">DELIVERY COMPLETED</string>
+    <string name="label_recipient_uppercase">RECIPIENT</string>
+    <string name="btn_navigate_stop">NAVIGATE TO THIS STOP</string>
+    <string name="label_now">NOW</string>
+    <string name="btn_retry">RETRY</string>
+    <string name="banner_offline_mode">OFFLINE - OFFLINE MODE ACTIVE</string>
+    <string name="label_sync_pending">Pending sync</string>
+    <string name="label_sync_error">Sync error</string>
+
     <!-- ======= Vehicles ======= -->
     <string name="vehicle_car">CAR</string>
     <string name="vehicle_van">VAN</string>
@@ -138,6 +153,7 @@
     <string name="error_long_name">Name is too long (max. 100 characters)</string>
     <string name="error_empty_date">Date cannot be empty</string>
     <string name="error_invalid_date">Invalid date format (use YYYY-MM-DD)</string>
+    <string name="error_past_date">Date cannot be previous than actual date</string>
     <string name="error_empty_phone">Phone cannot be empty</string>
     <string name="error_invalid_phone">Invalid phone number</string>
     <string name="error_empty_lat">Latitude cannot be empty</string>
@@ -145,4 +161,38 @@
     <string name="error_empty_lon">Longitude cannot be empty</string>
     <string name="error_invalid_lon">Invalid longitude (must be between -180 and 180)</string>
     <string name="error_session_expired">Session expired. Please log in again.</string>
+    <string name="perm_btn_exit">CLOSE APP</string>
+    <string name="error_invalid_user_id">Invalid user ID. Please log in again.</string>
+    <string name="perm_required_title">REQUIRED PERMISSIONS</string>
+    <string name="perm_required_desc">SLIOR needs access to your LOCATION and INTERNET to work properly. This permissions are mandatory to manage routes and maps</string>
+    <string name="perm_btn_grant">ALLOW PERMISSIONS</string>
+    <string name="perm_denied_title">DENIED PERMISSIONS</string>
+    <string name="perm_denied_desc">We cannot continue without the proper permissions. App will now close.</string>
+    <!-- ======= Password Reset ======= -->
+    <string name="title_forgot_password">FORGOT PASSWORD?</string>
+    <string name="desc_forgot_password">Enter your email and we will send you a security code to restore your access.</string>
+    <string name="desc_reset_password">We have sent a code to your email. Enter it below along with your new password.</string>
+    <string name="label_reset_code">SECURITY CODE</string>
+    <string name="label_new_password">NEW PASSWORD</string>
+    <string name="btn_send_code">SEND CODE</string>
+    <string name="btn_reset_password">RESET PASSWORD</string>
+    <string name="msg_code_sent">CODE SENT</string>
+    <string name="msg_reset_success">PASSWORD UPDATED</string>
+    <string name="btn_back_to_login">BACK TO LOGIN</string>
+
+    <!-- ======= Password Requirements ======= -->
+    <string name="val_pass_min_length">Minimum 8 characters</string>
+    <string name="val_pass_uppercase">At least one uppercase letter</string>
+    <string name="val_pass_number">At least one number</string>
+    <string name="error_invalid_code">Invalid code (6 digits)</string>
+    <string name="error_pass_too_short">Password is too short</string>
+    <string name="error_pass_no_upper">Missing uppercase letter</string>
+    <string name="error_pass_no_number">Missing number</string>
+
+    <!-- ======= Theme Settings ======= -->
+    <string name="title_theme">APP THEME</string>
+    <string name="theme_light">LIGHT MODE</string>
+    <string name="theme_dark">DARK MODE</string>
+    <string name="theme_system">SYSTEM DEFAULT</string>
+
 </resources>

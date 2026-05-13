@@ -17,7 +17,9 @@ class SyncDeliveryWorker @AssistedInject constructor(
     @Assisted context: Context,
     @Assisted workerParams: WorkerParameters,
     private val apiService: ApiService,
-    private val routeDao: RouteDao
+    private val routeDao: RouteDao,
+    private val userDao: com.slior.data.local.dao.UserDao,
+    private val notificationHelper: com.slior.util.NotificationHelper
 ) : CoroutineWorker(context, workerParams) {
 
     override suspend fun doWork(): Result {
@@ -29,6 +31,16 @@ class SyncDeliveryWorker @AssistedInject constructor(
             
             // Si tiene éxito, marcar como sincronizado
             routeDao.updateStopSyncStatus(stopId, SyncStatus.SYNCED.name)
+
+            // Notificar al usuario si ha dado su consentimiento
+            val userId = userDao.getFirstUserId()
+            if (userId != null) {
+                val user = userDao.getUserByIdSync(userId)
+                if (user?.consentimientoNotificaciones == true) {
+                    notificationHelper.showSyncSuccessNotification(1)
+                }
+            }
+
             Result.success()
         } catch (e: IOException) {
             // Error de red: reintentar más tarde (WorkManager se encarga)

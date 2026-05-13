@@ -34,6 +34,12 @@ import com.slior.ui.routes.RouteViewModel
 import com.slior.ui.theme.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.platform.LocalConfiguration
+import android.content.res.Configuration
+import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.ui.text.input.ImeAction
 import com.slior.R
 
 @Composable
@@ -57,6 +63,10 @@ fun PlacePickerScreen(
     val currentLocation by viewModel.currentLocation.collectAsStateWithLifecycle()
     val isResolving by viewModel.isResolvingAddress.collectAsStateWithLifecycle()
 
+    val configuration = LocalConfiguration.current
+    val isLandscape = configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
+    val focusManager = LocalFocusManager.current
+
     LaunchedEffect(Unit) {
         viewModel.startLocationTracking()
     }
@@ -67,7 +77,7 @@ fun PlacePickerScreen(
         }
     }
 
-    Box(modifier = Modifier.fillMaxSize().background(BrutalistWhite)) {
+    Box(modifier = Modifier.fillMaxSize().background(BrutalistWhite).imePadding()) {
         PlacePickerMap(
             selectedLocation = selectedLocation,
             defaultCenter = lastStopLocation ?: currentLocation,
@@ -84,13 +94,19 @@ fun PlacePickerScreen(
             modifier = Modifier.fillMaxSize()
         )
 
-        Box(modifier = Modifier.align(Alignment.BottomEnd).padding(bottom = 120.dp, end = 16.dp)) {
+        // Botón de mi ubicación (ajustado en landscape)
+        Box(modifier = Modifier.align(Alignment.BottomEnd).padding(bottom = if (isLandscape) 16.dp else 120.dp, end = 16.dp)) {
             Surface(modifier = Modifier.size(40.dp).border(2.dp, BrutalistBlack).clickable { centerTrigger++ }, color = BrutalistWhite, shape = RectangleShape) {
                 Icon(imageVector = Icons.Default.MyLocation, contentDescription = stringResource(R.string.status_verifying), tint = BrutalistBlack, modifier = Modifier.padding(8.dp))
             }
         }
 
-        Column(modifier = Modifier.statusBarsPadding().padding(16.dp).align(Alignment.TopCenter)) {
+        Column(
+            modifier = Modifier
+                .statusBarsPadding()
+                .padding(horizontal = 16.dp, vertical = if (isLandscape) 8.dp else 16.dp)
+                .align(Alignment.TopCenter)
+        ) {
             Surface(modifier = Modifier.fillMaxWidth().hardShadow().border(2.dp, BrutalistBlack), color = BrutalistWhite) {
                 Row(modifier = Modifier.fillMaxWidth().padding(horizontal = 4.dp), verticalAlignment = Alignment.CenterVertically) {
                     IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, stringResource(R.string.btn_back), tint = BrutalistBlack) }
@@ -100,6 +116,8 @@ fun PlacePickerScreen(
                         modifier = Modifier.weight(1f).padding(vertical = 12.dp),
                         textStyle = TextStyle(fontFamily = SpaceGroteskFamily, fontWeight = FontWeight.Bold, fontSize = 16.sp, color = BrutalistBlack),
                         singleLine = true,
+                        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
+                        keyboardActions = KeyboardActions(onSearch = { focusManager.clearFocus() }),
                         decorationBox = { innerTextField ->
                             Box(contentAlignment = Alignment.CenterStart) {
                                 if (searchQuery.isEmpty()) { Text(stringResource(R.string.placeholder_search_address), fontFamily = SpaceGroteskFamily, fontSize = 16.sp, color = Color(0xFFB0B0B0)) }
@@ -108,37 +126,71 @@ fun PlacePickerScreen(
                         }
                     )
                     if (searchQuery.isNotEmpty()) {
-                        IconButton(onClick = { searchQuery = ""; viewModel.clearAddressSuggestions() }) { Icon(Icons.Default.Close, null, tint = BrutalistBlack) }
+                        IconButton(onClick = { searchQuery = ""; viewModel.clearAddressSuggestions(); focusManager.clearFocus() }) { Icon(Icons.Default.Close, null, tint = BrutalistBlack) }
                     }
                 }
             }
             AnimatedVisibility(visible = suggestions.isNotEmpty(), enter = fadeIn(), exit = fadeOut()) {
-                Surface(modifier = Modifier.padding(top = 4.dp).fillMaxWidth().heightIn(max = 300.dp).hardShadow().border(2.dp, BrutalistBlack), color = BrutalistWhite) {
+                Surface(
+                    modifier = Modifier
+                        .padding(top = 0.dp) // Pegado a la barra de búsqueda
+                        .fillMaxWidth()
+                        .heightIn(max = if (isLandscape) 150.dp else 300.dp)
+                        .hardShadow()
+                        .border(2.dp, BrutalistBlack),
+                    color = BrutalistWhite
+                ) {
                     LazyColumn {
                         items(suggestions) { suggestion ->
-                            ListItem(headlineContent = { Text(suggestion.displayName, fontFamily = SpaceGroteskFamily, fontSize = 14.sp, fontWeight = FontWeight.Medium) }, modifier = Modifier.clickable { viewModel.selectLocationFromSuggestion(suggestion); searchQuery = suggestion.displayName; viewModel.clearAddressSuggestions() })
-                            HorizontalDivider(color = BrutalistBlack.copy(alpha = 0.1f))
+                            ListItem(
+                                headlineContent = { 
+                                    Text(
+                                        suggestion.displayName, 
+                                        fontFamily = SpaceGroteskFamily, 
+                                        fontSize = 14.sp, 
+                                        fontWeight = FontWeight.Medium,
+                                        modifier = Modifier.padding(vertical = 8.dp) // Cada opción algo más alta
+                                    ) 
+                                },
+                                modifier = Modifier.clickable { 
+                                    viewModel.selectLocationFromSuggestion(suggestion)
+                                    searchQuery = suggestion.displayName
+                                    viewModel.clearAddressSuggestions()
+                                    focusManager.clearFocus()
+                                }
+                            )
+                            HorizontalDivider(color = BrutalistBlack.copy(alpha = 0.2f))
                         }
                     }
                 }
             }
         }
 
-        selectedLocation?.let { picked ->
-            Box(modifier = Modifier.align(Alignment.BottomCenter).padding(24.dp).navigationBarsPadding()) {
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Surface(modifier = Modifier.fillMaxWidth().padding(bottom = 12.dp).hardShadow().border(2.dp, BrutalistBlack), color = BrutalistWhite) {
-                        Column(modifier = Modifier.padding(16.dp)) {
-                            Text(stringResource(R.string.map_label_selected), fontFamily = SpaceGroteskFamily, fontWeight = FontWeight.Black, fontSize = 10.sp, letterSpacing = 1.sp, color = Color(0xFF71717A))
-                            Text(picked.displayName, fontFamily = SpaceGroteskFamily, fontWeight = FontWeight.Bold, fontSize = 14.sp, color = BrutalistBlack, maxLines = 2)
+        // Solo mostrar confirmación si NO estamos buscando (especialmente en landscape)
+        val showConfirmation = selectedLocation != null && suggestions.isEmpty()
+        
+        AnimatedVisibility(
+            visible = showConfirmation,
+            modifier = Modifier.align(Alignment.BottomCenter),
+            enter = fadeIn(),
+            exit = fadeOut()
+        ) {
+            selectedLocation?.let { picked ->
+                Box(modifier = Modifier.padding(16.dp).navigationBarsPadding()) {
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Surface(modifier = Modifier.fillMaxWidth().padding(bottom = 12.dp).hardShadow().border(2.dp, BrutalistBlack), color = BrutalistWhite) {
+                            Column(modifier = Modifier.padding(12.dp)) {
+                                Text(stringResource(R.string.map_label_selected), fontFamily = SpaceGroteskFamily, fontWeight = FontWeight.Black, fontSize = 10.sp, letterSpacing = 1.sp, color = Color(0xFF71717A))
+                                Text(picked.displayName, fontFamily = SpaceGroteskFamily, fontWeight = FontWeight.Bold, fontSize = 13.sp, color = BrutalistBlack, maxLines = 1)
+                            }
                         }
-                    }
-                    Button(
-                        onClick = { onLocationConfirmed(picked) }, enabled = !isResolving, modifier = Modifier.fillMaxWidth().height(56.dp).hardShadow().border(2.dp, BrutalistBlack),
-                        colors = ButtonDefaults.buttonColors(containerColor = if (isResolving) Color(0xFFD4D4D8) else NeonGreen), shape = MaterialTheme.shapes.extraSmall, contentPadding = PaddingValues(0.dp)
-                    ) {
-                        if (isResolving) { CircularProgressIndicator(modifier = Modifier.size(24.dp), color = BrutalistBlack, strokeWidth = 2.dp) }
-                        else { Text(stringResource(R.string.btn_confirm_address), color = BrutalistBlack, fontFamily = SpaceGroteskFamily, fontWeight = FontWeight.Bold, fontSize = 16.sp) }
+                        Button(
+                            onClick = { onLocationConfirmed(picked) }, enabled = !isResolving, modifier = Modifier.fillMaxWidth().height(48.dp).hardShadow().border(2.dp, BrutalistBlack),
+                            colors = ButtonDefaults.buttonColors(containerColor = if (isResolving) Color(0xFFD4D4D8) else NeonGreen), shape = MaterialTheme.shapes.extraSmall, contentPadding = PaddingValues(0.dp)
+                        ) {
+                            if (isResolving) { CircularProgressIndicator(modifier = Modifier.size(24.dp), color = BrutalistBlack, strokeWidth = 2.dp) }
+                            else { Text(stringResource(R.string.btn_confirm_address), color = BrutalistBlack, fontFamily = SpaceGroteskFamily, fontWeight = FontWeight.Bold, fontSize = 15.sp) }
+                        }
                     }
                 }
             }

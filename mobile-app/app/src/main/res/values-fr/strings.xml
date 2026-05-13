@@ -44,7 +44,7 @@
     <string name="title_new_route">NOUVEL ITINÉRAIRE</string>
     <string name="title_edit_route">MODIFIER L\'ITINÉRAIRE</string>
     <string name="title_route_detail">DÉTAILS DE L\'ITINÉRAIRE</string>
-    <string name="status_in_progress">EN COURS</string>
+    <string name="status_in_progress">EN CURSO</string>
     <string name="status_planned">PLANIFIÉ</string>
     <string name="status_completed">TERMINÉ</string>
     <string name="status_cancelled">ANNULÉ</string>
@@ -107,13 +107,33 @@
     <!-- ======= Dialogues ======= -->
     <string name="dialog_delete_route_title">SUPPRIMER L\'ITINÉRAIRE ?</string>
     <string name="dialog_delete_route_desc">Cette action est irréversible. Tous les arrêts associés seront supprimés.</string>
+    <string name="dialog_delete_stop_title">SUPPRIMER L\'ARRÊT ?</string>
+    <string name="dialog_delete_stop_desc">Êtes-vous sûr de vouloir retirer cet arrêt de l\'itinéraire ?</string>
     <string name="dialog_call_title">APPELER LE %1$s ?</string>
     <string name="dialog_call_desc">L\'application téléphone va s\'ouvrir.</string>
+    <string name="dialog_lang_title">CHANGER DE LANGUE ?</string>
+    <string name="dialog_lang_desc">L\'application va redémarrer pour appliquer la nueva langue.</string>
+    <string name="btn_change">CHANGER</string>
     <string name="btn_delete">SUPPRIMER</string>
     <string name="btn_call">APPELER</string>
     <string name="btn_cancel">ANNULER</string>
     <string name="btn_ok">OK</string>
     <string name="btn_back">Retour</string>
+
+    <!-- ======= Numérisation ======= -->
+    <string name="btn_scan_package">SCANNER LE COLIS</string>
+    <string name="scan_mode_qr">MODE QR</string>
+    <string name="scan_mode_barcode">MODE BARRES</string>
+    <string name="btn_confirm_delivery">CONFIRMER LA LIVRAISON</string>
+    <string name="label_scan_instructions">Visez le code du colis</string>
+    <string name="label_delivery_confirmed">LIVRAISON TERMINÉE</string>
+    <string name="label_recipient_uppercase">DESTINATAIRE</string>
+    <string name="btn_navigate_stop">NAVIGUER VERS CET ARRÊT</string>
+    <string name="label_now">MAINTENANT</string>
+    <string name="btn_retry">RÉESSAYER</string>
+    <string name="banner_offline_mode">PAS DE CONNEXION - MODE HORS LIGNE ACTIF</string>
+    <string name="label_sync_pending">En attente de synchronisation</string>
+    <string name="label_sync_error">Erreur de synchronisation</string>
 
     <!-- ======= Véhicules ======= -->
     <string name="vehicle_car">AUTO</string>
@@ -128,16 +148,48 @@
     <string name="error_empty_email">L\'email ne peut pas être vide</string>
     <string name="error_invalid_email">Format d\'email invalide</string>
     <string name="error_empty_password">Le mot de passe ne peut pas être vide</string>
-    <string name="error_short_password">Le mot de passe doit faire au moins 8 caractères</string>
+    <string name="error_short_password">Le mot de passe doit faire au menos 8 caractères</string>
     <string name="error_empty_name">Le nom ne peut pas être vide</string>
     <string name="error_long_name">Le nom est trop long (max. 100 caractères)</string>
-    <string name="error_empty_date">La date ne puede pas être vide</string>
+    <string name="error_empty_date">La date ne peut pas être vide</string>
     <string name="error_invalid_date">Format de date invalide (utilisez AAAA-MM-JJ)</string>
-    <string name="error_empty_phone">Le téléphone ne puede pas être vide</string>
+    <string name="error_past_date">La date ne peut pas être antérieure à aujourd\'hui</string>
+    <string name="error_empty_phone">Le téléphone ne peut pas être vide</string>
     <string name="error_invalid_phone">Numéro de téléphone invalide</string>
-    <string name="error_empty_lat">La latitude ne puede pas être vide</string>
+    <string name="error_empty_lat">La latitude ne peut pas être vide</string>
     <string name="error_invalid_lat">Latitude invalide (doit être entre -90 et 90)</string>
     <string name="error_empty_lon">La longitude ne puede pas être vide</string>
     <string name="error_invalid_lon">Longitude invalide (doit être entre -180 et 180)</string>
     <string name="error_session_expired">Session expirée. Veuillez vous reconnecter.</string>
+    <string name="error_invalid_user_id">ID utilisateur invalide. Veuillez vous reconnecter.</string>
+
+    <!-- ======= Autorisations ======= -->
+    <string name="perm_required_title">AUTORISATIONS REQUISES</string>
+    <string name="perm_required_desc">SLIOR nécessite l\'accès à votre LOCALISATION et à INTERNET pour fonctionner correctement. Ces autorisations sont obligatoires pour gérer les itinéraires et les cartes.</string>
+    <string name="perm_btn_grant">ACCORDER LES AUTORISATIONS</string>
+    <string name="perm_denied_title">AUTORISATIONS REFUSÉES</string>
+    <string name="perm_denied_desc">Nous ne pouvons pas continuer sans les autorisations. L\'application va se fermer.</string>
+    <string name="perm_btn_exit">QUITTER L\'APP</string>
+
+    <!-- ======= Password Reset ======= -->
+    <string name="title_forgot_password">MOT DE PASSE OUBLIÉ ?</string>
+    <string name="desc_forgot_password">Entrez votre email et nous vous enverrons un code de sécurité pour restaurer votre accès.</string>
+    <string name="desc_reset_password">Nous avons envoyé un code à votre email. Entrez-le ci-dessous avec votre nouveau mot de passe.</string>
+    <string name="label_reset_code">CODE DE SÉCURITÉ</string>
+    <string name="label_new_password">NOUVEAU MOT DE PASSE</string>
+    <string name="btn_send_code">ENVOYER LE CODE</string>
+    <string name="btn_reset_password">RÉINITIALISER LE MOT DE PASSE</string>
+    <string name="msg_code_sent">CODE ENVOYÉ</string>
+    <string name="msg_reset_success">MOT DE PASSE MIS À JOUR</string>
+    <string name="btn_back_to_login">RETOUR AU LOGIN</string>
+
+    <!-- ======= Exigences de mot de passe ======= -->
+    <string name="val_pass_min_length">Minimum 8 caractères</string>
+    <string name="val_pass_uppercase">Au moins une majuscule</string>
+    <string name="val_pass_number">Au moins un chiffre</string>
+    <string name="error_invalid_code">Code invalide (6 chiffres)</string>
+    <string name="error_pass_too_short">Le mot de passe est trop court</string>
+    <string name="error_pass_no_upper">Majuscule manquante</string>
+    <string name="error_pass_no_number">Chiffre manquant</string>
+
 </resources>

@@ -27,7 +27,6 @@ import android.text.SpannableStringBuilder
 import android.text.style.ClickableSpan
 import android.text.style.URLSpan
 import android.view.View
-import androidx.appcompat.app.AlertDialog
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import com.slior.R
@@ -41,12 +40,16 @@ fun RouteMapView(
     onCallRequest: (String) -> Unit = {}
 ) {
     val context = LocalContext.current
+    
+    // Estado para controlar el centrado inicial y manual
+    var hasCenteredOnce by remember { mutableStateOf(false) }
+    var lastCenterKey by remember { mutableStateOf<Any?>(null) }
+
     val mapView = remember {
         MapView(context).apply {
             setTileSource(TileSourceFactory.MAPNIK)
             setMultiTouchControls(true)
             controller.setZoom(13.0)
-            // IMPORTANTE: Evitar que el mapa se destruya al ser removido momentáneamente de la composición
             setDestroyMode(false)
         }
     }
@@ -68,10 +71,6 @@ fun RouteMapView(
         }
     }
 
-    var hasCentered by remember { mutableStateOf(false) }
-    var lastCenterKey by remember { mutableStateOf<Any?>(null) }
-
-    // Obtenemos los strings localizados fuera del update del AndroidView
     val youLabel = stringResource(R.string.map_label_you)
     val stopLabelTemplate = stringResource(R.string.map_label_stop)
     val nameLabel = stringResource(R.string.map_info_name)
@@ -82,7 +81,6 @@ fun RouteMapView(
         modifier = modifier,
         factory = { mapView },
         update = { m ->
-            // Reasegurar el User Agent en cada actualización para evitar bloqueos
             Configuration.getInstance().userAgentValue = "SliorLogistics_TFG_App_${context.packageName}"
             
             m.overlays.clear()
@@ -115,13 +113,15 @@ fun RouteMapView(
                 }
             }
 
-            // 1. Línea
-            val points = mutableListOf<GeoPoint>()
-            userLocation?.let { points.add(GeoPoint(it.first, it.second)) }
-            points.addAll(stops.map { GeoPoint(it.latitud, it.longitud) })
-            if (points.size >= 2) {
+            // 1. Recopilar puntos para trazado y centrado
+            val geoPoints = mutableListOf<GeoPoint>()
+            userLocation?.let { if (it.first != 0.0) geoPoints.add(GeoPoint(it.first, it.second)) }
+            geoPoints.addAll(stops.map { GeoPoint(it.latitud, it.longitud) })
+
+            // 2. Línea de ruta (Polyline)
+            if (geoPoints.size >= 2) {
                 val polyline = Polyline(m).apply {
-                    setPoints(points)
+                    setPoints(geoPoints)
                     outlinePaint.color = Color.BLACK
                     outlinePaint.strokeWidth = 10f
                     outlinePaint.isAntiAlias = true
@@ -129,24 +129,26 @@ fun RouteMapView(
                 m.overlays.add(polyline)
             }
 
-            // 2. Usuario
+            // 3. Marcador de Usuario
             userLocation?.let {
-                val courierMarker = Marker(m).apply {
-                    position = GeoPoint(it.first, it.second)
-                    title = youLabel
-                    infoWindow = customInfoWindow
-                    val rawDrawable = context.resources.getDrawable(org.osmdroid.library.R.drawable.marker_default, null).mutate()
-                    val wrappedDrawable = DrawableCompat.wrap(rawDrawable)
-                    DrawableCompat.setTint(wrappedDrawable, Color.parseColor("#FF5722"))
-                    DrawableCompat.setTintMode(wrappedDrawable, PorterDuff.Mode.SRC_IN)
-                    icon = wrappedDrawable
-                    setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
-                    setOnMarkerClickListener { mark, _ -> mark.showInfoWindow(); true }
+                if (it.first != 0.0) {
+                    val courierMarker = Marker(m).apply {
+                        position = GeoPoint(it.first, it.second)
+                        title = youLabel
+                        infoWindow = customInfoWindow
+                        val rawDrawable = context.resources.getDrawable(org.osmdroid.library.R.drawable.marker_default, null).mutate()
+                        val wrappedDrawable = DrawableCompat.wrap(rawDrawable)
+                        DrawableCompat.setTint(wrappedDrawable, Color.parseColor("#FF5722"))
+                        DrawableCompat.setTintMode(wrappedDrawable, PorterDuff.Mode.SRC_IN)
+                        icon = wrappedDrawable
+                        setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
+                        setOnMarkerClickListener { mark, _ -> mark.showInfoWindow(); true }
+                    }
+                    m.overlays.add(courierMarker)
                 }
-                m.overlays.add(courierMarker)
             }
 
-            // 3. Paradas
+            // 4. Marcadores de Paradas
             stops.forEachIndexed { index, stop ->
                 val marker = Marker(m).apply {
                     position = GeoPoint(stop.latitud, stop.longitud)
@@ -160,12 +162,10 @@ fun RouteMapView(
                         sb.append("<b>${phoneLabel.split(":")[0]}:</b> <a href=\"tel:${stop.telefono}\">${stop.telefono}</a>")
                     }
                     snippet = sb.toString()
-
                     setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
                     
                     val rawDrawable = context.resources.getDrawable(org.osmdroid.library.R.drawable.marker_default, null).mutate()
                     val wrappedDrawable = DrawableCompat.wrap(rawDrawable)
-                    
                     if (stop.isCompleted) {
                         DrawableCompat.setTint(wrappedDrawable, Color.parseColor("#4CAF50"))
                         alpha = 0.7f
@@ -173,39 +173,34 @@ fun RouteMapView(
                         DrawableCompat.setTint(wrappedDrawable, Color.parseColor("#2196F3"))
                     }
                     icon = wrappedDrawable
-
                     setOnMarkerClickListener { mark, _ -> mark.showInfoWindow(); true }
                 }
                 m.overlays.add(marker)
             }
 
-            // 4. Centrado
+            // 5. Centrado Inteligente
             val isManualCenter = centerKey != null && centerKey != lastCenterKey
-            val shouldCenter = !hasCentered || isManualCenter
+            val validPoints = geoPoints.filter { it.latitude != 0.0 && it.longitude != 0.0 }
             
-            if (shouldCenter && points.isNotEmpty()) {
-                val validPoints = points.filter { it.latitude != 0.0 && it.longitude != 0.0 }
-                if (validPoints.isNotEmpty()) {
-                    if (validPoints.size == 1) {
-                        m.controller.setZoom(15.0)
-                        m.controller.animateTo(validPoints[0])
-                    } else {
-                        val boundingBox = org.osmdroid.util.BoundingBox.fromGeoPoints(validPoints)
-                        m.post { 
-                            // Añadimos límites de zoom y animación suave
-                            m.zoomToBoundingBox(boundingBox, true, 120, 18.0, 500)
-                        }
+            if ((!hasCenteredOnce || isManualCenter) && validPoints.isNotEmpty()) {
+                if (validPoints.size == 1) {
+                    m.controller.setZoom(15.0)
+                    m.controller.animateTo(validPoints[0])
+                } else {
+                    val boundingBox = org.osmdroid.util.BoundingBox.fromGeoPoints(validPoints)
+                    m.post { 
+                        m.zoomToBoundingBox(boundingBox, true, 120, 17.0, 500)
                     }
-                    hasCentered = true
-                    lastCenterKey = centerKey
                 }
+                hasCenteredOnce = true
+                lastCenterKey = centerKey
             }
+            
             m.invalidate()
         }
     )
 }
 
-/** Modelo de datos genérico para mostrar puntos en el mapa */
 data class RouteMapPoint(
     val latitud: Double,
     val longitud: Double,
