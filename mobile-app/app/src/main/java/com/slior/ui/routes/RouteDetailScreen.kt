@@ -463,13 +463,13 @@ private fun RouteDetailContent(
                         .fillMaxWidth()
                         .hardShadow()
                         .border(2.dp, BrutalistBlack)
-                        .background(onSurface.copy(alpha = 0.05f))
+                        .background(NeonGreen)
                         .clickable { onOptimize() }
                         .padding(14.dp),
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.Center
                 ) {
-                    Text(stringResource(R.string.btn_optimize), fontFamily = SpaceGroteskFamily, fontWeight = FontWeight.Bold, fontSize = 15.sp, letterSpacing = 1.sp, color = onSurface)
+                    Text(stringResource(R.string.btn_optimize), fontFamily = SpaceGroteskFamily, fontWeight = FontWeight.Bold, fontSize = 15.sp, letterSpacing = 1.sp, color = BrutalistBlack)
                 }
             }
         }

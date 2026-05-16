@@ -22,35 +22,52 @@ interface ConnectivityMonitor {
 
 @Singleton
 class ConnectivityMonitorImpl @Inject constructor(
-    @ApplicationContext private val context: Context
+    @ApplicationContext private val context: Context,
+    private val globalEventBus: GlobalEventBus
 ) : ConnectivityMonitor {
 
     private val connectivityManager =
         context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+
+    private val serviceScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
 
     // Usamos un MutableStateFlow para tener un valor inicial inmediato y suscribirnos a cambios
     private val _isConnected = MutableStateFlow(checkCurrentConnectivity())
     override val isConnected: Flow<Boolean> = _isConnected.asStateFlow()
 
     init {
+        // Emitir estado inicial al EventBus
+        serviceScope.launch {
+            globalEventBus.emitConnectivityChanged(_isConnected.value)
+        }
+
         val request = NetworkRequest.Builder()
             .addCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
             .build()
 
         connectivityManager.registerNetworkCallback(request, object : ConnectivityManager.NetworkCallback() {
             override fun onAvailable(network: Network) {
-                _isConnected.value = true
+                updateConnectivity(true)
             }
 
             override fun onLost(network: Network) {
                 // Al perder una red, verificamos si queda alguna otra activa
-                _isConnected.value = checkCurrentConnectivity()
+                updateConnectivity(checkCurrentConnectivity())
             }
 
             override fun onCapabilitiesChanged(network: Network, caps: NetworkCapabilities) {
-                _isConnected.value = caps.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
+                updateConnectivity(caps.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET))
             }
         })
+    }
+
+    private fun updateConnectivity(connected: Boolean) {
+        if (_isConnected.value != connected) {
+            _isConnected.value = connected
+            serviceScope.launch {
+                globalEventBus.emitConnectivityChanged(connected)
+            }
+        }
     }
 
     private fun checkCurrentConnectivity(): Boolean {

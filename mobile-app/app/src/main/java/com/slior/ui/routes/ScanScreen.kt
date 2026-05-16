@@ -99,6 +99,7 @@ fun ScanScreen(
             }
             this.barcodeView.cameraSettings.isExposureEnabled = true
             this.barcodeView.cameraSettings.isAutoFocusEnabled = true
+            this.setStatusText("") // Ocultamos el texto por defecto para que no se superponga
             decodeContinuous(callback)
         }
     }
@@ -273,19 +274,18 @@ private fun ScannerOverlay(scanMode: ScanMode, onToggleMode: () -> Unit, isLands
         Surface(
             modifier = Modifier
                 .align(Alignment.BottomCenter)
-                .padding(bottom = if (isLandscape) 12.dp else 24.dp)
-                .size(if (isLandscape) 48.dp else 64.dp)
-                .hardShadow(2.dp, 2.dp)
-                .border(2.dp, BrutalistBlack, CircleShape)
+                .padding(bottom = if (isLandscape) 8.dp else if (scanMode == ScanMode.QR) 12.dp else 24.dp)
+                .size(if (isLandscape) 40.dp else 56.dp)
+                .border(2.dp, NeonGreen, CircleShape)
                 .clickable { onToggleMode() },
-            color = surfaceColor,
+            color = Color.Transparent,
             shape = CircleShape
         ) {
             Box(contentAlignment = Alignment.Center) {
                 Icon(
                     imageVector = if (scanMode == ScanMode.QR) Icons.Default.ViewColumn else Icons.Default.QrCode,
                     contentDescription = "Cambiar modo",
-                    tint = onSurfaceColor,
+                    tint = NeonGreen,
                     modifier = Modifier.size(if (isLandscape) 24.dp else 32.dp)
                 )
             }
@@ -297,7 +297,7 @@ private fun ScannerOverlay(scanMode: ScanMode, onToggleMode: () -> Unit, isLands
                 .padding(top = 16.dp)
                 .border(1.dp, NeonGreen)
                 .padding(horizontal = 12.dp, vertical = 4.dp),
-            color = Color.Black.copy(alpha = 0.7f)
+            color = Color.Transparent
         ) {
             Text(
                 text = if (scanMode == ScanMode.QR) stringResource(R.string.scan_mode_qr) else stringResource(R.string.scan_mode_barcode),

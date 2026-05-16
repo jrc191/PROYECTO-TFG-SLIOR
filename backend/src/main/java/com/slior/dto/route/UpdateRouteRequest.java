@@ -1,5 +1,6 @@
 package com.slior.dto.route;
 
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
@@ -19,5 +20,6 @@ public record UpdateRouteRequest(
         String notas,
 
         @NotEmpty(message = "La ruta debe tener al menos una parada")
-        List<@NotNull StopRequest> paradas
+        @Valid
+        List<StopRequest> paradas
 ) {}

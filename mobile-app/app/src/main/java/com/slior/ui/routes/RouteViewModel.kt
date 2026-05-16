@@ -296,7 +296,21 @@ class RouteViewModel @Inject constructor(
     fun createRoute(request: CreateRouteRequest) {
         viewModelScope.launch {
             _createState.value = CreateRouteState.Loading
-            _createState.value = when (val result = routeRepository.createRoute(request)) {
+            
+            // Si por alguna razón el repartidorId llega vacío, intentamos recuperarlo de la sesión persistida
+            val finalRequest = if (request.repartidorId.isBlank()) {
+                val savedId = authRepository.getSavedUserId() ?: ""
+                request.copy(repartidorId = savedId)
+            } else {
+                request
+            }
+
+            if (finalRequest.repartidorId.isBlank()) {
+                _createState.value = CreateRouteState.Error("No se ha podido identificar al repartidor. Por favor, reinicia la app.")
+                return@launch
+            }
+
+            _createState.value = when (val result = routeRepository.createRoute(finalRequest)) {
                 is Result.Success -> {
                     CreateRouteState.Success
                 }

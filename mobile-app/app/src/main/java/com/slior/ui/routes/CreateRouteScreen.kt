@@ -354,31 +354,32 @@ fun CreateRouteScreen(
                     ) {
                         CreateRouteFormContent(
                             routeId = routeId,
+                            repartidorId = repartidorId,
                             nombre = nombre,
-                            onNombreChange = { nombre = it; nombreError = if (it.isBlank()) context.getString(R.string.error_empty_name) else "" },
+                            onNombreChange = { newValue -> nombre = newValue; nombreError = if (newValue.isBlank()) context.getString(R.string.error_empty_name) else "" },
                             nombreError = nombreError,
                             fecha = fecha,
                             onFechaClick = { showDatePicker = true },
                             fechaError = fechaError,
                             notas = notas,
-                            onNotasChange = { notas = it },
+                            onNotasChange = { newValue -> notas = newValue },
                             paradas = paradas,
-                            onDeleteStop = { stopToDeleteIndex = it },
+                            onDeleteStop = { index -> stopToDeleteIndex = index },
                             mostrarFormParada = mostrarFormParada,
                             onToggleFormParada = { mostrarFormParada = !mostrarFormParada },
                             stopDireccion = stopDireccion,
                             onSearchAddress = { if (hasLocationPermission(context)) { viewModel.fetchCurrentLocation(); mostrarPlacePicker = true } else { permissionLauncher.launch(arrayOf(Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION)) } },
                             stopDireccionError = (stopDireccion.isEmpty() && stopLatError.isNotEmpty()),
                             stopDestinatario = stopDestinatario,
-                            onStopDestinatarioChange = { stopDestinatario = it; stopDestinatarioError = if (it.isBlank()) context.getString(R.string.error_empty_name) else "" },
+                            onStopDestinatarioChange = { newValue -> stopDestinatario = newValue; stopDestinatarioError = if (newValue.isBlank()) context.getString(R.string.error_empty_name) else "" },
                             stopDestinatarioError = stopDestinatarioError,
                             stopTelefono = stopTelefono,
-                            onStopTelefonoChange = { stopTelefono = it; stopPhoneError = if (it.isBlank()) context.getString(R.string.error_empty_phone) else if (!Validators.isValidSpanishPhone(it)) context.getString(R.string.error_invalid_phone) else "" },
+                            onStopTelefonoChange = { newValue -> stopTelefono = newValue; stopPhoneError = if (newValue.isBlank()) context.getString(R.string.error_empty_phone) else if (!Validators.isValidSpanishPhone(newValue)) context.getString(R.string.error_invalid_phone) else "" },
                             stopPhoneError = stopPhoneError,
                             stopLat = stopLat,
                             stopLon = stopLon,
                             stopNotas = stopNotas,
-                            onStopNotasChange = { stopNotas = it },
+                            onStopNotasChange = { newValue -> stopNotas = newValue },
                             onConfirmStop = { 
                                 paradas.add(StopRequestDto(stopDireccion, stopDestinatario, stopTelefono, stopLat.toDouble(), stopLon.toDouble(), stopNotas.ifBlank { null }))
                                 stopDireccion = ""; stopDestinatario = ""; stopTelefono = ""; stopLat = ""; stopLon = ""; stopNotas = ""; mostrarFormParada = false 
@@ -426,31 +427,32 @@ fun CreateRouteScreen(
                 ) {
                     CreateRouteFormContent(
                         routeId = routeId,
+                        repartidorId = repartidorId,
                         nombre = nombre,
-                        onNombreChange = { nombre = it; nombreError = if (it.isBlank()) context.getString(R.string.error_empty_name) else "" },
+                        onNombreChange = { newValue -> nombre = newValue; nombreError = if (newValue.isBlank()) context.getString(R.string.error_empty_name) else "" },
                         nombreError = nombreError,
                         fecha = fecha,
                         onFechaClick = { showDatePicker = true },
                         fechaError = fechaError,
                         notas = notas,
-                        onNotasChange = { notas = it },
+                        onNotasChange = { newValue -> notas = newValue },
                         paradas = paradas,
-                        onDeleteStop = { stopToDeleteIndex = it },
+                        onDeleteStop = { index -> stopToDeleteIndex = index },
                         mostrarFormParada = mostrarFormParada,
                         onToggleFormParada = { mostrarFormParada = !mostrarFormParada },
                         stopDireccion = stopDireccion,
                         onSearchAddress = { if (hasLocationPermission(context)) { viewModel.fetchCurrentLocation(); mostrarPlacePicker = true } else { permissionLauncher.launch(arrayOf(Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION)) } },
                         stopDireccionError = (stopDireccion.isEmpty() && stopLatError.isNotEmpty()),
                         stopDestinatario = stopDestinatario,
-                        onStopDestinatarioChange = { stopDestinatario = it; stopDestinatarioError = if (it.isBlank()) context.getString(R.string.error_empty_name) else "" },
+                        onStopDestinatarioChange = { newValue -> stopDestinatario = newValue; stopDestinatarioError = if (newValue.isBlank()) context.getString(R.string.error_empty_name) else "" },
                         stopDestinatarioError = stopDestinatarioError,
                         stopTelefono = stopTelefono,
-                        onStopTelefonoChange = { stopTelefono = it; stopPhoneError = if (it.isBlank()) context.getString(R.string.error_empty_phone) else if (!Validators.isValidSpanishPhone(it)) context.getString(R.string.error_invalid_phone) else "" },
+                        onStopTelefonoChange = { newValue -> stopTelefono = newValue; stopPhoneError = if (newValue.isBlank()) context.getString(R.string.error_empty_phone) else if (!Validators.isValidSpanishPhone(newValue)) context.getString(R.string.error_invalid_phone) else "" },
                         stopPhoneError = stopPhoneError,
                         stopLat = stopLat,
                         stopLon = stopLon,
                         stopNotas = stopNotas,
-                        onStopNotasChange = { stopNotas = it },
+                        onStopNotasChange = { newValue -> stopNotas = newValue },
                         onConfirmStop = { 
                             paradas.add(StopRequestDto(stopDireccion, stopDestinatario, stopTelefono, stopLat.toDouble(), stopLon.toDouble(), stopNotas.ifBlank { null }))
                             stopDireccion = ""; stopDestinatario = ""; stopTelefono = ""; stopLat = ""; stopLon = ""; stopNotas = ""; mostrarFormParada = false 
@@ -484,6 +486,7 @@ fun CreateRouteScreen(
 @Composable
 private fun CreateRouteFormContent(
     routeId: String?,
+    repartidorId: String,
     nombre: String,
     onNombreChange: (String) -> Unit,
     nombreError: String,
@@ -547,12 +550,31 @@ private fun CreateRouteFormContent(
     }
 
     Row(
-        modifier = Modifier.fillMaxWidth().hardShadow().border(2.dp, BrutalistBlack).background(if (mostrarFormParada) onSurfaceColor.copy(alpha = 0.05f) else surfaceColor).clickable { onToggleFormParada() }.padding(16.dp),
-        verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.Center
+        modifier = Modifier
+            .fillMaxWidth()
+            .hardShadow()
+            .border(2.dp, BrutalistBlack)
+            .background(if (mostrarFormParada) surfaceColor else NeonGreen)
+            .clickable { onToggleFormParada() }
+            .padding(16.dp),
+        verticalAlignment = Alignment.CenterVertically, 
+        horizontalArrangement = Arrangement.Center
     ) {
-        Icon(Icons.Default.Add, null, tint = onSurfaceColor, modifier = Modifier.size(20.dp))
+        Icon(
+            imageVector = if (mostrarFormParada) Icons.Default.Close else Icons.Default.Add, 
+            contentDescription = null, 
+            tint = BrutalistBlack, 
+            modifier = Modifier.size(20.dp)
+        )
         Spacer(Modifier.width(8.dp))
-        Text(if (mostrarFormParada) stringResource(R.string.btn_cancel_stop) else stringResource(R.string.btn_add_stop), fontFamily = SpaceGroteskFamily, fontWeight = FontWeight.Bold, fontSize = 14.sp, letterSpacing = 1.sp, color = onSurfaceColor)
+        Text(
+            text = if (mostrarFormParada) stringResource(R.string.btn_cancel_stop) else stringResource(R.string.btn_add_stop), 
+            fontFamily = SpaceGroteskFamily, 
+            fontWeight = FontWeight.Bold, 
+            fontSize = 14.sp, 
+            letterSpacing = 1.sp, 
+            color = BrutalistBlack
+        )
     }
 
     if (mostrarFormParada) {
@@ -582,10 +604,17 @@ private fun CreateRouteFormContent(
             BrutalistField(label = stringResource(R.string.label_stop_notes_optional), value = stopNotas, onValueChange = onStopNotasChange, placeholder = stringResource(R.string.placeholder_notes_stop), onSurfaceColor = onSurfaceColor, surfaceColor = surfaceColor)
             val canAddStop = stopDireccion.isNotBlank() && stopDestinatario.isNotBlank() && stopTelefono.isNotBlank() && stopLat.isNotBlank() && stopLon.isNotBlank()
             Row(
-                modifier = Modifier.fillMaxWidth().hardShadow(color = NeonGreen).border(2.dp, BrutalistBlack).background(if (canAddStop) NeonGreen else onSurfaceColor.copy(alpha = 0.2f)).clickable(enabled = canAddStop) { if (canAddStop) onConfirmStop() }.padding(16.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .hardShadow()
+                    .border(2.dp, BrutalistBlack)
+                    .background(surfaceColor)
+                    .background(if (canAddStop) NeonGreen else onSurfaceColor.copy(alpha = 0.2f))
+                    .clickable(enabled = canAddStop) { if (canAddStop) onConfirmStop() }
+                    .padding(16.dp),
                 horizontalArrangement = Arrangement.Center, verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(stringResource(R.string.btn_confirm_stop), fontFamily = SpaceGroteskFamily, fontWeight = FontWeight.Black, fontSize = 14.sp, letterSpacing = 1.sp, color = if (canAddStop) Color.Black else onSurfaceColor.copy(alpha = 0.5f))
+                Text(stringResource(R.string.btn_confirm_stop), fontFamily = SpaceGroteskFamily, fontWeight = FontWeight.Black, fontSize = 14.sp, letterSpacing = 1.sp, color = if (canAddStop) BrutalistBlack else onSurfaceColor.copy(alpha = 0.5f))
             }
         }
     }
@@ -597,7 +626,8 @@ private fun CreateRouteFormContent(
     }
 
     Spacer(Modifier.height(8.dp))
-    val canSave = nombre.isNotBlank() && fecha.isNotBlank() && paradas.isNotEmpty() && createState !is CreateRouteState.Loading
+    val canSave = nombre.isNotBlank() && fecha.isNotBlank() && paradas.isNotEmpty() && 
+                 repartidorId.isNotBlank() && createState !is CreateRouteState.Loading
     Row(
         modifier = Modifier.fillMaxWidth().hardShadow(6.dp, 6.dp, if (canSave) SafetyOrange else Color.Gray).border(2.dp, BrutalistBlack).background(if (canSave) onSurfaceColor else onSurfaceColor.copy(alpha = 0.4f)).clickable(enabled = canSave) { if (canSave) onSaveRoute() }.height(72.dp),
         verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.Center

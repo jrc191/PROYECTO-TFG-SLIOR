@@ -47,6 +47,11 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ErrorResponse> handleValidationErrors(
             MethodArgumentNotValidException ex, HttpServletRequest request) {
+        
+        ex.getBindingResult().getFieldErrors().forEach(error -> 
+            log.warn("Validation error in {}.{}: {}", ex.getBindingResult().getObjectName(), error.getField(), error.getDefaultMessage())
+        );
+
         String firstError = ex.getBindingResult().getFieldErrors().stream()
                 .findFirst()
                 .map(FieldError::getDefaultMessage)
@@ -71,6 +76,14 @@ public class GlobalExceptionHandler {
                 .body(buildError(HttpStatus.NOT_FOUND, ex.getMessage(), request.getRequestURI()));
     }
 
+    /** Parada no encontrada → 404 */
+    @ExceptionHandler(StopNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleStopNotFound(
+            StopNotFoundException ex, HttpServletRequest request) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(buildError(HttpStatus.NOT_FOUND, ex.getMessage(), request.getRequestURI()));
+    }
+
     /** Acceso no autorizado a un recurso → 403 */
     @ExceptionHandler(UnauthorizedAccessException.class)
     public ResponseEntity<ErrorResponse> handleUnauthorizedAccess(
@@ -83,6 +96,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(org.springframework.http.converter.HttpMessageNotReadableException.class)
     public ResponseEntity<ErrorResponse> handleNotReadable(
             org.springframework.http.converter.HttpMessageNotReadableException ex, HttpServletRequest request) {
+        log.warn("Payload not readable for request {}: {}", request.getRequestURI(), ex.getMessage());
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                 .body(buildError(HttpStatus.BAD_REQUEST, "Cuerpo de solicitud inválido o ausente", request.getRequestURI()));
     }

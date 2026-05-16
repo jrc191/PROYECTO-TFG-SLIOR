@@ -190,7 +190,6 @@ fun SettingsScreen(
                         surfaceColor = surfaceColor,
                         onClick = { 
                             viewModel.saveTheme("light")
-                            (context as? android.app.Activity)?.recreate()
                         }
                     )
                     ThemeOption(
@@ -200,7 +199,6 @@ fun SettingsScreen(
                         surfaceColor = surfaceColor,
                         onClick = { 
                             viewModel.saveTheme("dark")
-                            (context as? android.app.Activity)?.recreate()
                         }
                     )
                     ThemeOption(
@@ -210,7 +208,6 @@ fun SettingsScreen(
                         surfaceColor = surfaceColor,
                         onClick = { 
                             viewModel.saveTheme("system")
-                            (context as? android.app.Activity)?.recreate()
                         }
                     )
                 }

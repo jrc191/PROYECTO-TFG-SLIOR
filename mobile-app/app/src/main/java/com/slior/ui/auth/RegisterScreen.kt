@@ -417,6 +417,7 @@ private fun RegisterFormFields(
             letterSpacing = (-0.3).sp,
             color         = onSurfaceColor
         )
+        Spacer(Modifier.width(8.dp))
         Box(
             modifier = Modifier
                 .background(SafetyOrange)
@@ -518,16 +519,18 @@ private fun VehicleTypeSelector(
 
     Column(modifier = modifier) {
         vehicleTypes.forEach { (type, label) ->
+            val isSelected = selectedType == type
+            
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .hardShadow(offsetX = 2.dp, offsetY = 2.dp, color = onSurfaceColor)
+                    .hardShadow(offsetX = 2.dp, offsetY = 2.dp, color = BrutalistBlack)
                     .border(
                         width = SliorDesignTokens.BorderWidth,
-                        color = if (selectedType == type) NeonGreen else onSurfaceColor,
+                        color = BrutalistBlack,
                         shape = RectangleShape
                     )
-                    .background(if (selectedType == type) NeonGreen.copy(alpha = 0.1f) else MaterialTheme.colorScheme.surface)
+                    .background(if (isSelected) NeonGreen else MaterialTheme.colorScheme.surface)
                     .clickable { onTypeSelected(type) }
                     .padding(horizontal = 16.dp, vertical = 12.dp),
                 verticalAlignment = Alignment.CenterVertically
@@ -535,21 +538,21 @@ private fun VehicleTypeSelector(
                 Box(
                     modifier = Modifier
                         .size(18.dp)
-                        .border(2.dp, onSurfaceColor, RectangleShape)
-                        .background(if (selectedType == type) NeonGreen else Color.Transparent),
+                        .border(2.dp, BrutalistBlack, RectangleShape)
+                        .background(if (isSelected) BrutalistBlack else Color.Transparent),
                     contentAlignment = Alignment.Center
                 ) {
-                    if (selectedType == type) {
-                        Text("✓", color = BrutalistBlack, fontWeight = FontWeight.Black, fontSize = 12.sp)
+                    if (isSelected) {
+                        Text("✓", color = NeonGreen, fontWeight = FontWeight.Black, fontSize = 12.sp)
                     }
                 }
                 Spacer(Modifier.width(12.dp))
                 Text(
                     text       = label,
                     fontFamily = SpaceGroteskFamily,
-                    fontWeight = FontWeight.Bold,
+                    fontWeight = FontWeight.Black,
                     fontSize   = 14.sp,
-                    color      = if (selectedType == type) BrutalistBlack else onSurfaceColor,
+                    color      = if (isSelected) BrutalistBlack else onSurfaceColor,
                     modifier   = Modifier.weight(1f)
                 )
             }

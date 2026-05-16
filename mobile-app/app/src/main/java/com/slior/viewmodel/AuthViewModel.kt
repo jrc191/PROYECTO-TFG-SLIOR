@@ -123,20 +123,28 @@ class AuthViewModel @Inject constructor(
     private fun checkExistingSession() {
         viewModelScope.launch {
             try {
+                android.util.Log.d("AuthViewModel", "Checking existing session...")
                 val prefs = context.dataStore.data.first()
                 val token = prefs[TOKEN_KEY]
 
                 if (!token.isNullOrBlank()) {
+                    android.util.Log.d("AuthViewModel", "Token found, checking userId...")
                     val userId = authRepository.getSavedUserId()
                     if (!userId.isNullOrBlank()) {
+                        android.util.Log.d("AuthViewModel", "Session restored for user: $userId")
                         _sessionUserId.value = userId
                         _authState.value = AuthState.Authenticated(userId)
                         return@launch
+                    } else {
+                        android.util.Log.w("AuthViewModel", "Token present but no userId found in local DB")
                     }
+                } else {
+                    android.util.Log.d("AuthViewModel", "No token found in DataStore")
                 }
                 _sessionUserId.value = ""
                 _authState.value = AuthState.Unauthenticated
             } catch (e: Exception) {
+                android.util.Log.e("AuthViewModel", "Error checking session: ${e.message}", e)
                 _sessionUserId.value = ""
                 _authState.value = AuthState.Unauthenticated
             }

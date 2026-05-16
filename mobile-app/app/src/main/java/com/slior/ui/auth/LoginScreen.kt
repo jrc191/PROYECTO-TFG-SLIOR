@@ -359,7 +359,7 @@ private fun LoginFormFields(
                     fontSize   = 11.sp,
                     color      = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
                 )
-                Spacer(Modifier.width(4.dp))
+                Spacer(Modifier.width(8.dp))
                 Text(
                     text          = stringResource(R.string.btn_register),
                     fontFamily    = SpaceGroteskFamily,
@@ -395,6 +395,7 @@ private fun LoginFormFields(
                     fontSize   = 12.sp,
                     color      = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
                 )
+                Spacer(Modifier.width(8.dp))
                 Text(
                     text          = stringResource(R.string.btn_register),
                     fontFamily    = SpaceGroteskFamily,

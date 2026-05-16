@@ -15,6 +15,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import com.slior.exception.RouteNotFoundException;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -62,8 +64,19 @@ public class RouteService {
         Route saved = routeRepository.save(route);
 
         // Generar PDFs automáticamente en segundo plano para no bloquear la respuesta
+        // IMPORTANTE: Se usa TransactionSynchronizationManager para asegurar que el hilo async
+        // vea los datos recién creados (después del commit).
         List<UUID> stopIds = saved.getStops().stream().map(Stop::getId).toList();
-        labelService.generateLabelsAsync(stopIds);
+        if (TransactionSynchronizationManager.isActualTransactionActive()) {
+            TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+                @Override
+                public void afterCommit() {
+                    labelService.generateLabelsAsync(stopIds);
+                }
+            });
+        } else {
+            labelService.generateLabelsAsync(stopIds);
+        }
 
         return RouteResponse.from(saved);
     }
@@ -126,7 +139,7 @@ public class RouteService {
     @Transactional
     public RouteResponse updateStopStatus(UUID stopId, StopStatus newStatus) {
         Stop stop = stopRepository.findById(stopId)
-                .orElseThrow(() -> new RuntimeException("Parada no encontrada"));
+                .orElseThrow(() -> new com.slior.exception.StopNotFoundException(stopId.toString()));
         
         stop.setStatus(newStatus);
         if (newStatus == StopStatus.ENTREGADO) {

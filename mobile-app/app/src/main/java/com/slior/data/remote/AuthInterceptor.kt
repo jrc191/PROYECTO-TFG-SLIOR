@@ -44,7 +44,7 @@ class AuthInterceptor @Inject constructor(
         val response = chain.proceed(request)
         val path = chain.request().url.encodedPath
 
-        if (response.code == 401 && !path.contains("/auth/v1/")) {
+        if (response.code == 401 && !path.contains("/auth/v1/") && !path.contains("/health")) {
             runBlocking {
                 globalEventBus.emitUnauthorized()
             }
