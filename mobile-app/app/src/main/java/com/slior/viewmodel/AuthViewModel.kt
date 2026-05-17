@@ -124,6 +124,9 @@ class AuthViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 android.util.Log.d("AuthViewModel", "Checking existing session...")
+                // Un pequeño delay ayuda a estabilizar el estado en recreaciones rápidas
+                kotlinx.coroutines.delay(100) 
+                
                 val prefs = context.dataStore.data.first()
                 val token = prefs[TOKEN_KEY]
 
@@ -135,12 +138,10 @@ class AuthViewModel @Inject constructor(
                         _sessionUserId.value = userId
                         _authState.value = AuthState.Authenticated(userId)
                         return@launch
-                    } else {
-                        android.util.Log.w("AuthViewModel", "Token present but no userId found in local DB")
                     }
-                } else {
-                    android.util.Log.d("AuthViewModel", "No token found in DataStore")
                 }
+                
+                android.util.Log.d("AuthViewModel", "No session found")
                 _sessionUserId.value = ""
                 _authState.value = AuthState.Unauthenticated
             } catch (e: Exception) {

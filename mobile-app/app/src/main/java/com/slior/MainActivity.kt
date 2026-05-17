@@ -59,6 +59,7 @@ class MainActivity : AppCompatActivity() {
         setContent {
             val context = LocalContext.current
             val authViewModel: com.slior.viewmodel.AuthViewModel = hiltViewModel()
+            val authState by authViewModel.authState.collectAsState()
             val themePref by authViewModel.appTheme.collectAsState()
             
             val darkTheme = when (themePref) {
@@ -135,7 +136,7 @@ class MainActivity : AppCompatActivity() {
                         )
                     }
                 } else {
-                    MainContent(notificationHelper)
+                    MainContent(notificationHelper, authViewModel, authState)
                 }
             }
         }
@@ -197,13 +198,15 @@ fun PermissionRequirementScreen(onRequestPermissions: () -> Unit) {
 }
 
 @Composable
-fun MainContent(notificationHelper: com.slior.util.NotificationHelper) {
-    val authViewModel: com.slior.viewmodel.AuthViewModel = hiltViewModel()
+fun MainContent(
+    notificationHelper: com.slior.util.NotificationHelper,
+    authViewModel: com.slior.viewmodel.AuthViewModel,
+    authState: com.slior.viewmodel.AuthState
+) {
     val routeViewModel: com.slior.ui.routes.RouteViewModel = hiltViewModel()
     val connViewModel: com.slior.viewmodel.ConnectivityViewModel = hiltViewModel()
     
     val navController = rememberNavController()
-    val authState by authViewModel.authState.collectAsState()
     val currentUser by authViewModel.currentUser.collectAsState()
     val isConnected by connViewModel.isConnected.collectAsState()
 
@@ -212,20 +215,14 @@ fun MainContent(notificationHelper: com.slior.util.NotificationHelper) {
     
     LaunchedEffect(isConnected, currentUser) {
         val userConsent = currentUser?.consentimientoNotificaciones == true
-        android.util.Log.d("SliorNotif", "Conn changed: $isConnected, Last: $lastConnectionState, UserConsent: $userConsent")
-        
         if (lastConnectionState != null && lastConnectionState != isConnected) {
             if (userConsent) {
-                android.util.Log.d("SliorNotif", "Triggering Connectivity Alert")
                 notificationHelper.showConnectivityAlert(isConnected)
-            } else {
-                android.util.Log.d("SliorNotif", "Notification skipped: No user consent")
             }
         }
         lastConnectionState = isConnected
     }
 
-    // Iniciar rastreo global de ubicación nada más cargar el contenido principal
     LaunchedEffect(Unit) {
         routeViewModel.startLocationTracking()
     }
@@ -240,9 +237,7 @@ fun MainContent(notificationHelper: com.slior.util.NotificationHelper) {
             else -> {
                 NavHost(
                     navController = navController,
-                    startDestination = if (authState is com.slior.viewmodel.AuthState.Authenticated && 
-                                          (authState as com.slior.viewmodel.AuthState.Authenticated).userId.isNotBlank()) 
-                                        "routes" else "login"
+                    startDestination = if (authState is com.slior.viewmodel.AuthState.Authenticated) "routes" else "login"
                 ) {
                     composable("login") {
                         LoginScreen(
@@ -323,18 +318,11 @@ fun MainContent(notificationHelper: com.slior.util.NotificationHelper) {
             }
         }
 
-        // Observar estado de autenticación para redirigir si se pierde la sesión
         LaunchedEffect(authState) {
             val currentRoute = navController.currentBackStackEntry?.destination?.route
-            
-            // Si el estado es Unauthenticated, redirigimos a login
-            // EXCEPCIÓN: No redirigir si ya estamos en pantallas de auth o si el estado es Loading
             if (authState is com.slior.viewmodel.AuthState.Unauthenticated) {
-                if (currentRoute == null || 
-                    currentRoute == "login" || 
-                    currentRoute == "register" || 
-                    currentRoute == "forgot_password" || 
-                    currentRoute == "change_password") {
+                if (currentRoute == null || currentRoute == "login" || currentRoute == "register" || 
+                    currentRoute == "forgot_password" || currentRoute == "change_password") {
                     return@LaunchedEffect
                 }
                 
@@ -345,13 +333,10 @@ fun MainContent(notificationHelper: com.slior.util.NotificationHelper) {
             }
         }
 
-        // Observar eventos de desautorización (token expirado)
         val unauthorizedEvent by authViewModel.unauthorizedEvent.collectAsState()
         LaunchedEffect(unauthorizedEvent) {
             if (unauthorizedEvent) {
                 android.util.Log.d("MainActivity", "Detectado 401: Forzando logout")
-                // El logout ya se llama en AuthViewModel al detectar el evento, 
-                // y el LaunchedEffect(authState) de arriba se encargará de navegar.
                 authViewModel.consumeUnauthorizedEvent()
             }
         }
