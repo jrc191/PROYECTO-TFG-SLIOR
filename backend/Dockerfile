@@ -28,7 +28,6 @@ COPY --from=build /app/target/slior-backend-*.jar app.jar
 # Variables de entorno por defecto (se pueden sobrescribir en docker-compose)
 ENV SERVER_PORT=8080
 ENV SPRING_PROFILES_ACTIVE=docker
-ENV JWT_SECRET=5368566D597133743677397A244226452948404D635166546A576E5A72347537
 
 EXPOSE 8080
 
