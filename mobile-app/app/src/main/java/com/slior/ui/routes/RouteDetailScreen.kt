@@ -81,13 +81,13 @@ fun RouteDetailScreen(
     val onSurfaceColor = MaterialTheme.colorScheme.onSurface
     
     val isRefreshing = state is RouteDetailState.Loading
-    var centerTrigger by remember { mutableStateOf(0) }
-    var phoneToCall by remember { mutableStateOf<String?>(null) }
+    var centerTrigger by rememberSaveable { mutableIntStateOf(0) }
+    var phoneToCall by rememberSaveable { mutableStateOf<String?>(null) }
 
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
     
-    var showDeleteConfirm by remember { mutableStateOf(false) }
+    var showDeleteConfirm by rememberSaveable { mutableStateOf(false) }
 
     val permissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestMultiplePermissions()

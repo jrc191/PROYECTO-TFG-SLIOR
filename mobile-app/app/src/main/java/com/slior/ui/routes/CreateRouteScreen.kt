@@ -90,8 +90,8 @@ fun CreateRouteScreen(
     val onSurfaceColor = MaterialTheme.colorScheme.onSurface
     
     val isRefreshing = detailState is RouteDetailState.Loading && routeId != null
-    var centerTrigger by remember { mutableStateOf(0) }
-    var phoneToCall by remember { mutableStateOf<String?>(null) }
+    var centerTrigger by rememberSaveable { mutableIntStateOf(0) }
+    var phoneToCall by rememberSaveable { mutableStateOf<String?>(null) }
 
     var nombre        by rememberSaveable { mutableStateOf("") }
     var fecha         by rememberSaveable { mutableStateOf("") }
@@ -116,7 +116,7 @@ fun CreateRouteScreen(
     var nombreError      by rememberSaveable { mutableStateOf("") }
 
     var showDatePicker by rememberSaveable { mutableStateOf(false) }
-    var stopToDeleteIndex by remember { mutableStateOf<Int?>(null) }
+    var stopToDeleteIndex by rememberSaveable { mutableStateOf<Int?>(null) }
     val dateFormatter = remember { DateTimeFormatter.ofPattern("yyyy-MM-dd") }
 
     val permissionLauncher = rememberLauncherForActivityResult(

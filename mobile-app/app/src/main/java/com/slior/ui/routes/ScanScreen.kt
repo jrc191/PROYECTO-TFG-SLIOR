@@ -1,6 +1,7 @@
 package com.slior.ui.routes
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.content.pm.PackageManager
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -18,6 +19,7 @@ import androidx.compose.material.icons.filled.QrCode
 import androidx.compose.material.icons.filled.ViewColumn
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -78,9 +80,9 @@ fun ScanScreen(
     val surfaceColor = MaterialTheme.colorScheme.surface
     val onSurfaceColor = MaterialTheme.colorScheme.onSurface
 
-    var scanMode by remember { mutableStateOf(ScanMode.QR) }
+    var scanMode by rememberSaveable { mutableStateOf(ScanMode.QR) }
 
-    var hasCameraPermission by remember {
+    var hasCameraPermission by rememberSaveable {
         mutableStateOf(
             ContextCompat.checkSelfPermission(context, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED
         )
@@ -242,6 +244,7 @@ fun ScanScreen(
     }
 }
 
+@SuppressLint("UnusedBoxWithConstraintsScope")
 @Composable
 private fun ScannerOverlay(scanMode: ScanMode, onToggleMode: () -> Unit, isLandscape: Boolean, surfaceColor: Color, onSurfaceColor: Color) {
     BoxWithConstraints(modifier = Modifier.fillMaxSize()) {

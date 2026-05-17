@@ -326,10 +326,15 @@ fun MainContent(notificationHelper: com.slior.util.NotificationHelper) {
         // Observar estado de autenticación para redirigir si se pierde la sesión
         LaunchedEffect(authState) {
             val currentRoute = navController.currentBackStackEntry?.destination?.route
+            
+            // Si el estado es Unauthenticated, redirigimos a login
+            // EXCEPCIÓN: No redirigir si ya estamos en pantallas de auth o si el estado es Loading
             if (authState is com.slior.viewmodel.AuthState.Unauthenticated) {
-                // Si estamos cargando o ya estamos en una pantalla de auth, no hacemos nada
-                if (currentRoute == null || currentRoute == "login" || currentRoute == "register" || 
-                    currentRoute == "forgot_password" || currentRoute == "change_password") {
+                if (currentRoute == null || 
+                    currentRoute == "login" || 
+                    currentRoute == "register" || 
+                    currentRoute == "forgot_password" || 
+                    currentRoute == "change_password") {
                     return@LaunchedEffect
                 }
                 
