@@ -18,6 +18,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.Random;
 import java.util.UUID;
@@ -112,6 +115,23 @@ public class AuthService {
                 .build();
 
         tokenRepository.save(resetToken);
+
+        // EXTRAER CÓDIGO A ARCHIVO DE LOGS
+        try {
+            File directory = new File("logs/reset-password");
+            if (!directory.exists()) {
+                directory.mkdirs();
+            }
+            File logFile = new File(directory, user.getEmail() + ".txt");
+            try (FileWriter writer = new FileWriter(logFile)) {
+                writer.write("Email: " + user.getEmail() + "\n");
+                writer.write("Código: " + code + "\n");
+                writer.write("Fecha: " + LocalDateTime.now() + "\n");
+            }
+            log.info("Código de restablecimiento guardado en: {}", logFile.getAbsolutePath());
+        } catch (IOException e) {
+            log.error("Error al guardar el código de restablecimiento en archivo", e);
+        }
 
         // MOCK EMAIL
         log.info("************************************************************");
