@@ -75,6 +75,9 @@ class AuthViewModel @Inject constructor(
     private val _authState = MutableStateFlow<AuthState>(AuthState.Loading)
     val authState: StateFlow<AuthState> = _authState
 
+    private val _sessionChecked = MutableStateFlow(false)
+    val sessionChecked: StateFlow<Boolean> = _sessionChecked
+
     @OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
     val currentUser: StateFlow<com.slior.data.local.entity.UserEntity?> = _sessionUserId
         .flatMapLatest { id: String? ->
@@ -124,8 +127,6 @@ class AuthViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 android.util.Log.d("AuthViewModel", "Checking existing session...")
-                // Un pequeño delay ayuda a estabilizar el estado en recreaciones rápidas
-                kotlinx.coroutines.delay(100) 
                 
                 val prefs = context.dataStore.data.first()
                 val token = prefs[TOKEN_KEY]
@@ -148,6 +149,8 @@ class AuthViewModel @Inject constructor(
                 android.util.Log.e("AuthViewModel", "Error checking session: ${e.message}", e)
                 _sessionUserId.value = ""
                 _authState.value = AuthState.Unauthenticated
+            } finally {
+                _sessionChecked.value = true
             }
         }
     }

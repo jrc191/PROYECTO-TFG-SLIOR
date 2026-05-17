@@ -59,7 +59,6 @@ class MainActivity : AppCompatActivity() {
         setContent {
             val context = LocalContext.current
             val authViewModel: com.slior.viewmodel.AuthViewModel = hiltViewModel()
-            val authState by authViewModel.authState.collectAsState()
             val themePref by authViewModel.appTheme.collectAsState()
             
             val darkTheme = when (themePref) {
@@ -136,7 +135,7 @@ class MainActivity : AppCompatActivity() {
                         )
                     }
                 } else {
-                    MainContent(notificationHelper, authViewModel, authState)
+                    MainContent(notificationHelper, authViewModel)
                 }
             }
         }
@@ -200,13 +199,14 @@ fun PermissionRequirementScreen(onRequestPermissions: () -> Unit) {
 @Composable
 fun MainContent(
     notificationHelper: com.slior.util.NotificationHelper,
-    authViewModel: com.slior.viewmodel.AuthViewModel,
-    authState: com.slior.viewmodel.AuthState
+    authViewModel: com.slior.viewmodel.AuthViewModel
 ) {
     val routeViewModel: com.slior.ui.routes.RouteViewModel = hiltViewModel()
     val connViewModel: com.slior.viewmodel.ConnectivityViewModel = hiltViewModel()
     
     val navController = rememberNavController()
+    val authState by authViewModel.authState.collectAsState()
+    val sessionChecked by authViewModel.sessionChecked.collectAsState()
     val currentUser by authViewModel.currentUser.collectAsState()
     val isConnected by connViewModel.isConnected.collectAsState()
 
@@ -228,107 +228,129 @@ fun MainContent(
     }
 
     Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
-        when (authState) {
-            is com.slior.viewmodel.AuthState.Loading -> {
+        // Mantenemos el NavHost SIEMPRE en la composición para que no pierda su estado al rotar
+        NavHost(
+            navController = navController,
+            startDestination = "splash"
+        ) {
+            composable("splash") {
                 Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                     CircularProgressIndicator(color = BrutalistBlack)
                 }
-            }
-            else -> {
-                NavHost(
-                    navController = navController,
-                    startDestination = if (authState is com.slior.viewmodel.AuthState.Authenticated) "routes" else "login"
-                ) {
-                    composable("login") {
-                        LoginScreen(
-                            onLoginSuccess = { navController.navigate("routes") { popUpTo("login") { inclusive = true } } },
-                            onGoToRegister = { navController.navigate("register") },
-                            onGoToForgotPassword = { navController.navigate("forgot_password") }
-                        )
-                    }
-                    composable("register") {
-                        RegisterScreen(
-                            onRegisterSuccess = { navController.navigate("login") { popUpTo("register") { inclusive = true } } },
-                            onGoToLogin = { navController.popBackStack() }
-                        )
-                    }
-                    composable("forgot_password") {
-                        ForgotPasswordScreen(
-                            onBack = { navController.popBackStack() }
-                        )
-                    }
-                    composable("routes") {
-                        val userId = (authState as? com.slior.viewmodel.AuthState.Authenticated)?.userId ?: ""
-                        RouteListScreen(
-                            repartidorId = userId,
-                            onCreateRoute = { navController.navigate("createRoute") },
-                            onRouteClick = { routeId -> navController.navigate("routeDetail/$routeId") },
-                            onSettings = { navController.navigate("settings") },
-                            onLogout = { authViewModel.logout(); navController.navigate("login") { popUpTo(0) { inclusive = true } } },
-                            onEditProfile = { /* TODO */ },
-                            onChangePassword = { navController.navigate("change_password") }
-                        )
-                    }
-                    composable("change_password") {
-                        ChangePasswordScreen(
-                            onBack = { navController.popBackStack() }
-                        )
-                    }
-                    composable("createRoute") {
-                        val userId = (authState as? com.slior.viewmodel.AuthState.Authenticated)?.userId ?: ""
-                        CreateRouteScreen(
-                            repartidorId = userId,
-                            onBack = { navController.popBackStack() },
-                            onRouteCreated = { navController.popBackStack() }
-                        )
-                    }
-                    composable("routeDetail/{routeId}") { backStackEntry ->
-                        val routeId = backStackEntry.arguments?.getString("routeId") ?: ""
-                        RouteDetailScreen(
-                            routeId = routeId,
-                            onBack = { navController.popBackStack() },
-                            onEdit = { rId -> navController.navigate("editRoute/$rId") },
-                            onStopClick = { stopId -> navController.navigate("scan/$stopId") }
-                        )
-                    }
-                    composable("editRoute/{routeId}") { backStackEntry ->
-                        val routeId = backStackEntry.arguments?.getString("routeId") ?: ""
-                        val userId = (authState as? com.slior.viewmodel.AuthState.Authenticated)?.userId ?: ""
-                        CreateRouteScreen(
-                            repartidorId = userId,
-                            routeId = routeId,
-                            onBack = { navController.popBackStack() },
-                            onRouteCreated = { navController.popBackStack() }
-                        )
-                    }
-                    composable("scan/{stopId}") { backStackEntry ->
-                        val stopId = backStackEntry.arguments?.getString("stopId") ?: ""
-                        ScanScreen(
-                            stopId = stopId,
-                            onBack = { navController.popBackStack() },
-                            onDeliveryConfirmed = { navController.popBackStack() }
-                        )
-                    }
-                    composable("settings") {
-                        SettingsScreen(
-                            onBack = { navController.popBackStack() }
-                        )
+
+                // Navegación automática basada en el estado de autenticación
+                LaunchedEffect(authState, sessionChecked) {
+                    if (!sessionChecked) return@LaunchedEffect
+                    when (authState) {
+                        is com.slior.viewmodel.AuthState.Authenticated -> {
+                            navController.navigate("routes") {
+                                popUpTo("splash") { inclusive = true }
+                            }
+                        }
+                        is com.slior.viewmodel.AuthState.Unauthenticated -> {
+                            navController.navigate("login") {
+                                popUpTo("splash") { inclusive = true }
+                            }
+                        }
+                        else -> Unit // Esperar a que cargue
                     }
                 }
+            }
+
+            composable("login") {
+                LoginScreen(
+                    onLoginSuccess = { navController.navigate("routes") { popUpTo("login") { inclusive = true } } },
+                    onGoToRegister = { navController.navigate("register") },
+                    onGoToForgotPassword = { navController.navigate("forgot_password") }
+                )
+            }
+            composable("register") {
+                RegisterScreen(
+                    onRegisterSuccess = { navController.navigate("login") { popUpTo("register") { inclusive = true } } },
+                    onGoToLogin = { navController.popBackStack() }
+                )
+            }
+            composable("forgot_password") {
+                ForgotPasswordScreen(
+                    onBack = { navController.popBackStack() }
+                )
+            }
+            composable("routes") {
+                val userId = (authState as? com.slior.viewmodel.AuthState.Authenticated)?.userId ?: ""
+                RouteListScreen(
+                    repartidorId = userId,
+                    onCreateRoute = { navController.navigate("createRoute") },
+                    onRouteClick = { routeId -> navController.navigate("routeDetail/$routeId") },
+                    onSettings = { navController.navigate("settings") },
+                    onLogout = {
+                        authViewModel.logout()
+                        navController.navigate("login") {
+                            popUpTo(0) { inclusive = true }
+                        }
+                    },
+                    onEditProfile = { /* TODO */ },
+                    onChangePassword = { navController.navigate("change_password") }
+                )
+            }
+            composable("change_password") {
+                ChangePasswordScreen(
+                    onBack = { navController.popBackStack() }
+                )
+            }
+            composable("createRoute") {
+                val userId = (authState as? com.slior.viewmodel.AuthState.Authenticated)?.userId ?: ""
+                CreateRouteScreen(
+                    repartidorId = userId,
+                    onBack = { navController.popBackStack() },
+                    onRouteCreated = { navController.popBackStack() }
+                )
+            }
+            composable("routeDetail/{routeId}") { backStackEntry ->
+                val routeId = backStackEntry.arguments?.getString("routeId") ?: ""
+                RouteDetailScreen(
+                    routeId = routeId,
+                    onBack = { navController.popBackStack() },
+                    onEdit = { rId -> navController.navigate("editRoute/$rId") },
+                    onStopClick = { stopId -> navController.navigate("scan/$stopId") }
+                )
+            }
+            composable("editRoute/{routeId}") { backStackEntry ->
+                val routeId = backStackEntry.arguments?.getString("routeId") ?: ""
+                val userId = (authState as? com.slior.viewmodel.AuthState.Authenticated)?.userId ?: ""
+                CreateRouteScreen(
+                    repartidorId = userId,
+                    routeId = routeId,
+                    onBack = { navController.popBackStack() },
+                    onRouteCreated = { navController.popBackStack() }
+                )
+            }
+            composable("scan/{stopId}") { backStackEntry ->
+                val stopId = backStackEntry.arguments?.getString("stopId") ?: ""
+                ScanScreen(
+                    stopId = stopId,
+                    onBack = { navController.popBackStack() },
+                    onDeliveryConfirmed = { navController.popBackStack() }
+                )
+            }
+            composable("settings") {
+                SettingsScreen(
+                    onBack = { navController.popBackStack() }
+                )
             }
         }
 
-        LaunchedEffect(authState) {
+        // Redirección global solo para desautenticaciones REALES (p.ej. token expirado en 401)
+        // No redirigir hasta que la sesión haya sido comprobada realmente.
+        LaunchedEffect(authState, sessionChecked) {
             val currentRoute = navController.currentBackStackEntry?.destination?.route
-            if (authState is com.slior.viewmodel.AuthState.Unauthenticated) {
-                if (currentRoute == null || currentRoute == "login" || currentRoute == "register" || 
-                    currentRoute == "forgot_password" || currentRoute == "change_password") {
-                    return@LaunchedEffect
-                }
-                
-                android.util.Log.d("MainActivity", "Estado Unauthenticated detectado: Redirigiendo a Login desde $currentRoute")
-                navController.navigate("login") {
-                    popUpTo(0) { inclusive = true }
+                if (sessionChecked && authState is com.slior.viewmodel.AuthState.Unauthenticated) {
+                if (currentRoute != null && currentRoute != "login" && currentRoute != "register" &&
+                    currentRoute != "forgot_password" && currentRoute != "splash") {
+
+                    android.util.Log.d("MainActivity", "Sesión perdida confirmada: Redirigiendo a Login")
+                    navController.navigate("login") {
+                        popUpTo(0) { inclusive = true }
+                    }
                 }
             }
         }
