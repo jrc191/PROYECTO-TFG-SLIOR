@@ -174,6 +174,28 @@ fun ScanScreen(
                 Box(modifier = Modifier.weight(1f).fillMaxWidth(), contentAlignment = Alignment.Center) {
                     Text(stringResource(R.string.perm_required_title), fontFamily = SpaceGroteskFamily, fontWeight = FontWeight.Bold, color = SafetyOrange)
                 }
+            } else if (stop?.status?.uppercase() == "ENTREGADO") {
+                Box(modifier = Modifier.weight(1f).fillMaxWidth().padding(24.dp), contentAlignment = Alignment.Center) {
+                    Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                        Icon(Icons.Default.CheckCircle, null, tint = NeonGreen, modifier = Modifier.size(64.dp))
+                        Text(
+                            stringResource(R.string.label_delivery_confirmed),
+                            fontFamily = SpaceGroteskFamily,
+                            fontWeight = FontWeight.Black,
+                            fontSize = 20.sp,
+                            color = onSurfaceColor,
+                            textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                        )
+                        Button(
+                            onClick = onBack,
+                            modifier = Modifier.hardShadow().border(2.dp, BrutalistBlack),
+                            colors = ButtonDefaults.buttonColors(containerColor = NeonGreen),
+                            shape = RectangleShape
+                        ) {
+                            Text(stringResource(R.string.btn_back), color = Color.Black, fontFamily = SpaceGroteskFamily, fontWeight = FontWeight.Bold)
+                        }
+                    }
+                }
             } else {
                 if (isLandscape) {
                     Row(modifier = Modifier.weight(1f).fillMaxWidth()) {

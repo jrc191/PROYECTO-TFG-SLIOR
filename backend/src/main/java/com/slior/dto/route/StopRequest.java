@@ -3,7 +3,10 @@ package com.slior.dto.route;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
+import java.util.UUID;
+
 public record StopRequest(
+        UUID id,
 
         @NotBlank(message = "La dirección es obligatoria")
         String direccion,

@@ -385,6 +385,11 @@ class RouteViewModel @Inject constructor(
         _scannedPackageCode.value = code
         val stop = _stopDetail.value
         if (stop != null) {
+            // Si ya está entregado, no es válido escanearlo de nuevo
+            if (stop.status.uppercase() == "ENTREGADO") {
+                _isPackageValid.value = false
+                return
+            }
             // Verificación: Por ahora comprobamos contra el ID o el codigoPaquete si existe
             val expectedCode = stop.codigoPaquete ?: stop.id
             _isPackageValid.value = (code == expectedCode)
@@ -427,6 +432,8 @@ class RouteViewModel @Inject constructor(
             _isRetryingSync.value = true
             val pending = routeDao.getPendingStops()
             pending.forEach { stop ->
+                // Marcamos como PENDING para que el Worker o el observador sepa que debe reintentar
+                routeDao.updateStopSyncStatus(stop.id, com.slior.data.local.entity.SyncStatus.PENDING.name)
                 confirmDelivery(stop.id)
             }
             delay(1000) // Pequeño delay para que se vea el feedback

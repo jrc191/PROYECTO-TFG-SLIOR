@@ -21,8 +21,6 @@ import javax.inject.Singleton
 import androidx.datastore.preferences.core.stringPreferencesKey
 import com.slior.data.remote.dto.*
 
-// ... rest of imports
-
 @Singleton
 class AuthRepository @Inject constructor(
     private val apiService: ApiService,

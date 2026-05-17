@@ -1,6 +1,7 @@
 package com.slior.data.remote.dto
 
 data class StopRequestDto(
+    val id: String? = null,
     val direccion: String,
     val destinatario: String,
     val telefonoDestinatario: String,

@@ -21,7 +21,9 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -111,28 +113,63 @@ public class RouteService {
         route.setFechaPlanificada(request.fechaPlanificada());
         route.setNotas(request.notas());
 
-        // Para simplificar la actualización, eliminamos las paradas actuales y creamos las nuevas
-        // En una app real se podría hacer un "diff", pero para un TFG recrearlas es más limpio y evita bugs de estado.
-        route.getStops().clear();
+        // Mapear paradas existentes para identificar cuáles se quedan
+        Map<UUID, Stop> existingStopsMap = route.getStops().stream()
+                .filter(s -> s.getId() != null)
+                .collect(Collectors.toMap(Stop::getId, s -> s));
         
-        List<Stop> nuevasParadas = new ArrayList<>();
+        // Limpiamos la lista para reconstruirla con el nuevo orden,
+        // pero manteniendo las referencias a los objetos que ya existen.
+        List<Stop> currentStops = route.getStops();
+        currentStops.clear();
+        
         for (int i = 0; i < request.paradas().size(); i++) {
             StopRequest sr = request.paradas().get(i);
-            Stop stop = new Stop();
-            stop.setDireccion(sr.direccion());
-            stop.setLatitud(sr.latitud());
-            stop.setLongitud(sr.longitud());
-            stop.setDestinatario(sr.destinatario());
-            stop.setTelefonoDestinatario(sr.telefonoDestinatario());
-            stop.setNotas(sr.notas());
-            stop.setOrdenVisita(i + 1);
-            stop.setStatus(StopStatus.PENDIENTE);
-            stop.setRoute(route);
-            nuevasParadas.add(stop);
+            Stop stop;
+
+            if (sr.id() != null && existingStopsMap.containsKey(sr.id())) {
+                // Actualizar parada existente
+                stop = existingStopsMap.get(sr.id());
+                stop.setDireccion(sr.direccion());
+                stop.setLatitud(sr.latitud());
+                stop.setLongitud(sr.longitud());
+                stop.setDestinatario(sr.destinatario());
+                stop.setTelefonoDestinatario(sr.telefonoDestinatario());
+                stop.setNotas(sr.notas());
+                stop.setOrdenVisita(i + 1);
+            } else {
+                // Crear parada nueva
+                stop = new Stop();
+                stop.setDireccion(sr.direccion());
+                stop.setLatitud(sr.latitud());
+                stop.setLongitud(sr.longitud());
+                stop.setDestinatario(sr.destinatario());
+                stop.setTelefonoDestinatario(sr.telefonoDestinatario());
+                stop.setNotas(sr.notas());
+                stop.setOrdenVisita(i + 1);
+                stop.setStatus(StopStatus.PENDIENTE);
+                stop.setRoute(route);
+            }
+            currentStops.add(stop);
         }
-        route.getStops().addAll(nuevasParadas);
 
         Route updated = routeRepository.save(route);
+
+        // Generar/Actualizar PDFs para TODAS las paradas de la ruta
+        // Esto asegura que si ha cambiado el orden de visita (#1, #2...), la etiqueta lo refleje.
+        List<UUID> stopIds = updated.getStops().stream().map(Stop::getId).toList();
+
+        if (TransactionSynchronizationManager.isActualTransactionActive()) {
+            TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+                @Override
+                public void afterCommit() {
+                    labelService.generateLabelsAsync(stopIds);
+                }
+            });
+        } else {
+            labelService.generateLabelsAsync(stopIds);
+        }
+
         return RouteResponse.from(updated);
     }
 

@@ -83,7 +83,7 @@ fun StopDetailScreen(
                     verticalArrangement = Arrangement.spacedBy(24.dp)
                 ) {
                     // Estado de entrega
-                    if (s.status == "ENTREGADO") {
+                    if (s.status.uppercase() == "ENTREGADO") {
                         Surface(
                             modifier = Modifier.fillMaxWidth().border(2.dp, BrutalistBlack),
                             color = NeonGreen
@@ -138,7 +138,7 @@ fun StopDetailScreen(
                     }
 
                     // Botón Escanear (solo si no está entregado)
-                    if (s.status != "ENTREGADO") {
+                    if (s.status.uppercase() != "ENTREGADO") {
                         // INFO DE DESARROLLO (TEMPORAL PARA PRUEBAS)
                         Surface(
                             modifier = Modifier.fillMaxWidth().border(1.dp, Color.LightGray),

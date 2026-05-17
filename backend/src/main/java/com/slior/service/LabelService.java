@@ -64,10 +64,11 @@ public class LabelService {
         String fileName = "etiqueta-" + stopId + ".pdf";
         File pdfFile = new File(directory, fileName);
         
-        // Si ya existe, no lo volvemos a generar para ahorrar recursos
+        // Si ya existe, lo borramos para forzar la regeneración con los datos actualizados
+        // (Por ejemplo, si ha cambiado el orden de visita o el destinatario)
         if (pdfFile.exists()) {
-            log.info("PDF already exists at: {}", pdfFile.getAbsolutePath());
-            return pdfFile.getAbsolutePath();
+            log.info("PDF already exists, deleting for regeneration: {}", pdfFile.getAbsolutePath());
+            pdfFile.delete();
         }
 
         byte[] pdfBytes = generateLabelPdf(stopId);

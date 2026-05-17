@@ -153,7 +153,7 @@ fun CreateRouteScreen(
             notas = data.route.notas ?: ""
             paradas.clear()
             paradas.addAll(data.stops.map { 
-                StopRequestDto(it.direccion, it.destinatario, it.telefonoDestinatario, it.latitud, it.longitud, it.notas)
+                StopRequestDto(it.id, it.direccion, it.destinatario, it.telefonoDestinatario, it.latitud, it.longitud, it.notas)
             })
         }
     }
@@ -381,7 +381,7 @@ fun CreateRouteScreen(
                             stopNotas = stopNotas,
                             onStopNotasChange = { newValue -> stopNotas = newValue },
                             onConfirmStop = { 
-                                paradas.add(StopRequestDto(stopDireccion, stopDestinatario, stopTelefono, stopLat.toDouble(), stopLon.toDouble(), stopNotas.ifBlank { null }))
+                                paradas.add(StopRequestDto(null, stopDireccion, stopDestinatario, stopTelefono, stopLat.toDouble(), stopLon.toDouble(), stopNotas.ifBlank { null }))
                                 stopDireccion = ""; stopDestinatario = ""; stopTelefono = ""; stopLat = ""; stopLon = ""; stopNotas = ""; mostrarFormParada = false 
                             },
                             createState = createState,
@@ -454,7 +454,7 @@ fun CreateRouteScreen(
                         stopNotas = stopNotas,
                         onStopNotasChange = { newValue -> stopNotas = newValue },
                         onConfirmStop = { 
-                            paradas.add(StopRequestDto(stopDireccion, stopDestinatario, stopTelefono, stopLat.toDouble(), stopLon.toDouble(), stopNotas.ifBlank { null }))
+                            paradas.add(StopRequestDto(null, stopDireccion, stopDestinatario, stopTelefono, stopLat.toDouble(), stopLon.toDouble(), stopNotas.ifBlank { null }))
                             stopDireccion = ""; stopDestinatario = ""; stopTelefono = ""; stopLat = ""; stopLon = ""; stopNotas = ""; mostrarFormParada = false 
                         },
                         createState = createState,
@@ -627,7 +627,7 @@ private fun CreateRouteFormContent(
 
     Spacer(Modifier.height(8.dp))
     val canSave = nombre.isNotBlank() && fecha.isNotBlank() && paradas.isNotEmpty() && 
-                 repartidorId.isNotBlank() && createState !is CreateRouteState.Loading
+                 createState !is CreateRouteState.Loading
     Row(
         modifier = Modifier.fillMaxWidth().hardShadow(6.dp, 6.dp, if (canSave) SafetyOrange else Color.Gray).border(2.dp, BrutalistBlack).background(if (canSave) onSurfaceColor else onSurfaceColor.copy(alpha = 0.4f)).clickable(enabled = canSave) { if (canSave) onSaveRoute() }.height(72.dp),
         verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.Center
